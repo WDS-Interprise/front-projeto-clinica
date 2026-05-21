@@ -81,7 +81,7 @@ export default function PainelPage() {
 
       <div className="flex-1 p-6 lg:p-8 space-y-6 overflow-auto">
         <div className="rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 px-5 py-4 text-sm text-text">
-          Bem-vindo ao <strong>ClinicHub</strong> — dados em tempo real do banco.
+          Bem-vindo ao <strong>ClinMax</strong> — dados em tempo real do banco.
         </div>
 
         <div className="flex justify-end">

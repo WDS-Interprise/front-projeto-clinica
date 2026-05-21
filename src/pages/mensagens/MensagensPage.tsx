@@ -82,7 +82,7 @@ export default function MensagensPage() {
       setText(
         renderMessageTemplate(tpl.body, {
           nome: selected?.patient?.name ?? "",
-          clinica: "ClinicHub",
+          clinica: "ClinMax",
         })
       )
     }

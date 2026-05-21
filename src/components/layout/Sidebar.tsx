@@ -10,6 +10,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { APP_NAME, APP_TAGLINE } from "@/lib/brand"
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -41,8 +42,8 @@ export default function Sidebar() {
           <Hospital className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h1 className="text-sm font-bold text-text">CliniCare</h1>
-          <p className="text-xs text-text-secondary">CRM Hospitalar</p>
+          <h1 className="text-sm font-bold text-text">{APP_NAME}</h1>
+          <p className="text-xs text-text-secondary">{APP_TAGLINE}</p>
         </div>
       </div>
 

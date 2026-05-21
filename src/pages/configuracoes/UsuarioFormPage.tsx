@@ -125,7 +125,7 @@ export default function UsuarioFormPage() {
           <h2 className="text-sm font-semibold text-text-secondary uppercase">Clínica</h2>
           <div className="flex items-center justify-between p-4 rounded-xl border border-border">
             <div>
-              <p className="font-medium text-text">ClinicHub Clínica Geral</p>
+              <p className="font-medium text-text">ClinMax — Clínica Geral</p>
               <p className="text-xs text-text-secondary">Administrador da clínica</p>
             </div>
             <Switch checked={form.isClinicAdmin} onChange={(v) => setForm({ ...form, isClinicAdmin: v })} />
