@@ -21,6 +21,7 @@ env:
   WEB_ROOT: /var/www/clinmax-front
   DEPLOY_TMP: /tmp/clinmax-front-deploy
   NGINX_SITE: clinmax-www
+  FRONT_PORT: "3551"
   SSH_PORT: ${{ secrets.PORT || '22' }}
 
 jobs:
@@ -103,14 +104,17 @@ jobs:
               sudo rm -f /etc/nginx/sites-enabled/default
               sudo nginx -t
               sudo systemctl reload nginx
-              curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1/ | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML para www.clinmax.com.br — confira sites-enabled"
+              curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1:${{ env.FRONT_PORT }}/ | grep -qi "<html" || {
+                echo "Nginx nao serviu HTML na porta ${{ env.FRONT_PORT }} (www)"
                 ls -la /etc/nginx/sites-enabled/ || true
                 exit 1
               }
-              curl -sf -H "Host: clinmax.com.br" http://127.0.0.1/ | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML para clinmax.com.br"
+              curl -sf -H "Host: clinmax.com.br" http://127.0.0.1:${{ env.FRONT_PORT }}/ | grep -qi "<html" || {
+                echo "Nginx nao serviu HTML na porta ${{ env.FRONT_PORT }} (apex)"
                 exit 1
+              }
+              curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1/ | grep -qi "<html" || {
+                echo "Aviso: porta 80 sem HTML — Cloudflare pode precisar de origem na 3551"
               }
               rm -rf ${{ env.DEPLOY_TMP }}
               echo "ClinMax front publicado em ${{ env.WEB_ROOT }}"
