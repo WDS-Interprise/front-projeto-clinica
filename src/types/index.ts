@@ -82,6 +82,7 @@ export interface Appointment {
     name: string
     phone: string
     phoneHome?: string | null
+    whatsapp?: string | null
     email?: string | null
     insurancePlan?: string
     birthDate?: string
