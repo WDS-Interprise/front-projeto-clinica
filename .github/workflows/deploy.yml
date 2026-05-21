@@ -21,6 +21,7 @@ env:
   WEB_ROOT: /var/www/clinmax-front
   DEPLOY_TMP: /tmp/clinmax-front-deploy
   NGINX_SITE: clinmax-www
+  SSH_PORT: ${{ secrets.PORT || '22' }}
 
 jobs:
   deploy:
@@ -62,6 +63,14 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
+      - name: Validar secrets
+        env:
+          SSH_HOST: ${{ secrets.HOST }}
+          SSH_USER: ${{ secrets.USERNAME }}
+        run: |
+          test -n "$SSH_HOST" || (echo "Secret HOST ausente" && exit 1)
+          test -n "$SSH_USER" || (echo "Secret USERNAME ausente" && exit 1)
+
       - name: Enviar arquivos para VPS
         uses: nick-fields/retry@v4
         with:
@@ -69,9 +78,9 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 30
           command: |
-            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ secrets.PORT }} \
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
               ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p ${{ env.DEPLOY_TMP }}"
-            scp -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -P ${{ secrets.PORT }} \
+            scp -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -P ${{ env.SSH_PORT }} \
               dist.tar.gz deploy/nginx-www.conf \
               ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ env.DEPLOY_TMP }}/
 
@@ -82,7 +91,7 @@ jobs:
           max_attempts: 3
           retry_wait_seconds: 30
           command: |
-            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ secrets.PORT }} \
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
               ${{ secrets.USERNAME }}@${{ secrets.HOST }} '
               set -e
               sudo mkdir -p ${{ env.WEB_ROOT }}
