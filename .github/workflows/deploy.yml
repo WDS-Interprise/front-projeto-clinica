@@ -95,27 +95,38 @@ jobs:
             ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
               ${{ secrets.USERNAME }}@${{ secrets.HOST }} '
               set -e
-              sudo mkdir -p ${{ env.WEB_ROOT }}
-              sudo rm -rf ${{ env.WEB_ROOT }}/*
-              sudo tar -xzf ${{ env.DEPLOY_TMP }}/dist.tar.gz -C ${{ env.WEB_ROOT }}
-              test -f ${{ env.WEB_ROOT }}/index.html
-              sudo cp ${{ env.DEPLOY_TMP }}/nginx-www.conf /etc/nginx/sites-available/${{ env.NGINX_SITE }}
-              sudo ln -sf /etc/nginx/sites-available/${{ env.NGINX_SITE }} /etc/nginx/sites-enabled/${{ env.NGINX_SITE }}
-              sudo rm -f /etc/nginx/sites-enabled/default
+              SITE=${{ env.NGINX_SITE }}
+              WEB=${{ env.WEB_ROOT }}
+              TMP=${{ env.DEPLOY_TMP }}
+              PORT=${{ env.FRONT_PORT }}
+              sudo mkdir -p "$WEB"
+              sudo rm -rf "$WEB"/*
+              sudo tar -xzf "$TMP/dist.tar.gz" -C "$WEB"
+              test -f "$WEB/index.html"
+              if ! sudo grep -q "listen.*443" /etc/nginx/sites-available/"$SITE" 2>/dev/null; then
+                sudo cp "$TMP/nginx-www.conf" /etc/nginx/sites-available/"$SITE"
+                sudo ln -sf /etc/nginx/sites-available/"$SITE" /etc/nginx/sites-enabled/"$SITE"
+                echo "Nginx $SITE instalado (HTTP). Rode certbot uma vez: certbot --nginx -d clinmax.com.br -d www.clinmax.com.br"
+              else
+                echo "Nginx $SITE ja tem SSL (443) — mantendo config; apenas arquivos em $WEB atualizados"
+              fi
               sudo nginx -t
               sudo systemctl reload nginx
-              curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1:${{ env.FRONT_PORT }}/ | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML na porta ${{ env.FRONT_PORT }} (www)"
+              curl -sf -H "Host: www.clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
+                echo "Nginx nao serviu HTML na porta ${PORT} (www)"
                 ls -la /etc/nginx/sites-enabled/ || true
                 exit 1
               }
-              curl -sf -H "Host: clinmax.com.br" http://127.0.0.1:${{ env.FRONT_PORT }}/ | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML na porta ${{ env.FRONT_PORT }} (apex)"
+              curl -sf -H "Host: clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
+                echo "Nginx nao serviu HTML na porta ${PORT} (apex)"
                 exit 1
               }
               curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1/ | grep -qi "<html" || {
-                echo "Aviso: porta 80 sem HTML — Cloudflare pode precisar de origem na 3551"
+                echo "Aviso: porta 80 sem HTML para clinmax — confira server_name ou Cloudflare origin port"
               }
-              rm -rf ${{ env.DEPLOY_TMP }}
-              echo "ClinMax front publicado em ${{ env.WEB_ROOT }}"
+              curl -sfk https://clinmax.com.br/ 2>/dev/null | grep -qi "<html" || {
+                echo "Aviso: HTTPS ainda sem HTML — rode certbot na VPS se ainda nao fez"
+              }
+              rm -rf "$TMP"
+              echo "ClinMax front publicado em $WEB"
             '
