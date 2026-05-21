@@ -1,0 +1,42 @@
+---
+description: Feedback ao usuário no front (toasts, sem alert nativo)
+globs: front-projeto-clinica/**/*.{tsx,ts}
+alwaysApply: true
+---
+
+# Feedback na UI (front-projeto-clinica)
+
+## Proibido
+
+- **Nunca** usar `alert()`, `window.alert()` ou diálogos nativos do navegador para erros, sucesso ou avisos.
+- Evitar `confirm()` para fluxos novos; preferir componente de confirmação da aplicação quando existir.
+
+## Obrigatório
+
+- Usar **`useToast()`** de `@/context/ToastContext` para sucesso, erro e avisos.
+- Erros de API: usar `toastMessageFromApiError()` de `@/lib/api-errors` (mensagem + campos duplicados).
+- Promises de carregamento (`api.*`, `backofficeApi.*`): sempre `.catch()` com toast — nunca deixar rejeição sem tratamento (evita "Uncaught (in promise)").
+
+## Padrão
+
+```tsx
+const { toast } = useToast()
+
+try {
+  await api.patients.create(data)
+  toast("Paciente cadastrado com sucesso!")
+} catch (err: unknown) {
+  toast(toastMessageFromApiError(err, "Erro ao salvar paciente"), "error")
+}
+```
+
+## Backoffice
+
+- Mesmo `ToastProvider` do app principal (já envolve rotas `/backoffice`).
+- Cliente HTTP: `backoffice-api.ts` — erros lançam `ApiError` com mensagens claras (incl. 502 quando o backend não responde).
+
+## Tema (light / dark)
+
+- Toggle global: `ThemeToggle` + `ThemeProvider` (`clinichub_theme` no `localStorage`).
+- Preferir tokens semânticos (`bg-surface`, `text-text`, `border-border`) em vez de `slate-*` / `gray-*` fixos.
+- Botão de tema na navbar (`AppHeader`) e no backoffice (sidebar); login/cadastro com toggle no canto superior direito.
