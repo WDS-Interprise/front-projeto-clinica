@@ -1,6 +1,6 @@
 import { ApiError } from "@/services/api"
 
-const BASE = "/api"
+const BASE = import.meta.env.VITE_API_BASE ?? "/api"
 const TOKEN_KEY = "backoffice_token"
 const USER_KEY = "backoffice_user"
 

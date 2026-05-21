@@ -1,0 +1,55 @@
+name: Executar comandos via SSH
+
+# on:
+#  workflow_dispatch:  # ou 'push', se quiser que rode em push
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  exec-comandos:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: 📦 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 📄 Criar arquivo .env temporário
+        run: echo "${{ vars.DOTENV_FILE }}" > .env
+        # run: echo "${{ secrets.DOTENV_FILE }}" > .env
+
+      - name: 🚚 Enviar .env para a VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: ".env"
+          target: "/root/vila-vault-new"
+          
+      - name: 🔐 Acessar VPS e executar comandos
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            export PATH="/root/.local/share/fnm:$PATH"
+            eval "`fnm env`"
+            fnm use --install-if-missing 20
+            cd /root/vila-vault-new
+            git fetch origin
+            git reset --hard origin/main
+            npm i -f
+            (while true; do echo "⏳ ainda rodando... $(date)"; sleep 60; done) &
+            KEEPALIVE_PID=$!
+            npx tsc --noEmit || { echo "❌ TypeScript com erros."; kill $KEEPALIVE_PID; exit 1; }
+            npm run build || { echo "❌ Erro no build."; kill $KEEPALIVE_PID; exit 1; }
+            kill $KEEPALIVE_PID
+            rm -rf /var/www/html/*
+            cp -r /root/vila-vault-new/build/* /var/www/html/
+            systemctl restart nginx

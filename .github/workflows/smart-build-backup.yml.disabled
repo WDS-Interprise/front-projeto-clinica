@@ -1,0 +1,129 @@
+name: 🧠 Smart Build (BACKUP - NÃO USAR)
+
+# ❌ DESABILITADO - Apenas para consulta/comparação
+# Este arquivo existe APENAS para referência se der algum erro
+# NÃO será executado automaticamente
+
+on:
+  # Todos os triggers estão comentados
+  # push:
+  #   branches: [develop, feat/*, feature/*]
+  # pull_request:
+  #   branches: [main, develop]
+
+jobs:
+  smart-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧠 Smart Node.js Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: "beta-Exemple-front/package-lock.json"
+
+      - name: 📦 Smart Install (Cache Inteligente)
+        run: |
+          cd beta-Exemple-front
+
+          # Verificar se cache está válido
+          if [ -f "package-lock.json" ] && [ -d "node_modules" ]; then
+            echo "✅ Cache válido detectado - usando node_modules existente"
+            npm ci --prefer-offline --no-audit --no-fund
+          else
+            echo "🔄 Cache inválido - reinstalação completa"
+            rm -rf node_modules package-lock.json
+            npm install --no-audit --no-fund
+          fi
+
+      - name: 🔍 Bundle Analysis (Antes)
+        run: |
+          cd beta-Exemple-front
+          npm run build
+          npx source-map-explorer 'build/static/js/*.js' --json bundle-before.json || true
+
+      - name: 📊 Bundle Size Check
+        run: |
+          cd beta-Exemple-front
+          echo "📊 Tamanho dos chunks principais:"
+          find build/static/js -name "*.js" -exec ls -lh {} \; | head -10
+
+      - name: 🧪 Run Tests
+        run: |
+          cd beta-Exemple-front
+          npm test -- --coverage --watchAll=false
+
+      - name: 🚀 Build Production
+        run: |
+          cd beta-Exemple-front
+          npm run build
+
+      - name: 📈 Bundle Analysis (Depois)
+        run: |
+          cd beta-Exemple-front
+          npx source-map-explorer 'build/static/js/*.js' --json bundle-after.json --html bundle-report.html || true
+
+      - name: 📋 Bundle Report
+        run: |
+          cd beta-Exemple-front
+          echo "📋 RELATÓRIO DE BUNDLE:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Tamanhos dos Chunks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Arquivo | Tamanho |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
+          find build/static/js -name "*.js" -exec sh -c 'echo "| $1 | $(ls -lh "$1" | awk "{print \$5}") |"' _ {} \; >> $GITHUB_STEP_SUMMARY
+
+      - name: 🎯 Performance Check
+        run: |
+          cd beta-Exemple-front
+          echo "🎯 VERIFICAÇÕES DE PERFORMANCE:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Verificar se main chunk está muito grande
+          MAIN_SIZE=$(find build/static/js -name "main.*.js" -exec ls -l {} \; | awk '{print $5}')
+          MAIN_SIZE_MB=$(echo "scale=2; $MAIN_SIZE / 1024 / 1024" | bc -l)
+
+          echo "### 📦 Main Chunk: ${MAIN_SIZE_MB} MB" >> $GITHUB_STEP_SUMMARY
+
+          if (( $(echo "$MAIN_SIZE_MB > 2.0" | bc -l) )); then
+            echo "⚠️ **ATENÇÃO**: Main chunk > 2MB! Considere code splitting." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Main chunk em tamanho aceitável (< 2MB)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Contar chunks
+          CHUNK_COUNT=$(find build/static/js -name "*.js" | wc -l)
+          echo "### 📊 Total de chunks: $CHUNK_COUNT" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$CHUNK_COUNT" -lt 3 ]; then
+            echo "⚠️ **SUGESTÃO**: Poucos chunks detectados. Considere lazy loading." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Code splitting funcionando bem" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Upload Bundle Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-analysis
+          path: |
+            beta-Exemple-front/bundle-report.html
+            beta-Exemple-front/bundle-before.json
+            beta-Exemple-front/bundle-after.json
+          retention-days: 30
+
+      - name: 🚨 Bundle Size Alert
+        if: failure()
+        run: |
+          echo "🚨 BUILD FALHOU!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔧 Possíveis soluções:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verificar se todas as dependências estão corretas" >> $GITHUB_STEP_SUMMARY
+          echo "2. Limpar cache: \`rm -rf node_modules package-lock.json\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Verificar se não há imports circulares" >> $GITHUB_STEP_SUMMARY
+          echo "4. Considerar lazy loading para libs pesadas" >> $GITHUB_STEP_SUMMARY
