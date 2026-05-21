@@ -77,7 +77,7 @@ export default function BackofficeLayout() {
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-alt hover:text-text transition-colors mt-4"
           >
             <ExternalLink className="w-4 h-4" />
-            Abrir CRM principal
+            Abrir ClinMax
           </a>
         </nav>
 

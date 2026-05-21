@@ -7,6 +7,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle"
 import { fieldInputWithIconClass, fieldLabelClass, iconButtonMutedClass } from "@/lib/form-classes"
 import { api } from "@/services/api"
 import { applyAuthRedirectFlags } from "@/lib/onboarding"
+import { APP_LOGIN_SUBTITLE, APP_NAME } from "@/lib/brand"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -56,10 +57,8 @@ export default function Login() {
             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary mx-auto flex items-center justify-center mb-4">
               <Hospital className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-text">CliniCare</h1>
-            <p className="text-sm text-text-secondary mt-1">
-              CRM Hospitalar — Faça login para continuar
-            </p>
+            <h1 className="text-2xl font-bold text-text">{APP_NAME}</h1>
+            <p className="text-sm text-text-secondary mt-1">{APP_LOGIN_SUBTITLE}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

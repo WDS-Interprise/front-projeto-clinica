@@ -72,7 +72,7 @@ export default function BackofficeDashboard() {
         <div>
           <h1 className="text-2xl font-bold text-text">Métricas do site principal</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Visão consolidada do CRM CliniCare em tempo real
+            Visão consolidada do ClinMax em tempo real
           </p>
           {metrics?.generatedAt && (
             <p className="text-xs text-text-secondary mt-2">

@@ -40,7 +40,7 @@ export default function BackofficeLogin() {
             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 mx-auto flex items-center justify-center mb-4">
               <Shield className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-text">Backoffice</h1>
+            <h1 className="text-2xl font-bold text-text">ClinMax Backoffice</h1>
             <p className="text-sm text-text-secondary mt-1">
               Somente donos da plataforma (conta com permissão de proprietário)
             </p>
@@ -52,7 +52,7 @@ export default function BackofficeLogin() {
                 id="bo-email"
                 label="E-mail do administrador"
                 type="email"
-                placeholder="admin@clinicare.com"
+                placeholder="admin@clinmax.com.br"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import ThemeToggle from "@/components/ui/ThemeToggle"
+import { APP_NAME } from "@/lib/brand"
 import type { Permission } from "@/lib/permissions"
 
 type NavItem = {
@@ -74,7 +75,7 @@ export default function AppHeader() {
             <Hospital className="w-4 h-4 text-white" />
           </div>
           <div className="hidden sm:block">
-            <p className="text-sm font-bold text-text leading-tight">ClinicHub</p>
+            <p className="text-sm font-bold text-text leading-tight">{APP_NAME}</p>
             <p className="text-[10px] text-text-secondary leading-tight">
               {clinicName || "Clínica Geral"}
             </p>
