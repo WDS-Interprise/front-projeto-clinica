@@ -37,6 +37,42 @@ type ClinicalForm = {
   notes: string
 }
 
+type ClinicalTextField = {
+  key: keyof ClinicalForm
+  label: string
+  placeholder: string
+}
+
+type CidField = {
+  label: string
+  isCid: true
+}
+
+type AttendanceField = ClinicalTextField | CidField
+
+const attendanceFields: AttendanceField[] = [
+  { key: "mainComplaint", label: "Queixa principal", placeholder: "Descreva a queixa..." },
+  {
+    key: "currentIllnessHistory",
+    label: "História da moléstia atual",
+    placeholder: "Evolução dos sintomas...",
+  },
+  { key: "physicalExam", label: "Exame físico", placeholder: "Achados do exame..." },
+  {
+    key: "historyAndAntecedents",
+    label: "Histórico e antecedentes",
+    placeholder: "Antecedentes pessoais e familiares...",
+  },
+  { label: "Hipótese diagnóstica / CID", isCid: true },
+  { key: "conduct", label: "Condutas", placeholder: "Plano terapêutico..." },
+  { key: "prescriptionSummary", label: "Prescrevo", placeholder: "Medicamentos e orientações..." },
+  {
+    key: "notes",
+    label: "Observações",
+    placeholder: "Notas...",
+  },
+]
+
 const emptyClinicalForm = (): ClinicalForm => ({
   mainComplaint: "",
   currentIllnessHistory: "",
@@ -91,7 +127,7 @@ export default function AtendimentoPage() {
             historyAndAntecedents: next.historyAndAntecedents || null,
             conduct: next.conduct || null,
             prescriptionSummary: next.prescriptionSummary || null,
-            notes: next.notes || null,
+            notes: next.notes || undefined,
           })
         } catch (err: unknown) {
           toast(toastMessageFromApiError(err, "Erro ao salvar atendimento"), "error")
@@ -265,33 +301,10 @@ export default function AtendimentoPage() {
         </div>
 
         <div className="grid gap-4 max-w-3xl w-full">
-          {(
-            [
-              { key: "mainComplaint" as const, label: "Queixa principal", placeholder: "Descreva a queixa..." },
-              {
-                key: "currentIllnessHistory" as const,
-                label: "História da moléstia atual",
-                placeholder: "Evolução dos sintomas...",
-              },
-              { key: "physicalExam" as const, label: "Exame físico", placeholder: "Achados do exame..." },
-              {
-                key: "historyAndAntecedents" as const,
-                label: "Histórico e antecedentes",
-                placeholder: "Antecedentes pessoais e familiares...",
-              },
-              { label: "Hipótese diagnóstica / CID", isCid: true as const },
-              { key: "conduct" as const, label: "Condutas", placeholder: "Plano terapêutico..." },
-              { key: "prescriptionSummary" as const, label: "Prescrevo", placeholder: "Medicamentos e orientações..." },
-              {
-                key: "notes" as const,
-                label: "Observações",
-                placeholder: patient?.medications ? `Medicamentos: ${patient.medications}` : "Notas...",
-              },
-            ] as const
-          ).map((field) => (
+          {attendanceFields.map((field) => (
             <div key={"key" in field ? field.key : field.label}>
               <label className="block text-sm font-medium text-text mb-1.5">{field.label}</label>
-              {"isCid" in field && field.isCid ? (
+              {"isCid" in field ? (
                 <CidSearchField
                   value={cid}
                   onChange={handleCidChange}
@@ -302,7 +315,11 @@ export default function AtendimentoPage() {
                   rows={3}
                   value={clinical[field.key]}
                   onChange={(e) => updateClinicalField(field.key, e.target.value)}
-                  placeholder={field.placeholder}
+                  placeholder={
+                    field.key === "notes" && patient?.medications
+                      ? `Medicamentos: ${patient.medications}`
+                      : field.placeholder
+                  }
                   disabled={!started || !canAttend}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm resize-y focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none disabled:opacity-60 disabled:bg-surface-alt"
                 />
