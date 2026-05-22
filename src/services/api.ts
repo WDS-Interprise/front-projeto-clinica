@@ -22,6 +22,7 @@ export type WhatsappChat = {
   lastMessage: string | null
   lastMessageAt: string | null
   unreadCount: number
+  aiPaused: boolean
   patient?: { id: string; name: string; phone: string; whatsapp: string | null } | null
   connection?: { id: string; name: string; status: string }
 }
@@ -44,6 +45,9 @@ export type WhatsappSettings = {
   reminderOffsetsJson: string
   reminderOffsets: number[]
   autoRemindersEnabled: boolean
+  aiAssistantEnabled: boolean
+  aiAutoReplyEnabled: boolean
+  openRouterConfigured?: boolean
   connections: { id: string; name: string; status: string; phoneNumber: string | null }[]
 }
 
@@ -85,7 +89,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     ...(options?.headers as Record<string, string>),
   }
 
-  if (options?.body != null && options.body !== "") {
+  if (options?.body != null && options.body !== "" && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json"
   }
 
@@ -176,6 +180,8 @@ export const api = {
         name: string
         email: string
         role: string
+        phone?: string | null
+        gender?: "M" | "F" | "O"
         clinicId: string
         clinicName?: string
         permissions: string[]
@@ -186,6 +192,34 @@ export const api = {
         needsOnboarding?: boolean
         provisionedByClinic?: boolean
       }>("/auth/me"),
+    meAvatar: () => request<{ imageUrl: string | null }>("/auth/me/avatar"),
+    uploadAvatar: (file: File) => {
+      const body = new FormData()
+      body.append("file", file)
+      return request<{ imageUrl: string | null }>("/auth/me/avatar", {
+        method: "POST",
+        body,
+      })
+    },
+    updateMe: (data: {
+      name?: string
+      email?: string
+      phone?: string
+      gender?: "M" | "F" | "O"
+      password?: string
+      currentPassword?: string
+    }) =>
+      request<{
+        id: string
+        name: string
+        email: string
+        role: string
+        phone?: string | null
+        gender?: "M" | "F" | "O"
+        clinicId: string
+        clinicName?: string
+        permissions: string[]
+      }>("/auth/me", { method: "PATCH", body: JSON.stringify(data) }),
   },
 
   users: {
@@ -247,6 +281,8 @@ export const api = {
       )
     },
     getById: (id: string) => request<any>(`/patients/${id}`),
+    getHistory: (id: string) =>
+      request<import("@/types/patient-history").PatientHistoryResponse>(`/patients/${id}/history`),
     create: (data: any) =>
       request<any>("/patients", { method: "POST", body: JSON.stringify(data) }),
     update: (id: string, data: any) =>
@@ -405,13 +441,29 @@ export const api = {
       const q = params?.patientId ? `?patientId=${params.patientId}` : ""
       return request<WhatsappChat[]>(`/whatsapp/chats${q}`)
     },
+    createChat: (data: { patientId?: string; phone?: string }) =>
+      request<WhatsappChat>("/whatsapp/chats", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     getChatMessages: (chatId: string) =>
       request<{ chat: WhatsappChat; messages: WhatsappMessage[] }>(
         `/whatsapp/chats/${chatId}/messages`
       ),
+    setChatAiPaused: (chatId: string, aiPaused: boolean) =>
+      request<WhatsappChat>(`/whatsapp/chats/${chatId}/ai`, {
+        method: "PATCH",
+        body: JSON.stringify({ aiPaused }),
+      }),
     sendMessage: (
       connectionId: string,
-      data: { to: string; message: string; patientId?: string; templateId?: string }
+      data: {
+        to: string
+        message: string
+        remoteJid?: string
+        patientId?: string
+        templateId?: string
+      }
     ) =>
       request<{ connectionId: string; jid: string; messageId?: string }>(
         `/whatsapp/connections/${connectionId}/messages`,
@@ -448,6 +500,8 @@ export const api = {
       defaultConnectionId?: string | null
       reminderOffsets?: number[]
       autoRemindersEnabled?: boolean
+      aiAssistantEnabled?: boolean
+      aiAutoReplyEnabled?: boolean
     }) =>
       request<WhatsappSettings>("/whatsapp/settings", {
         method: "PUT",
@@ -468,5 +522,348 @@ export const api = {
       request<any>(`/records/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     remove: (id: string) =>
       request<void>(`/records/${id}`, { method: "DELETE" }),
+  },
+
+  cid10: {
+    search: (params?: { search?: string; capitulo?: string; grupo?: string; tipo?: string; page?: number; limit?: number }) => {
+      const q = new URLSearchParams()
+      if (params?.search) q.set("search", params.search)
+      if (params?.capitulo) q.set("capitulo", params.capitulo)
+      if (params?.grupo) q.set("grupo", params.grupo)
+      if (params?.tipo) q.set("tipo", params.tipo)
+      if (params?.page) q.set("page", String(params.page))
+      if (params?.limit) q.set("limit", String(params.limit))
+      return request<{
+        data: Array<{
+          id: string
+          codigo: string
+          descricao: string
+          capitulo: string
+          capituloDesc: string
+          grupo: string
+          grupoDesc: string
+          categoria: string
+          categoriaDesc: string
+          tipo: string
+        }>
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+      }>(`/cid10?${q}`)
+    },
+    getByCodigo: (codigo: string) =>
+      request<{
+        id: string
+        codigo: string
+        descricao: string
+        capitulo: string
+        capituloDesc: string
+        grupo: string
+        grupoDesc: string
+        categoria: string
+        categoriaDesc: string
+        tipo: string
+      }>(`/cid10/${encodeURIComponent(codigo)}`),
+    capitulos: () =>
+      request<Array<{ codigo: string; descricao: string }>>("/cid10/capitulos"),
+    grupos: (capitulo?: string) => {
+      const q = capitulo ? `?capitulo=${encodeURIComponent(capitulo)}` : ""
+      return request<Array<{ codigo: string; descricao: string; capitulo: string }>>(`/cid10/grupos${q}`)
+    },
+  },
+
+  cid11: {
+    search: (params?: { search?: string; capitulo?: string; bloco?: string; tipo?: string; page?: number; limit?: number }) => {
+      const q = new URLSearchParams()
+      if (params?.search) q.set("search", params.search)
+      if (params?.capitulo) q.set("capitulo", params.capitulo)
+      if (params?.bloco) q.set("bloco", params.bloco)
+      if (params?.tipo) q.set("tipo", params.tipo)
+      if (params?.page) q.set("page", String(params.page))
+      if (params?.limit) q.set("limit", String(params.limit))
+      return request<{
+        data: Array<{
+          id: string
+          codigo: string
+          descricao: string
+          bloco: string
+          blocoDesc: string
+          capitulo: string
+          capituloDesc: string
+          tipo: string
+          cid10Equivalente: string | null
+        }>
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+      }>(`/cid11?${q}`)
+    },
+    getByCodigo: (codigo: string) =>
+      request<{
+        id: string
+        codigo: string
+        descricao: string
+        bloco: string
+        blocoDesc: string
+        capitulo: string
+        capituloDesc: string
+        tipo: string
+        cid10Equivalente: string | null
+      }>(`/cid11/${encodeURIComponent(codigo)}`),
+    capitulos: () =>
+      request<Array<{ codigo: string; descricao: string }>>("/cid11/capitulos"),
+    blocos: (capitulo?: string) => {
+      const q = capitulo ? `?capitulo=${encodeURIComponent(capitulo)}` : ""
+      return request<Array<{ codigo: string; descricao: string; capitulo: string }>>(`/cid11/blocos${q}`)
+    },
+  },
+
+  cid: {
+    inss: (codigo: string) =>
+      request<{
+        codigo: string
+        temCarencia: boolean
+        fonteCarencia: string | null
+        temIrpf: boolean
+        fonteIrpf: string | null
+        temNtep: boolean
+        fonteNtep: string | null
+        cnaes: unknown
+        versao: string | null
+      }>(`/cid/inss/${encodeURIComponent(codigo)}`),
+  },
+
+  prescriptions: {
+    resolveContext: (routeId: string) =>
+      request<import("@/types/prescription").PrescriptionContext>(
+        `/prescriptions/context/${encodeURIComponent(routeId)}`
+      ),
+    list: (params?: {
+      patientId?: string
+      appointmentId?: string
+      status?: string
+      limit?: number
+    }) => {
+      const q = new URLSearchParams()
+      if (params?.patientId) q.set("patientId", params.patientId)
+      if (params?.appointmentId) q.set("appointmentId", params.appointmentId)
+      if (params?.status) q.set("status", params.status)
+      if (params?.limit) q.set("limit", String(params.limit))
+      return request<{ data: import("@/types/prescription").Prescription[] }>(
+        `/prescriptions?${q}`
+      )
+    },
+    getById: (id: string) =>
+      request<import("@/types/prescription").Prescription>(`/prescriptions/${id}`),
+    create: (data: {
+      patientId: string
+      appointmentId?: string
+      prescriptionDate?: string
+      showDate?: boolean
+      notes?: string
+    }) =>
+      request<import("@/types/prescription").Prescription>("/prescriptions", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (
+      id: string,
+      data: Partial<{
+        prescriptionDate: string
+        showDate: boolean
+        notes: string | null
+      }>
+    ) =>
+      request<import("@/types/prescription").Prescription>(`/prescriptions/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    addItem: (
+      id: string,
+      data: {
+        type: import("@/types/prescription").PrescriptionItemType
+        name: string
+        presentation?: string
+        dosage?: string
+        frequency?: string
+        duration?: string
+        quantity?: string
+        instructions?: string
+        continuousUse?: boolean
+        extraJson?: string
+      }
+    ) =>
+      request<{ prescription: import("@/types/prescription").Prescription }>(
+        `/prescriptions/${id}/items`,
+        { method: "POST", body: JSON.stringify(data) }
+      ),
+    removeItem: (id: string, itemId: string) =>
+      request<import("@/types/prescription").Prescription>(
+        `/prescriptions/${id}/items/${itemId}`,
+        { method: "DELETE" }
+      ),
+    finalize: (
+      id: string,
+      data?: { shareWhatsApp?: boolean; sharePhone?: string; signDigital?: boolean }
+    ) =>
+      request<import("@/types/prescription").Prescription>(
+        `/prescriptions/${id}/finalize`,
+        { method: "POST", body: JSON.stringify(data ?? {}) }
+      ),
+    renew: (id: string) =>
+      request<import("@/types/prescription").Prescription>(
+        `/prescriptions/${id}/renew`,
+        { method: "POST", body: JSON.stringify({}) }
+      ),
+    resendWhatsapp: (id: string, data?: { phone?: string }) =>
+      request<import("@/types/prescription").Prescription>(
+        `/prescriptions/${id}/resend-whatsapp`,
+        { method: "POST", body: JSON.stringify(data ?? {}) }
+      ),
+    listTemplates: () =>
+      request<{ data: import("@/types/prescription").PrescriptionTemplate[] }>(
+        "/prescriptions/templates"
+      ),
+    pdfUrl: (id: string) => {
+      const token = getToken()
+      const base = BASE.replace(/\/$/, "")
+      const q = token ? `?token=${encodeURIComponent(token)}` : ""
+      return `${base}/prescriptions/${id}/pdf${q}`
+    },
+    fetchPdfHtml: async (id: string) => {
+      const token = getToken()
+      const res = await fetch(`${BASE}/prescriptions/${id}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new ApiError((data as { error?: string }).error || "Erro ao carregar PDF")
+      }
+      return res.text()
+    },
+  },
+
+  medicamentos: {
+    search: (q: string) =>
+      request<import("@/types/medicamento").MedicamentoSearchResponse>(
+        `/medicamentos/search?q=${encodeURIComponent(q)}`
+      ),
+    getProduct: (id: string) =>
+      request<import("@/types/medicamento").MedicamentoProduto>(
+        `/medicamentos/products/${encodeURIComponent(id)}`
+      ),
+  },
+
+  exames: {
+    search: (q: string) =>
+      request<import("@/types/tuss").TussSearchResponse>(
+        `/exames/search?q=${encodeURIComponent(q)}`
+      ),
+    getByCode: (code: string) =>
+      request<import("@/types/tuss").TussTerm>(`/exames/${encodeURIComponent(code)}`),
+  },
+
+  vacinas: {
+    search: (q: string) =>
+      request<import("@/types/vacina").VacinaSearchResponse>(
+        `/vacinas/search?q=${encodeURIComponent(q)}`
+      ),
+  },
+
+  outros: {
+    searchBulas: (params?: { q?: string; page?: number; limit?: number }) => {
+      const q = new URLSearchParams()
+      if (params?.q) q.set("q", params.q)
+      if (params?.page) q.set("page", String(params.page))
+      if (params?.limit) q.set("limit", String(params.limit))
+      return request<{
+        source: "anvisa" | "bulapi"
+        items: Array<{
+          id: string
+          name: string
+          substanceName?: string
+          manufacturerName?: string
+          regulatoryCategory?: string
+          therapeuticClass?: string
+          variantCount?: number
+        }>
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+      }>(`/outros/bulas/search?${q}`)
+    },
+    getBulaDetail: (id: string) =>
+      request<{
+        id: string
+        nome: string
+        classes: string[]
+        fonte: string
+        registro_ms?: string
+        informacoes_legais?: string
+        laboratorio?: string
+        secoes: {
+          indicacao?: string
+          farmacocinetica?: string
+          contraindicacoes?: string
+          posologia?: {
+            texto_completo?: string
+            gotas?: string
+            xarope?: string
+            injetavel?: string
+            supositorio?: string
+            casos_especiais?: string
+          }
+          efeitos_colaterais?: string
+          advertencias_precaucoes?: string
+          interacoes_medicamentosas?: string
+          superdosagem?: string
+          composicao?: string
+          apresentacoes?: string
+          armazenamento?: string
+        }
+        url_pdf?: string
+        atualizado_em: string
+      }>(`/outros/bulas/${encodeURIComponent(id)}`),
+    /** @deprecated Use getBulaDetail */
+    getBula: (id: string) => request<Record<string, unknown>>(`/outros/bulas/${encodeURIComponent(id)}`),
+    cid10Chapters: () => request<Array<{ id: string; romanNumber: string; name: string; codeRange: string }>>("/outros/cid10/chapters"),
+    searchCid10: (q: string) =>
+      request<Array<{ id: string; code: string; description: string; chapter: { name: string } }>>(
+        `/outros/cid10/search?q=${encodeURIComponent(q)}`
+      ),
+    getCid10: (code: string) =>
+      request<{ code: string; description: string; chapter: { name: string; romanNumber: string } }>(
+        `/outros/cid10/code/${encodeURIComponent(code)}`
+      ),
+    contacts: (params?: { search?: string; type?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.search) q.set("search", params.search)
+      if (params?.type) q.set("type", params.type)
+      return request<Array<{ id: string; name: string; type: string; phone: string | null; email: string | null; subtitle?: string }>>(
+        `/outros/contacts?${q}`
+      )
+    },
+    logs: (params?: { search?: string; module?: string; page?: number }) => {
+      const q = new URLSearchParams()
+      if (params?.search) q.set("search", params.search)
+      if (params?.module) q.set("module", params.module)
+      if (params?.page) q.set("page", String(params.page))
+      return request<{
+        data: Array<{
+          id: string
+          module: string
+          action: string
+          description: string
+          createdAt: string
+          userId: string | null
+        }>
+        total: number
+        page: number
+        totalPages: number
+      }>(`/outros/logs?${q}`)
+    },
   },
 }

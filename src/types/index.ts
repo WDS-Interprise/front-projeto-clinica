@@ -11,6 +11,10 @@ export interface Patient {
   bloodType: string | null
   allergies: string
   medications: string
+  clinicalHistory?: string
+  surgicalHistory?: string
+  familyHistory?: string
+  habits?: string
   insurancePlan?: string
   whatsapp?: string | null
   insuranceCard?: string | null
@@ -72,6 +76,17 @@ export interface Appointment {
   paymentLinkUrl?: string | null
   paymentStatus?: string
   reminderSentAt?: string | null
+  startedAt?: string | null
+  endedAt?: string | null
+  cidCode?: string | null
+  cidDescription?: string | null
+  cidVersion?: string | null
+  mainComplaint?: string | null
+  physicalExam?: string | null
+  currentIllnessHistory?: string | null
+  historyAndAntecedents?: string | null
+  conduct?: string | null
+  prescriptionSummary?: string | null
   totalAmount?: number
   chargedAmount?: number
   billingStatus?: string
@@ -158,6 +173,15 @@ export interface CreateAppointmentInput {
   recurrence?: "NONE" | "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "YEARLY"
   notes?: string
   generatePaymentLink?: boolean
+  cidCode?: string | null
+  cidDescription?: string | null
+  cidVersion?: string | null
+  mainComplaint?: string | null
+  physicalExam?: string | null
+  currentIllnessHistory?: string | null
+  historyAndAntecedents?: string | null
+  conduct?: string | null
+  prescriptionSummary?: string | null
   procedures?: Array<{ procedureId: string; quantity: number; unitPrice: number }>
   waitingListEntryId?: string
 }

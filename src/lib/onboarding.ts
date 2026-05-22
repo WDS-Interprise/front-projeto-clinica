@@ -72,6 +72,11 @@ export function markSelfRegisteredOnboardingDone() {
   setAuthHome("/dashboard")
 }
 
+export function shouldShowOnboarding(): boolean {
+  if (shouldSkipOnboarding()) return false
+  return isSelfRegisteredUser() || !localStorage.getItem(ONBOARDING_KEY)
+}
+
 export function markOnboardingDoneIfProvisioned() {
   if (isSelfRegisteredUser()) return
   if (shouldSkipOnboarding()) {

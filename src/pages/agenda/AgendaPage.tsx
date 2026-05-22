@@ -32,6 +32,13 @@ import type { Appointment, Doctor } from "@/types"
 
 import { cn } from "@/lib/utils"
 
+import {
+  buildAgendaRows,
+  DEFAULT_AGENDA_SCHEDULE,
+  parseAgendaSchedule,
+  type AgendaSchedule,
+} from "@/lib/agenda-schedule"
+
 import { useToast } from "@/context/ToastContext"
 
 import { useAuth } from "@/context/AuthContext"
@@ -45,18 +52,6 @@ import WaitingListDrawer from "@/components/agenda/WaitingListDrawer"
 import AgendaNotesDrawer from "@/components/agenda/AgendaNotesDrawer"
 
 import AgendaPrintPreview from "@/components/agenda/AgendaPrintPreview"
-
-
-
-const hours = [
-
-  "08:00", "08:15", "08:30", "08:45", "09:00", "09:30", "10:00", "10:30",
-
-  "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00",
-
-]
-
-
 
 const statusColors: Record<string, string> = {
   SCHEDULED:
@@ -84,7 +79,7 @@ export default function AgendaPage() {
 
   const { toast } = useToast()
 
-  const { hasPermission, user } = useAuth()
+  const { hasPermission, user, clinicId } = useAuth()
 
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 0 }))
 
@@ -123,6 +118,10 @@ export default function AgendaPage() {
   const [printOpen, setPrintOpen] = useState(false)
 
   const [notesCount, setNotesCount] = useState(0)
+
+  const [agendaSchedule, setAgendaSchedule] = useState<AgendaSchedule>(DEFAULT_AGENDA_SCHEDULE)
+
+  const agendaRows = buildAgendaRows(agendaSchedule)
 
 
 
@@ -205,6 +204,28 @@ export default function AgendaPage() {
     })
 
   }, [user?.role, user?.doctorId])
+
+
+
+  useEffect(() => {
+
+    const loadId = clinicId
+
+    if (!loadId) {
+
+      api.clinics.list().then((list) => {
+
+        if (list[0]) setAgendaSchedule(parseAgendaSchedule(list[0]))
+
+      })
+
+      return
+
+    }
+
+    api.clinics.getById(loadId).then((c) => setAgendaSchedule(parseAgendaSchedule(c))).catch(() => {})
+
+  }, [clinicId])
 
 
 
@@ -303,7 +324,7 @@ export default function AgendaPage() {
 
   return (
 
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="h-full overflow-y-auto p-4 lg:p-6 space-y-6">
 
       <div className="flex flex-wrap items-start justify-between gap-4">
 
@@ -570,89 +591,109 @@ export default function AgendaPage() {
 
         <div className="max-h-[560px] overflow-y-auto">
 
-          {hours.map((hour) => (
+          {agendaRows.map((row) => (
 
-            <div key={hour} className="grid grid-cols-8 border-b border-border min-h-[44px]">
+            <div
+
+              key={row.kind === "slot" ? row.time : `lunch-${row.from}`}
+
+              className="grid grid-cols-8 border-b border-border min-h-[44px]"
+
+            >
 
               <div className="p-2 text-xs font-mono text-text-secondary border-r border-border flex items-start">
 
-                {hour}
+                {row.kind === "slot" ? row.time : `${row.from} – ${row.to}`}
 
               </div>
 
-              {weekDays.map((day) => {
+              {row.kind === "lunch" ? (
 
-                const apt = filtered.find(
+                <div className="col-span-7 flex items-center justify-center bg-surface-alt/80 text-xs font-medium text-text-secondary border-l border-border">
 
-                  (a) =>
+                  {row.label}
 
-                    (a.startTime === hour || a.time === hour) &&
+                </div>
 
-                    isSameDay(new Date(a.date), day)
+              ) : (
 
-                )
+                weekDays.map((day) => {
 
-                return (
+                  const hour = row.time
 
-                  <div
+                  const apt = filtered.find(
 
-                    key={`${day}-${hour}`}
+                    (a) =>
 
-                    className="p-0.5 border-l border-border relative min-h-[44px]"
+                      (a.startTime === hour || a.time === hour) &&
 
-                  >
+                      isSameDay(new Date(a.date), day)
 
-                    {apt ? (
+                  )
 
-                      <button
+                  return (
 
-                        type="button"
+                    <div
 
-                        onClick={() => setSelectedId(apt.id)}
+                      key={`${day}-${hour}`}
 
-                        className={cn(
+                      className="p-0.5 border-l border-border relative min-h-[44px]"
 
-                          "w-full h-full min-h-[40px] text-left text-xs p-1.5 rounded-md border truncate",
+                    >
 
-                          statusColors[apt.type === "BLOCK" ? "BLOCK" : apt.status] ??
+                      {apt ? (
 
-                            statusColors.SCHEDULED
+                        <button
 
-                        )}
+                          type="button"
 
-                      >
+                          onClick={() => setSelectedId(apt.id)}
 
-                        {apt.type === "BLOCK"
+                          className={cn(
 
-                          ? "Bloqueado"
+                            "w-full h-full min-h-[40px] text-left text-xs p-1.5 rounded-md border truncate",
 
-                          : apt.patient?.name ?? "—"}
+                            statusColors[apt.type === "BLOCK" ? "BLOCK" : apt.status] ??
 
-                      </button>
+                              statusColors.SCHEDULED
 
-                    ) : (
+                          )}
 
-                      <button
+                        >
 
-                        type="button"
+                          {apt.type === "BLOCK"
 
-                        className="w-full h-full opacity-0 hover:opacity-100 hover:bg-primary-light/30 dark:hover:bg-primary/25 rounded text-[10px] text-primary"
+                            ? "Bloqueado"
 
-                        onClick={() => openNewAt(day, hour)}
+                            : apt.patient?.name ?? "—"}
 
-                      >
+                        </button>
 
-                        +
+                      ) : (
 
-                      </button>
+                        <button
 
-                    )}
+                          type="button"
 
-                  </div>
+                          className="w-full h-full opacity-0 hover:opacity-100 hover:bg-primary-light/30 dark:hover:bg-primary/25 rounded text-[10px] text-primary"
 
-                )
+                          onClick={() => openNewAt(day, hour)}
 
-              })}
+                        >
+
+                          +
+
+                        </button>
+
+                      )}
+
+                    </div>
+
+                  )
+
+                })
+
+              )}
 
             </div>
 
@@ -693,6 +734,8 @@ export default function AgendaPage() {
         initialDoctorId={initialDoctorForModal}
 
         waitingListEntryId={formPrefill.waitingListEntryId}
+
+        schedule={agendaSchedule}
 
       />
 

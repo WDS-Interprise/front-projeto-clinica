@@ -4,7 +4,6 @@ import Login from "@/pages/Login"
 import Register from "@/pages/Register"
 import Patients from "@/pages/Patients"
 import Doctors from "@/pages/Doctors"
-import Records from "@/pages/Records"
 import BackofficeLogin from "@/pages/backoffice/BackofficeLogin"
 import BackofficeDashboard from "@/pages/backoffice/BackofficeDashboard"
 import BackofficeClinicsPage from "@/pages/backoffice/BackofficeClinicsPage"
@@ -21,13 +20,22 @@ import PrescricoesPage from "@/pages/prescricoes/PrescricoesPage"
 import UsuariosPage from "@/pages/configuracoes/UsuariosPage"
 import UsuarioFormPage from "@/pages/configuracoes/UsuarioFormPage"
 import ClinicasPage from "@/pages/configuracoes/ClinicasPage"
+import AgendaConfigPage from "@/pages/configuracoes/AgendaConfigPage"
+import AparenciaPage from "@/pages/configuracoes/AparenciaPage"
+import MinhaContaPage from "@/pages/configuracoes/MinhaContaPage"
 import WhatsappPage from "@/pages/configuracoes/WhatsappPage"
 import MensagensPage from "@/pages/mensagens/MensagensPage"
-import OnboardingPage from "@/pages/onboarding/OnboardingPage"
+import BulasPage from "@/pages/outros/BulasPage"
+import BulaDetailPage from "@/pages/outros/BulaDetailPage"
+import Cid10Page from "@/pages/outros/Cid10Page"
+import Cid11Page from "@/pages/outros/Cid11Page"
+import ContatosPage from "@/pages/outros/ContatosPage"
+import LogsPage from "@/pages/outros/LogsPage"
 import { getBackofficeToken } from "@/services/backoffice-api"
 import { ToastProvider } from "@/context/ToastContext"
 import { ThemeProvider } from "@/context/ThemeContext"
 import { AuthProvider } from "@/context/AuthContext"
+import { UserAvatarProvider } from "@/context/UserAvatarContext"
 import PermissionRoute from "@/components/PermissionRoute"
 import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
 import { getAuthHome } from "@/lib/onboarding"
@@ -54,7 +62,10 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/agenda" replace />
 }
 
-function HomeRedirect() {
+function RootRedirect() {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />
+  }
   return <Navigate to={getAuthHome()} replace />
 }
 
@@ -77,8 +88,10 @@ export default function App() {
     <ThemeProvider>
     <ToastProvider>
       <AuthProvider>
+      <UserAvatarProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
@@ -104,7 +117,7 @@ export default function App() {
             path="/onboarding"
             element={
               <ProtectedRoute>
-                <OnboardingPage />
+                <Navigate to="/dashboard" replace />
               </ProtectedRoute>
             }
           />
@@ -116,7 +129,6 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<HomeRedirect />} />
             <Route
               path="dashboard"
               element={
@@ -139,6 +151,55 @@ export default function App() {
             <Route path="prontuario/:pacienteId" element={<ProntuarioPage />} />
             <Route path="atendimento/:id" element={<AtendimentoPage />} />
             <Route path="prescricoes/:atendimentoId" element={<PrescricoesPage />} />
+            <Route path="outros" element={<Navigate to="/outros/bulas" replace />} />
+            <Route
+              path="outros/bulas"
+              element={
+                <PermissionRoute permission="records:view" fallback="/agenda">
+                  <BulasPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="outros/bulas/:bulaId"
+              element={
+                <PermissionRoute permission="records:view" fallback="/agenda">
+                  <BulaDetailPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="outros/contatos"
+              element={
+                <PermissionRoute permission="patients:view" fallback="/agenda">
+                  <ContatosPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="outros/cid-10"
+              element={
+                <PermissionRoute permission="records:view" fallback="/agenda">
+                  <Cid10Page />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="outros/cid-11"
+              element={
+                <PermissionRoute permission="records:view" fallback="/agenda">
+                  <Cid11Page />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="outros/logs"
+              element={
+                <PermissionRoute permission="users:manage" fallback="/agenda">
+                  <LogsPage />
+                </PermissionRoute>
+              }
+            />
             <Route
               path="configuracoes/usuarios"
               element={
@@ -180,6 +241,16 @@ export default function App() {
               }
             />
             <Route
+              path="configuracoes/agenda"
+              element={
+                <PermissionRoute permission="clinics:manage">
+                  <AgendaConfigPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="configuracoes/aparencia" element={<AparenciaPage />} />
+            <Route path="configuracoes/conta" element={<MinhaContaPage />} />
+            <Route
               path="configuracoes/whatsapp"
               element={
                 <PermissionRoute permission="clinics:manage">
@@ -191,7 +262,7 @@ export default function App() {
             <Route path="patients" element={<Navigate to="/pacientes" replace />} />
             <Route path="appointments" element={<Navigate to="/agenda" replace />} />
             <Route path="doctors" element={<Doctors />} />
-            <Route path="records" element={<Records />} />
+            <Route path="records" element={<Navigate to="/pacientes" replace />} />
             <Route
               path="settings"
               element={
@@ -203,6 +274,7 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </UserAvatarProvider>
       </AuthProvider>
     </ToastProvider>
     </ThemeProvider>

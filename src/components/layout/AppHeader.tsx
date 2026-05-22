@@ -2,10 +2,7 @@ import { useState } from "react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import {
   Hospital,
-  Bell,
   MessageSquare,
-  User,
-  LogOut,
   ChevronDown,
   Plus,
   CalendarPlus,
@@ -14,7 +11,12 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
+import { OutrosNavDropdown } from "@/components/outros/OutrosNavDropdown"
 import ThemeToggle from "@/components/ui/ThemeToggle"
+import NotificationsMenu from "@/components/layout/NotificationsMenu"
+import UserMenu from "@/components/layout/UserMenu"
+import HeaderIconButton from "@/components/layout/HeaderIconButton"
+import { useUnreadMessages } from "@/hooks/useUnreadMessages"
 import { APP_NAME } from "@/lib/brand"
 import type { Permission } from "@/lib/permissions"
 
@@ -33,15 +35,13 @@ const allNav: NavItem[] = [
     to: "/pacientes",
     label: "Pacientes",
     permission: "patients:view",
-    activeWhen: (p) => p === "/pacientes" || p.startsWith("/pacientes/"),
+    activeWhen: (p) =>
+      p === "/pacientes" ||
+      p.startsWith("/pacientes/") ||
+      p.startsWith("/prontuario/") ||
+      p.startsWith("/atendimento/") ||
+      p.startsWith("/prescricoes/"),
   },
-  {
-    to: "/records",
-    label: "Prontuários",
-    permission: "records:view",
-    activeWhen: (p) => p === "/records" || p.startsWith("/prontuario/"),
-  },
-  { to: "/prescricoes/novo", label: "Prescrições", permission: "prescriptions:write" },
   {
     to: "/mensagens",
     label: "Mensagens",
@@ -55,17 +55,13 @@ const allNav: NavItem[] = [
 export default function AppHeader() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, clinicName, hasPermission, logout } = useAuth()
+  const { clinicName, hasPermission } = useAuth()
+  const unreadMessages = useUnreadMessages()
   const [quickOpen, setQuickOpen] = useState(false)
 
   const mainNav = allNav.filter(
     (item) => !item.permission || hasPermission(item.permission)
   )
-
-  const handleLogout = () => {
-    logout()
-    navigate("/login")
-  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-surface/95 backdrop-blur">
@@ -82,28 +78,29 @@ export default function AppHeader() {
           </div>
         </NavLink>
 
-        <nav className="hidden lg:flex items-center gap-1 flex-1 overflow-x-auto">
+        <nav className="hidden lg:flex items-center gap-1 flex-1 min-w-0 overflow-x-auto">
           {mainNav.map(({ to, label, activeWhen }) => {
             const isActive = activeWhen
               ? activeWhen(location.pathname)
               : location.pathname === to || location.pathname.startsWith(`${to}/`)
             return (
-            <NavLink
-              key={`${to}-${label}`}
-              to={to}
-              className={() =>
-                cn(
-                  "px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
-                  isActive
-                    ? "bg-primary-light text-primary"
-                    : "text-text-secondary hover:text-text hover:bg-surface-alt"
-                )
-              }
-            >
-              {label}
-            </NavLink>
+              <NavLink
+                key={`${to}-${label}`}
+                to={to}
+                className={() =>
+                  cn(
+                    "px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors shrink-0",
+                    isActive
+                      ? "bg-primary-light text-primary"
+                      : "text-text-secondary hover:text-text hover:bg-surface-alt"
+                  )
+                }
+              >
+                {label}
+              </NavLink>
             )
           })}
+          <OutrosNavDropdown />
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
@@ -183,43 +180,14 @@ export default function AppHeader() {
             )}
           </div>
 
-          <button
-            type="button"
-            className="p-2 rounded-lg text-text-secondary hover:bg-surface-alt relative"
-            title="Notificações"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full" />
-          </button>
-          <button
-            type="button"
-            className="p-2 rounded-lg text-text-secondary hover:bg-surface-alt"
-            title="Mensagens"
-          >
-            <MessageSquare className="w-5 h-5" />
-          </button>
-          <div className="hidden md:flex items-center gap-2 pl-2 border-l border-border ml-1">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center text-white text-xs font-bold">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="text-left max-w-[140px]">
-              <p className="text-xs font-medium text-text truncate">
-                {user?.name || "Usuário"}
-              </p>
-              <p className="text-[10px] text-text-secondary truncate">
-                {user?.role || "ADMIN"}
-              </p>
-            </div>
-            <ChevronDown className="w-4 h-4 text-text-secondary" />
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="p-2 rounded-lg text-text-secondary hover:text-danger hover:bg-danger/10"
-            title="Sair"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <NotificationsMenu />
+          <HeaderIconButton
+            icon={<MessageSquare className="h-5 w-5" />}
+            label="Mensagens"
+            badge={unreadMessages}
+            onClick={() => navigate("/mensagens")}
+          />
+          <UserMenu />
         </div>
       </div>
     </header>

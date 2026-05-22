@@ -1,0 +1,30 @@
+import { useEffect, useRef } from "react"
+
+export function useClickOutside<T extends HTMLElement>(
+  open: boolean,
+  onClose: () => void
+) {
+  const ref = useRef<T>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current?.contains(e.target as Node)) return
+      onClose()
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+
+    document.addEventListener("mousedown", onDoc)
+    document.addEventListener("keydown", onKey)
+    return () => {
+      document.removeEventListener("mousedown", onDoc)
+      document.removeEventListener("keydown", onKey)
+    }
+  }, [open, onClose])
+
+  return ref
+}

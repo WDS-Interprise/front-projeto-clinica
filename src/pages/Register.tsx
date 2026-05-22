@@ -1,67 +1,102 @@
 import { useState, useMemo } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { Hospital, Eye, EyeOff, Check, X, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import ThemeToggle from "@/components/ui/ThemeToggle"
+import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react"
 import {
-  fieldInputClass,
-  fieldInputWithIconClass,
-  fieldLabelClass,
-  iconButtonMutedClass,
-} from "@/lib/form-classes"
+  AuthCard,
+  AuthError,
+  AuthLogo,
+  AuthPageShell,
+  authInputCompactClass,
+  authInputCompactWithIconClass,
+  authLabelClass,
+  authSubmitClass,
+} from "@/components/auth/AuthLayout"
 import { api } from "@/services/api"
 import type { ApiFieldErrors } from "@/services/api"
 import { fieldsFromApiError, messageFromApiError } from "@/lib/api-errors"
 import { markSelfRegisteredUser } from "@/lib/onboarding"
+import { useAuth } from "@/context/AuthContext"
+import { useTheme } from "@/context/ThemeContext"
+import { cn } from "@/lib/utils"
+import {
+  formatCPFInput,
+  sanitizePersonName,
+  validateCPF,
+  validateEmail,
+  validateName,
+} from "@/lib/form-validation"
 
-function formatCPF(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11)
-  return digits
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-}
-
-function validateName(name: string) {
-  if (name.length < 5) return { ok: false, msg: "Minimo de 5 caracteres" }
-  if (/[^a-zA-ZÀ-ÿ\s]/.test(name)) return { ok: false, msg: "Caracteres especiais nao permitidos" }
-  return { ok: true, msg: "" }
-}
-
-function validateEmail(email: string) {
-  if (/\s/.test(email)) return { ok: false, msg: "Nao pode conter espacos" }
-  if (email.includes("@")) {
-    const afterAt = email.split("@")[1]
-    if (afterAt && /[^a-zA-Z0-9.\-]/.test(afterAt)) return { ok: false, msg: "Caracteres especiais nao permitidos apos @" }
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, msg: "Email invalido" }
-  return { ok: true, msg: "" }
-}
-
-function validateCPF(cpf: string) {
-  const digits = cpf.replace(/\D/g, "")
-  if (digits.length !== 11) return { ok: false, msg: "Deve ter 11 digitos" }
-  return { ok: true, msg: "" }
+function FieldHint({ message }: { message: string }) {
+  return (
+    <p className="mt-1 flex items-center gap-1 text-[11px] text-red-600">
+      <X className="h-3 w-3 shrink-0" />
+      {message}
+    </p>
+  )
 }
 
 const passwordRules = [
-  { label: "Minimo 8 caracteres", test: (v: string) => v.length >= 8 },
-  { label: "Letra maiuscula", test: (v: string) => /[A-Z]/.test(v) },
+  { label: "8+ caracteres", test: (v: string) => v.length >= 8 },
+  { label: "Maiuscula", test: (v: string) => /[A-Z]/.test(v) },
   { label: "Numero", test: (v: string) => /\d/.test(v) },
-  { label: "Caractere especial", test: (v: string) => /[^a-zA-Z0-9]/.test(v) },
+  { label: "Especial", test: (v: string) => /[^a-zA-Z0-9]/.test(v) },
 ]
 
 function getStrength(pass: string) {
   const count = passwordRules.filter((r) => r.test(pass)).length
-  if (count <= 1) return { level: 1, color: "bg-danger", label: "Fraca" }
-  if (count === 2) return { level: 2, color: "bg-warning", label: "Media" }
-  if (count === 3) return { level: 3, color: "bg-yellow-400", label: "Boa" }
-  return { level: 4, color: "bg-success", label: "Forte" }
+  if (count <= 1) return { level: 1, color: "bg-red-500", label: "Fraca", textColor: "text-red-600" }
+  if (count === 2) return { level: 2, color: "bg-amber-500", label: "Media", textColor: "text-amber-600" }
+  if (count === 3) return { level: 3, color: "bg-yellow-400", label: "Boa", textColor: "text-yellow-600" }
+  return { level: 4, color: "bg-emerald-500", label: "Forte", textColor: "text-emerald-600" }
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  show,
+  onToggleShow,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (v: string) => void
+  show: boolean
+  onToggleShow: () => void
+}) {
+  return (
+    <div className="space-y-1">
+      <label htmlFor={id} className={cn(authLabelClass, "text-xs")}>
+        {label}<span className="text-slate-900">*</span>
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={show ? "text" : "password"}
+          placeholder="••••••••"
+          className={authInputCompactWithIconClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+        />
+        <button
+          type="button"
+          onClick={onToggleShow}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+          aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+        >
+          {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function Register() {
   const navigate = useNavigate()
+  const { setSession } = useAuth()
+  const { setTheme } = useTheme()
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -92,13 +127,15 @@ export default function Register() {
     try {
       const cpfDigits = cpf.replace(/\D/g, "")
       const result = await api.auth.register({ name, email, password, cpf: cpfDigits })
-      localStorage.setItem("token", result.token)
-      localStorage.setItem("user", JSON.stringify(result.user))
-      if (result.permissions) {
-        localStorage.setItem("permissions", JSON.stringify(result.permissions))
-      }
+      setSession({
+        token: result.token,
+        user: result.user,
+        clinicId: "",
+        permissions: result.permissions ?? [],
+      })
       markSelfRegisteredUser()
-      navigate("/onboarding", { replace: true })
+      setTheme("light")
+      navigate("/dashboard", { replace: true })
     } catch (err: unknown) {
       setFieldErrors(fieldsFromApiError(err))
       setError(messageFromApiError(err, "Erro ao cadastrar"))
@@ -107,202 +144,156 @@ export default function Register() {
     }
   }
 
-  const icon = (ok: boolean) =>
-    ok ? <Check className="w-3.5 h-3.5 text-success shrink-0" /> : <X className="w-3.5 h-3.5 text-danger shrink-0" />
-
-  const showRealtime = password.length > 0 || confirm.length > 0
+  const ruleIcon = (ok: boolean) =>
+    ok ? <Check className="h-3 w-3 shrink-0 text-emerald-600" /> : <X className="h-3 w-3 shrink-0 text-slate-400" />
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-primary via-primary-dark to-secondary flex items-center justify-center p-4">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle className="border-white/30 bg-surface/90 backdrop-blur" />
-      </div>
-      <div className="w-full max-w-md">
-        <div className="bg-surface rounded-2xl shadow-2xl shadow-primary/10 p-8">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary mx-auto flex items-center justify-center mb-4">
-              <Hospital className="w-7 h-7 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-text">Criar Conta</h1>
-            <p className="text-sm text-text-secondary mt-1">
-              Preencha os dados para se cadastrar
-            </p>
-          </div>
+    <AuthPageShell wide>
+      <AuthCard>
+        <div className="mb-5 text-center">
+          <AuthLogo compact />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">Criar conta</h1>
+          <p className="mt-1 text-sm text-slate-500">Preencha os dados para se cadastrar</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Input
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label htmlFor="name" className={cn(authLabelClass, "text-xs")}>
+                Nome<span className="text-slate-900">*</span>
+              </label>
+              <input
                 id="name"
-                label="Nome completo"
                 type="text"
                 placeholder="Seu nome"
                 value={name}
-                onChange={(e) => setName(e.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, ""))}
+                onChange={(e) => setName(sanitizePersonName(e.target.value))}
                 required
+                className={authInputCompactClass}
               />
               {name.length > 0 && name.length < 5 && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  Minimo de 5 caracteres
-                </p>
+                <FieldHint message="Min. 5 caracteres" />
               )}
-              {fieldErrors.name && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  {fieldErrors.name}
-                </p>
-              )}
+              {fieldErrors.name && <FieldHint message={fieldErrors.name} />}
             </div>
 
-            <div>
-              <Input
+            <div className="space-y-1">
+              <label htmlFor="email" className={cn(authLabelClass, "text-xs")}>
+                E-mail<span className="text-slate-900">*</span>
+              </label>
+              <input
                 id="email"
-                label="E-mail"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder="exemplo@clinmax.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className={authInputCompactClass}
               />
-              {email.length > 0 && !emailVal.ok && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  {emailVal.msg}
-                </p>
-              )}
-              {fieldErrors.email && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  {fieldErrors.email}
-                </p>
-              )}
+              {email.length > 0 && !emailVal.ok && <FieldHint message={emailVal.msg} />}
+              {fieldErrors.email && <FieldHint message={fieldErrors.email} />}
             </div>
+          </div>
 
-            <div>
-              <label htmlFor="cpf" className={`${fieldLabelClass} mb-1`}>
-                CPF
-              </label>
-              <input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                className={fieldInputClass}
-                value={cpf}
-                onChange={(e) => setCpf(formatCPF(e.target.value))}
-                required
-                maxLength={14}
-              />
-              {cpf.length > 0 && !cpfVal.ok && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  {cpfVal.msg}
-                </p>
-              )}
-              {fieldErrors.cpf && (
-                <p className="flex items-center gap-1 mt-1 text-xs text-danger">
-                  {icon(false)}
-                  {fieldErrors.cpf}
-                </p>
-              )}
-            </div>
+          <div className="space-y-1">
+            <label htmlFor="cpf" className={cn(authLabelClass, "text-xs")}>
+              CPF<span className="text-slate-900">*</span>
+            </label>
+            <input
+              id="cpf"
+              type="text"
+              placeholder="000.000.000-00"
+              className={authInputCompactClass}
+              value={cpf}
+              onChange={(e) => setCpf(formatCPFInput(e.target.value))}
+              required
+              maxLength={14}
+            />
+            {cpf.length > 0 && !cpfVal.ok && <FieldHint message={cpfVal.msg} />}
+            {fieldErrors.cpf && <FieldHint message={fieldErrors.cpf} />}
+          </div>
 
-            <div>
-              <label htmlFor="password" className={`${fieldLabelClass} mb-1`}>
-                Senha
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className={fieldInputWithIconClass}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${iconButtonMutedClass}`}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-3">
+            <PasswordField
+              id="password"
+              label="Senha"
+              value={password}
+              onChange={setPassword}
+              show={showPassword}
+              onToggleShow={() => setShowPassword(!showPassword)}
+            />
+            <PasswordField
+              id="confirm"
+              label="Repetir senha"
+              value={confirm}
+              onChange={setConfirm}
+              show={showConfirm}
+              onToggleShow={() => setShowConfirm(!showConfirm)}
+            />
+          </div>
 
-            <div>
-              <label htmlFor="confirm" className={`${fieldLabelClass} mb-1`}>
-                Repetir senha
-              </label>
-              <div className="relative">
-                <input
-                  id="confirm"
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="••••••••"
-                  className={fieldInputWithIconClass}
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${iconButtonMutedClass}`}
-                >
-                  {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-
-              {showRealtime && (
-                <div className="mt-3 space-y-2 p-3 rounded-lg bg-surface-alt border border-border">
-                  <div className="flex gap-1 h-2">
-                    <div className={`flex-1 rounded-full transition-colors ${strength.level >= 1 ? strength.color : "bg-border"}`} />
-                    <div className={`flex-1 rounded-full transition-colors ${strength.level >= 2 ? strength.color : "bg-border"}`} />
-                    <div className={`flex-1 rounded-full transition-colors ${strength.level >= 3 ? strength.color : "bg-border"}`} />
-                    <div className={`flex-1 rounded-full transition-colors ${strength.level >= 4 ? strength.color : "bg-border"}`} />
-                  </div>
-
-                  <p className={`text-xs font-medium ${strength.level <= 1 ? "text-danger" : strength.level === 2 ? "text-warning" : "text-success"}`}>
-                    {strength.label}
-                  </p>
-
-                  <div className="space-y-1">
-                    {passwordRules.map((rule) => {
-                      const ok = rule.test(password)
-                      return (
-                        <p key={rule.label} className={`flex items-center gap-1 text-xs ${ok ? "text-success" : "text-text-secondary"}`}>
-                          {icon(ok)}
-                          {rule.label}
-                        </p>
-                      )
-                    })}
-                    <p className={`flex items-center gap-1 text-xs ${confirmOk ? "text-success" : "text-text-secondary"}`}>
-                      {icon(confirmOk)}
-                      Senhas conferem
-                    </p>
-                  </div>
+          {password.length > 0 && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="mb-1.5 flex items-center gap-2">
+                <div className="flex h-1 flex-1 gap-0.5">
+                  {[1, 2, 3, 4].map((step) => (
+                    <div
+                      key={step}
+                      className={cn(
+                        "flex-1 rounded-full transition-colors",
+                        strength.level >= step ? strength.color : "bg-slate-200"
+                      )}
+                    />
+                  ))}
                 </div>
-              )}
+                <span className={cn("shrink-0 text-[10px] font-medium", strength.textColor)}>
+                  {strength.label}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                {passwordRules.map((rule) => {
+                  const ok = rule.test(password)
+                  return (
+                    <p
+                      key={rule.label}
+                      className={cn(
+                        "flex items-center gap-1 text-[10px] leading-tight",
+                        ok ? "text-emerald-600" : "text-slate-500"
+                      )}
+                    >
+                      {ruleIcon(ok)}
+                      {rule.label}
+                    </p>
+                  )
+                })}
+                <p
+                  className={cn(
+                    "flex items-center gap-1 text-[10px] leading-tight",
+                    confirmOk ? "text-emerald-600" : "text-slate-500"
+                  )}
+                >
+                  {ruleIcon(confirmOk)}
+                  Senhas conferem
+                </p>
+              </div>
             </div>
+          )}
 
-            {error && (
-              <p className="text-xs text-danger bg-danger/10 px-3 py-2 rounded-lg">{error}</p>
-            )}
+          {error && <AuthError message={error} />}
 
-            <Button type="submit" className="w-full" size="lg" disabled={!allOk || loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {loading ? "Cadastrando..." : "Criar conta"}
-            </Button>
-          </form>
+          <button type="submit" disabled={!allOk || loading} className={authSubmitClass}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {loading ? "Cadastrando..." : "Criar conta"}
+          </button>
+        </form>
 
-          <p className="text-center text-sm text-text-secondary mt-6">
-            Ja tem conta?{" "}
-            <Link to="/login" className="text-primary font-medium hover:underline">
-              Fazer login
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Já tem conta?{" "}
+          <Link to="/login" className="font-semibold text-slate-900 hover:underline">
+            Fazer login
+          </Link>
+        </p>
+      </AuthCard>
+    </AuthPageShell>
   )
 }

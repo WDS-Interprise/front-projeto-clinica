@@ -50,7 +50,7 @@ export default function PainelPage() {
     : []
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)]">
+    <div className="flex h-full overflow-hidden">
       <aside className="w-72 shrink-0 border-r border-border bg-surface p-4 hidden md:block">
         <h2 className="text-sm font-semibold text-text px-2 mb-4">Pacientes do dia</h2>
         <div className="space-y-2">
