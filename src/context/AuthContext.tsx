@@ -31,7 +31,7 @@ type AuthState = {
   setSession: (data: {
     token: string
     user: AuthUser
-    clinicId: string
+    clinicId?: string
     permissions: string[]
     clinicName?: string
   }) => void
@@ -123,18 +123,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (data: {
       token: string
       user: AuthUser
-      clinicId: string
+      clinicId?: string
       permissions: string[]
       clinicName?: string
     }) => {
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
-      localStorage.setItem("clinicId", data.clinicId)
       localStorage.setItem("permissions", JSON.stringify(data.permissions))
-      if (data.clinicName) localStorage.setItem("clinicName", data.clinicName)
+      if (data.clinicId) {
+        localStorage.setItem("clinicId", data.clinicId)
+        setClinicId(data.clinicId)
+      } else {
+        localStorage.removeItem("clinicId")
+        setClinicId(null)
+      }
+      if (data.clinicName) {
+        localStorage.setItem("clinicName", data.clinicName)
+        setClinicName(data.clinicName)
+      } else {
+        localStorage.removeItem("clinicName")
+        setClinicName(null)
+      }
       setUser(data.user)
-      setClinicId(data.clinicId)
-      setClinicName(data.clinicName ?? null)
       setPermissions(data.permissions)
       setLoading(false)
     },

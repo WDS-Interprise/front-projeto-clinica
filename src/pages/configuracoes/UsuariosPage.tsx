@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { Plus, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import SettingsSidebar from "@/components/layout/SettingsSidebar"
+import SettingsLayout, { SettingsPageHeader } from "@/components/layout/SettingsLayout"
 import { api } from "@/services/api"
 
 type UserRow = {
@@ -33,12 +33,12 @@ export default function UsuariosPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] p-6 lg:p-8 gap-8">
-      <SettingsSidebar />
-      <div className="flex-1 space-y-8">
+    <SettingsLayout className="max-w-5xl">
+      <SettingsPageHeader title="Usuários da clínica" description="Gerencie profissionais de saúde e recepcionistas." />
+      <div className="space-y-8">
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-text">Profissionais de saúde</h1>
+            <h2 className="text-lg font-semibold text-text">Profissionais de saúde</h2>
             <Link to="/configuracoes/usuarios/profissional/novo">
               <Button className="gap-2">
                 <Plus className="w-4 h-4" />
@@ -78,7 +78,7 @@ export default function UsuariosPage() {
 
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-text">Recepcionistas</h2>
+            <h2 className="text-lg font-semibold text-text">Recepcionistas</h2>
             <Link to="/configuracoes/usuarios/novo">
               <Button variant="secondary" className="gap-2">
                 <Plus className="w-4 h-4" />
@@ -118,6 +118,6 @@ export default function UsuariosPage() {
           </div>
         </section>
       </div>
-    </div>
+    </SettingsLayout>
   )
 }

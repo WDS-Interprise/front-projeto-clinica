@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom"
 
 import { MessageCircle, Plus, QrCode, Smartphone, Trash2, Unplug } from "lucide-react"
 
-import SettingsSidebar from "@/components/layout/SettingsSidebar"
+import SettingsLayout, { SettingsPageHeader } from "@/components/layout/SettingsLayout"
 
 import { Button } from "@/components/ui/button"
 
@@ -446,41 +446,21 @@ export default function WhatsappPage() {
 
   return (
 
-    <div className="flex min-h-[calc(100vh-4rem)] p-6 lg:p-8 gap-8">
+    <SettingsLayout className="max-w-4xl">
 
-      <SettingsSidebar />
-
-      <div className="flex-1 space-y-6 max-w-4xl">
-
-        <div className="flex items-start justify-between gap-4">
-
-          <div>
-
-            <h1 className="text-2xl font-bold text-text flex items-center gap-2">
-
-              <MessageCircle className="w-7 h-7 text-primary" />
-
-              WhatsApp (Baileys)
-
-            </h1>
-
-            <p className="text-sm text-text-secondary mt-1">
-
-              Conecte números da clínica por QR Code ou código de pareamento. Cada conexão é
-
-              independente e vinculada ao seu usuário.
-
-            </p>
-
-          </div>
-
-          {settingsTab === "connections" && (
-            <Button className="gap-2" onClick={() => setShowForm((v) => !v)}>
-              <Plus className="w-4 h-4" />
-              Nova conexão
-            </Button>
-          )}
-        </div>
+        <SettingsPageHeader
+          icon={<MessageCircle className="w-7 h-7 text-primary" />}
+          title="WhatsApp (Baileys)"
+          description="Conecte números da clínica por QR Code ou código de pareamento. Cada conexão é independente e vinculada ao seu usuário."
+          action={
+            settingsTab === "connections" ? (
+              <Button className="gap-2" onClick={() => setShowForm((v) => !v)}>
+                <Plus className="w-4 h-4" />
+                Nova conexão
+              </Button>
+            ) : undefined
+          }
+        />
 
         <div className="flex gap-2 border-b border-border pb-2">
           {(
@@ -959,9 +939,7 @@ export default function WhatsappPage() {
           </>
         )}
 
-      </div>
-
-    </div>
+    </SettingsLayout>
 
   )
 

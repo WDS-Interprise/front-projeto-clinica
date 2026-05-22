@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import SettingsSidebar from "@/components/layout/SettingsSidebar"
+import SettingsLayout from "@/components/layout/SettingsLayout"
 import { useToast } from "@/context/ToastContext"
 import { api } from "@/services/api"
 import { toastMessageFromApiError } from "@/lib/api-errors"
@@ -58,9 +58,7 @@ export default function ProfissionalFormPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] p-6 lg:p-8 gap-8">
-      <SettingsSidebar />
-      <div className="flex-1 max-w-2xl space-y-8">
+    <SettingsLayout className="max-w-2xl space-y-8">
         <h1 className="text-2xl font-bold text-text">Profissional de saúde</h1>
 
         <section className="space-y-4">
@@ -87,7 +85,6 @@ export default function ProfissionalFormPage() {
         <Button size="lg" onClick={handleSave} disabled={loading}>
           {loading ? "Salvando..." : "Salvar"}
         </Button>
-      </div>
-    </div>
+    </SettingsLayout>
   )
 }

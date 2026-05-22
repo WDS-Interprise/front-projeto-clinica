@@ -7,6 +7,12 @@ import { Switch } from "@/components/ui/switch"
 import { api } from "@/services/api"
 import { toastMessageFromApiError } from "@/lib/api-errors"
 import { isResolvableEntityId } from "@/lib/route-ids"
+import {
+  addMinutesToTime,
+  DEFAULT_AGENDA_SCHEDULE,
+  validateAppointmentSchedule,
+  type AgendaSchedule,
+} from "@/lib/agenda-schedule"
 import type { CreateAppointmentInput, Doctor, Patient, Procedure } from "@/types"
 
 type ProcedureLine = { procedureId: string; quantity: number; unitPrice: number }
@@ -20,6 +26,7 @@ interface Props {
   initialPatientId?: string
   initialDoctorId?: string
   waitingListEntryId?: string
+  schedule?: AgendaSchedule
 }
 
 const recurrenceOptions = [
@@ -53,6 +60,7 @@ export default function AppointmentFormModal({
   initialPatientId,
   initialDoctorId,
   waitingListEntryId,
+  schedule = DEFAULT_AGENDA_SCHEDULE,
 }: Props) {
   const [type, setType] = useState<"SCHEDULE" | "BLOCK">("SCHEDULE")
   const [doctorId, setDoctorId] = useState("")
@@ -84,9 +92,7 @@ export default function AppointmentFormModal({
     setDate(format(defaultDate ?? new Date(), "yyyy-MM-dd"))
     if (defaultStart) {
       setStartTime(defaultStart)
-      const [h, m] = defaultStart.split(":").map(Number)
-      const endM = m + 15
-      setEndTime(`${String(h + Math.floor(endM / 60)).padStart(2, "0")}:${String(endM % 60).padStart(2, "0")}`)
+      setEndTime(addMinutesToTime(defaultStart, schedule.slotIntervalMinutes))
     }
     api.doctors.list().then((docs: Doctor[]) => {
       if (initialDoctorId) setDoctorId(initialDoctorId)
@@ -117,7 +123,7 @@ export default function AppointmentFormModal({
         ])
       }
     })
-  }, [open, defaultDate, defaultStart, initialPatientId, initialDoctorId])
+  }, [open, defaultDate, defaultStart, initialPatientId, initialDoctorId, schedule.slotIntervalMinutes])
 
   useEffect(() => {
     if (patientSearch.length < 3) {
@@ -178,6 +184,12 @@ export default function AppointmentFormModal({
         setError("Selecione o convenio")
         return
       }
+    }
+
+    const scheduleError = validateAppointmentSchedule(startTime, endTime, schedule, type)
+    if (scheduleError) {
+      setError(scheduleError)
+      return
     }
 
     setLoading(true)

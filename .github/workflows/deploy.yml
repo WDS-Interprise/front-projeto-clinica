@@ -1,132 +1,156 @@
 name: Deploy ClinMax Front (VPS)
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-  workflow_call:
-    inputs:
-      ref:
-        description: Branch ou SHA para deploy
-        required: false
-        type: string
-        default: main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch ou SHA para deploy
+        required: false
+        type: string
+        default: main
 
 concurrency:
-  group: deploy-clinmax-front
-  cancel-in-progress: true
+  group: deploy-clinmax-front
+  cancel-in-progress: true
 
 env:
-  WEB_ROOT: /var/www/clinmax-front
-  DEPLOY_TMP: /tmp/clinmax-front-deploy
-  NGINX_SITE: clinmax-www
-  FRONT_PORT: "3551"
-  SSH_PORT: ${{ secrets.PORT || '22' }}
+  WEB_ROOT: /var/www/clinmax-front
+  DEPLOY_TMP: /tmp/clinmax-front-deploy
+  NGINX_SITE: clinmax-www
+  FRONT_PORT: "3551"
+  SSH_PORT: ${{ secrets.PORT || '22' }}
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment: Production
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Production
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ inputs.ref || github.ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
-      - name: Criar .env de build
-        env:
-          DOTENV_FILE: ${{ vars.DOTENV_FILE }}
-        run: |
-          test -n "$DOTENV_FILE" || (echo "Variable DOTENV_FILE ausente no Environment Production" && exit 1)
-          printf '%s\n' "$DOTENV_FILE" > .env
-          grep -q 'VITE_API_BASE=' .env || echo 'VITE_API_BASE=https://api.clinmax.com.br/api' >> .env
+      - name: Criar .env de build
+        env:
+          DOTENV_FILE: ${{ vars.DOTENV_FILE }}
+        run: |
+          test -n "$DOTENV_FILE" || (echo "Variable DOTENV_FILE ausente no Environment Production" && exit 1)
+          printf '%s\n' "$DOTENV_FILE" > .env
+          grep -q 'VITE_API_BASE=' .env || echo 'VITE_API_BASE=https://api.clinmax.com.br/api' >> .env
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: "20"
-          cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: npm
 
-      - name: Instalar e buildar
-        run: |
-          npm ci
-          NODE_OPTIONS="--max-old-space-size=8192" npm run build
-          test -f dist/index.html
+      - name: Instalar e buildar
+        run: |
+          npm ci
+          NODE_OPTIONS="--max-old-space-size=8192" npm run build
+          test -f dist/index.html
 
-      - name: Compactar dist
-        run: tar -czf dist.tar.gz -C dist .
+      - name: Compactar dist
+        run: tar -czf dist.tar.gz -C dist .
 
-      - name: Configurar SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
+      - name: Configurar SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
 
-      - name: Validar secrets
-        env:
-          SSH_HOST: ${{ secrets.HOST }}
-          SSH_USER: ${{ secrets.USERNAME }}
-        run: |
-          test -n "$SSH_HOST" || (echo "Secret HOST ausente" && exit 1)
-          test -n "$SSH_USER" || (echo "Secret USERNAME ausente" && exit 1)
+      - name: Validar secrets
+        env:
+          SSH_HOST: ${{ secrets.HOST }}
+          SSH_USER: ${{ secrets.USERNAME }}
+        run: |
+          test -n "$SSH_HOST" || (echo "Secret HOST ausente" && exit 1)
+          test -n "$SSH_USER" || (echo "Secret USERNAME ausente" && exit 1)
 
-      - name: Enviar arquivos para VPS
-        uses: nick-fields/retry@v4
-        with:
-          timeout_minutes: 5
-          max_attempts: 3
-          retry_wait_seconds: 30
-          command: |
-            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
-              ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p ${{ env.DEPLOY_TMP }}"
-            scp -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -P ${{ env.SSH_PORT }} \
-              dist.tar.gz deploy/nginx-www.conf \
-              ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ env.DEPLOY_TMP }}/
+      - name: Enviar arquivos para VPS
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: |
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
+              ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p ${{ env.DEPLOY_TMP }}"
+            scp -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -P ${{ env.SSH_PORT }} \
+              dist.tar.gz deploy/nginx-www.conf \
+              ${{ secrets.USERNAME }}@${{ secrets.HOST }}:${{ env.DEPLOY_TMP }}/
 
-      - name: Publicar site + nginx
-        uses: nick-fields/retry@v4
-        with:
-          timeout_minutes: 5
-          max_attempts: 3
-          retry_wait_seconds: 30
-          command: |
-            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
-              ${{ secrets.USERNAME }}@${{ secrets.HOST }} '
-              set -e
-              SITE=${{ env.NGINX_SITE }}
-              WEB=${{ env.WEB_ROOT }}
-              TMP=${{ env.DEPLOY_TMP }}
-              PORT=${{ env.FRONT_PORT }}
-              sudo mkdir -p "$WEB"
-              sudo rm -rf "$WEB"/*
-              sudo tar -xzf "$TMP/dist.tar.gz" -C "$WEB"
-              test -f "$WEB/index.html"
-              if ! sudo grep -q "listen.*443" /etc/nginx/sites-available/"$SITE" 2>/dev/null; then
-                sudo cp "$TMP/nginx-www.conf" /etc/nginx/sites-available/"$SITE"
-                sudo ln -sf /etc/nginx/sites-available/"$SITE" /etc/nginx/sites-enabled/"$SITE"
-                echo "Nginx $SITE instalado (HTTP). Rode certbot uma vez: certbot --nginx -d clinmax.com.br -d www.clinmax.com.br"
-              else
-                echo "Nginx $SITE ja tem SSL (443) — mantendo config; apenas arquivos em $WEB atualizados"
-              fi
-              sudo nginx -t
-              sudo systemctl reload nginx
-              curl -sf -H "Host: www.clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML na porta ${PORT} (www)"
-                ls -la /etc/nginx/sites-enabled/ || true
-                exit 1
-              }
-              curl -sf -H "Host: clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
-                echo "Nginx nao serviu HTML na porta ${PORT} (apex)"
-                exit 1
-              }
-              curl -sf -H "Host: www.clinmax.com.br" http://127.0.0.1/ | grep -qi "<html" || {
-                echo "Aviso: porta 80 sem HTML para clinmax — confira server_name ou Cloudflare origin port"
-              }
-              curl -sfk https://clinmax.com.br/ 2>/dev/null | grep -qi "<html" || {
-                echo "Aviso: HTTPS ainda sem HTML — rode certbot na VPS se ainda nao fez"
-              }
-              rm -rf "$TMP"
-              echo "ClinMax front publicado em $WEB"
-            '
+      - name: Publicar site + nginx
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: |
+            ssh -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
+              ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+              "SITE=${{ env.NGINX_SITE }} WEB=${{ env.WEB_ROOT }} TMP=${{ env.DEPLOY_TMP }} PORT=${{ env.FRONT_PORT }} bash -s" << 'REMOTE'
+            set -euo pipefail
+            CONF="/etc/nginx/sites-available/${SITE}"
+            SSL_SNIP="/tmp/clinmax-ssl-blocks.conf"
+
+            test -n "$WEB" || { echo "WEB_ROOT vazio"; exit 1; }
+            test "$WEB" = "/var/www/clinmax-front" || { echo "WEB_ROOT inválido: $WEB"; exit 1; }
+            test "$WEB" != "/var/www/html" || { echo "BLOQUEADO: pasta do Vila Vault"; exit 1; }
+
+            sudo mkdir -p "$WEB"
+            sudo rm -rf "$WEB"/*
+            sudo tar -xzf "$TMP/dist.tar.gz" -C "$WEB"
+            test -f "$WEB/index.html"
+
+            if sudo test -f "$CONF" && sudo grep -qE "listen[^;]*443" "$CONF" 2>/dev/null; then
+              echo "Preservando bloco(s) SSL 443..."
+              sudo awk '
+                /^server[[:space:]]*\{/ { in_server=1; block="" }
+                in_server { block = block $0 "\n" }
+                in_server && /^\}/ {
+                  if (block ~ /listen[^;]*443/) print block
+                  in_server=0; block=""
+                }
+              ' "$CONF" | sudo tee "$SSL_SNIP" > /dev/null
+            fi
+
+            sudo cp "$TMP/nginx-www.conf" "$CONF"
+
+            if sudo test -s "$SSL_SNIP" 2>/dev/null; then
+              echo "" | sudo tee -a "$CONF" > /dev/null
+              sudo cat "$SSL_SNIP" | sudo tee -a "$CONF" > /dev/null
+              sudo rm -f "$SSL_SNIP"
+              echo "nginx-www.conf aplicado + SSL 443 mantido"
+            else
+              echo "nginx-www.conf aplicado (sem SSL 443 — rode certbot se precisar HTTPS)"
+            fi
+
+            sudo ln -sf "$CONF" "/etc/nginx/sites-enabled/${SITE}"
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            curl -sf -H "Host: www.clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
+              echo "Nginx nao serviu HTML na porta ${PORT} (www)"
+              exit 1
+            }
+            curl -sf -H "Host: clinmax.com.br" "http://127.0.0.1:${PORT}/" | grep -qi "<html" || {
+              echo "Nginx nao serviu HTML na porta ${PORT} (apex)"
+              exit 1
+            }
+            curl -sf -H "Host: vilavault.com.br" http://127.0.0.1/ | grep -qi "<html" || \
+              curl -sk -H "Host: vilavault.com.br" https://127.0.0.1/ | grep -qi "<html" || {
+              echo "AVISO: vilavault.com.br nao serviu HTML — confira vilavault-www"
+            }
+            curl -sfk https://clinmax.com.br/ 2>/dev/null | grep -qi "<html" || {
+              echo "Aviso: HTTPS clinmax sem HTML — confira Certbot"
+            }
+
+            rm -rf "$TMP"
+            echo "ClinMax front publicado em $WEB"
+            REMOTE

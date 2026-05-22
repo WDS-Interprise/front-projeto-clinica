@@ -4,7 +4,6 @@ import {
   Users,
   Calendar,
   Stethoscope,
-  FileText,
   Settings,
   Hospital,
   LogOut,
@@ -17,7 +16,6 @@ const navItems = [
   { to: "/patients", label: "Pacientes", icon: Users },
   { to: "/appointments", label: "Consultas", icon: Calendar },
   { to: "/doctors", label: "Médicos", icon: Stethoscope },
-  { to: "/records", label: "Prontuários", icon: FileText },
   { to: "/settings", label: "Configurações", icon: Settings },
 ]
 

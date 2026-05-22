@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useConfirm } from "@/hooks/useConfirm"
 import WhatsappSendDrawer from "@/components/whatsapp/WhatsappSendDrawer"
 import type { Appointment } from "@/types"
+import { cn } from "@/lib/utils"
 
 const statusOptions = [
   { value: "SCHEDULED", label: "Agendado" },
@@ -41,18 +42,32 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
   const [loading, setLoading] = useState(false)
   const [whatsappOpen, setWhatsappOpen] = useState(false)
   const [sendingReminder, setSendingReminder] = useState(false)
+  const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(null)
   const reminderInFlight = useRef(false)
 
   const load = () => {
     if (!appointmentId) return
-    api.appointments.getById(appointmentId).then((data) => {
-      setApt(data)
-      setChargeValue(String(data.totalAmount ?? 0))
-    })
+    api.appointments
+      .getById(appointmentId)
+      .then((data) => {
+        setApt(data)
+        setChargeValue(String(data.totalAmount ?? 0))
+      })
+      .catch((err: unknown) => {
+        toast(toastMessageFromApiError(err, "Erro ao carregar agendamento"), "error")
+      })
   }
 
   useEffect(() => {
     load()
+  }, [appointmentId])
+
+  useEffect(() => {
+    if (!appointmentId) return
+    api.whatsapp
+      .getSettings()
+      .then((s) => setWhatsappConnected(s.connections.some((c) => c.status === "CONNECTED")))
+      .catch(() => setWhatsappConnected(false))
   }, [appointmentId])
 
   if (!appointmentId) return null
@@ -127,6 +142,11 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
       setSendingReminder(false)
       reminderInFlight.current = false
     }
+  }
+
+  const goToWhatsappSettings = () => {
+    onClose()
+    navigate("/configuracoes/whatsapp")
   }
 
   const handleDelete = async () => {
@@ -211,34 +231,57 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
                 <p className="text-sm text-text-secondary">
                   {apt.patient?.whatsapp || apt.patient?.phone || "Sem telefone"}
                 </p>
-                <div className="mt-2 flex flex-col items-start gap-1">
-                  <button
-                    type="button"
-                    onClick={handleReminder}
-                    disabled={sendingReminder || !patientWhatsappPhone()}
-                    className="text-xs font-medium text-success flex items-center gap-1 hover:underline disabled:opacity-50 disabled:no-underline"
-                  >
-                    {sendingReminder ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <MessageCircle className="w-4 h-4" />
-                    )}
-                    {sendingReminder ? "Enviando..." : "ENVIAR LEMBRETE DE CONSULTA"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWhatsappOpen(true)}
-                    className="text-[10px] text-text-secondary hover:text-primary hover:underline"
-                  >
-                    Editar mensagem antes de enviar
-                  </button>
+                <div
+                  className={cn(
+                    "mt-2 flex flex-col items-stretch gap-1 rounded-lg border p-2",
+                    whatsappConnected === false
+                      ? "border-danger/40 bg-danger/5"
+                      : "border-border bg-surface"
+                  )}
+                >
+                  {whatsappConnected === false ? (
+                    <button
+                      type="button"
+                      onClick={goToWhatsappSettings}
+                      className="flex h-8 w-full items-center justify-start gap-2 rounded-md border border-danger/40 px-2 text-xs font-semibold uppercase tracking-wide text-danger transition-colors hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40"
+                    >
+                      <MessageCircle className="h-4 w-4 shrink-0" />
+                      WhatsApp não conectado — conectar agora
+                    </button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={handleReminder}
+                      disabled={sendingReminder || !patientWhatsappPhone() || whatsappConnected !== true}
+                      variant="secondary"
+                      size="sm"
+                      className="h-8 justify-start border-success/40 text-success hover:bg-success/10 hover:text-success focus-visible:ring-success/60"
+                    >
+                      {sendingReminder ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <MessageCircle className="w-4 h-4" />
+                      )}
+                      {sendingReminder ? "Enviando..." : "ENVIAR LEMBRETE DE CONSULTA"}
+                    </Button>
+                  )}
+                  {whatsappConnected !== false && (
+                    <button
+                      type="button"
+                      onClick={() => setWhatsappOpen(true)}
+                      disabled={!patientWhatsappPhone()}
+                      className="rounded-md px-2 py-1 text-left text-[10px] text-text-secondary hover:bg-surface-alt hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-50"
+                    >
+                      Editar mensagem antes de enviar
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
                       onClose()
                       navigate("/configuracoes/whatsapp?tab=templates")
                     }}
-                    className="text-[10px] text-text-secondary hover:text-primary hover:underline"
+                    className="rounded-md px-2 py-1 text-left text-[10px] text-text-secondary hover:bg-surface-alt hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                   >
                     Gerenciar templates
                   </button>
@@ -261,7 +304,7 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
           <div>
             <label className="text-xs font-medium text-text-secondary">Status</label>
             <select
-              className="mt-1 w-full h-10 rounded-lg border border-border px-3 text-sm"
+              className="mt-1 h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
               value={apt.status}
               disabled={loading}
               onChange={(e) => handleStatus(e.target.value as Appointment["status"])}
@@ -279,24 +322,26 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
             <strong>{apt.insurancePlan ?? "Particular"}</strong>
           </p>
 
-          <div className="rounded-xl border border-border p-4 space-y-3">
+          <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
             <p className="text-xs font-semibold text-text-secondary uppercase">Cobrar agendamento</p>
             <div className="flex gap-2 items-center">
-              <span className="text-sm">Valor</span>
+              <span className="text-sm text-text">Valor</span>
               <input
                 type="number"
-                className="flex-1 h-10 rounded-lg border border-border px-3 text-sm"
+                className="h-10 flex-1 rounded-lg border border-border bg-surface-alt px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
                 value={chargeValue}
                 onChange={(e) => setChargeValue(e.target.value)}
               />
             </div>
-            <button
+            <Button
               type="button"
               onClick={handleCharge}
-              className="text-sm text-primary font-medium flex items-center gap-1"
+              variant="secondary"
+              size="sm"
+              className="h-8 w-fit"
             >
               <DollarSign className="w-4 h-4" /> Gerar cobrança
-            </button>
+            </Button>
             <p className="text-xs text-text-secondary">
               Status cobrança: {apt.billingStatus ?? "PENDING"}
             </p>

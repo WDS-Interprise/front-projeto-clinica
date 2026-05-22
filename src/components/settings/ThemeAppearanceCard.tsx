@@ -8,17 +8,19 @@ const options: { value: Theme; label: string; description: string; Icon: typeof 
   { value: "dark", label: "Escuro", description: "Reduz brilho em ambientes com pouca luz", Icon: Moon },
 ]
 
-export default function ThemeAppearanceCard() {
+export default function ThemeAppearanceCard({ hideHeader = false }: { hideHeader?: boolean }) {
   const { theme, setTheme } = useTheme()
 
   return (
     <div className="bg-surface rounded-xl border border-border p-6 space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-text">Aparência</h2>
-        <p className="text-sm text-text-secondary mt-1">
-          Escolha o tema da interface. A preferência é salva neste navegador.
-        </p>
-      </div>
+      {!hideHeader && (
+        <div>
+          <h2 className="text-lg font-semibold text-text">Aparência</h2>
+          <p className="text-sm text-text-secondary mt-1">
+            Escolha o tema da interface. A preferência é salva neste navegador.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {options.map(({ value, label, description, Icon }) => {
           const active = theme === value

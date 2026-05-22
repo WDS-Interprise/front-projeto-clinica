@@ -1,21 +1,43 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { Hospital, Eye, EyeOff, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import ThemeToggle from "@/components/ui/ThemeToggle"
-import { fieldInputWithIconClass, fieldLabelClass, iconButtonMutedClass } from "@/lib/form-classes"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  AuthBackofficeLink,
+  AuthCard,
+  AuthDivider,
+  AuthError,
+  AuthLogo,
+  AuthPageShell,
+  AuthSocialButtons,
+  authInputClass,
+  authInputWithIconClass,
+  authLabelClass,
+  authSubmitClass,
+} from "@/components/auth/AuthLayout"
 import { api } from "@/services/api"
 import { applyAuthRedirectFlags } from "@/lib/onboarding"
-import { APP_LOGIN_SUBTITLE, APP_NAME } from "@/lib/brand"
+import { useAuth } from "@/context/AuthContext"
+
+const REMEMBER_EMAIL_KEY = "clinmax_remember_email"
 
 export default function Login() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberDevice, setRememberDevice] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { setSession } = useAuth()
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY)
+    if (savedEmail) {
+      setEmail(savedEmail)
+      setRememberDevice(true)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,14 +46,22 @@ export default function Login() {
 
     try {
       const result = await api.auth.login(email, password)
-      localStorage.setItem("token", result.token)
-      localStorage.setItem("user", JSON.stringify(result.user))
-      if (result.clinicId) localStorage.setItem("clinicId", result.clinicId)
-      if (result.permissions) {
-        localStorage.setItem("permissions", JSON.stringify(result.permissions))
-      }
       const clinicName = result.clinics?.[0]?.name
-      if (clinicName) localStorage.setItem("clinicName", clinicName)
+
+      setSession({
+        token: result.token,
+        user: result.user,
+        clinicId: result.clinicId,
+        permissions: result.permissions ?? [],
+        clinicName,
+      })
+
+      if (rememberDevice) {
+        localStorage.setItem(REMEMBER_EMAIL_KEY, email)
+      } else {
+        localStorage.removeItem(REMEMBER_EMAIL_KEY)
+      }
+
       const home = result.redirectPath || "/dashboard"
       applyAuthRedirectFlags({
         redirectPath: home,
@@ -47,83 +77,92 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-primary via-primary-dark to-secondary flex items-center justify-center p-4">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle className="border-white/30 bg-surface/90 backdrop-blur" />
-      </div>
-      <div className="w-full max-w-md">
-        <div className="bg-surface rounded-2xl shadow-2xl shadow-primary/10 p-8">
-          <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary mx-auto flex items-center justify-center mb-4">
-              <Hospital className="w-7 h-7 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-text">{APP_NAME}</h1>
-            <p className="text-sm text-text-secondary mt-1">{APP_LOGIN_SUBTITLE}</p>
-          </div>
+    <AuthPageShell footer={<AuthBackofficeLink />}>
+      <AuthCard>
+        <div className="mb-7 text-center">
+          <AuthLogo />
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Bem-vindo ao Clinmax
+          </h1>
+          <p className="mt-1.5 text-sm text-slate-500">Faça login na sua conta agora</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
+        <AuthSocialButtons />
+        <AuthDivider text="ou faça login com" />
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="email" className={authLabelClass}>
+              E-mail<span className="text-slate-900">*</span>
+            </label>
+            <input
               id="email"
-              label="E-mail"
               type="email"
-              placeholder="seu@email.com"
+              placeholder="exemplo@clinmax.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              className={authInputClass}
             />
+          </div>
 
-            <div className="space-y-1">
-              <label htmlFor="password" className={fieldLabelClass}>
-                Senha
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className={fieldInputWithIconClass}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${iconButtonMutedClass}`}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+          <div className="space-y-1.5">
+            <label htmlFor="password" className={authLabelClass}>
+              Senha<span className="text-slate-900">*</span>
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className={authInputWithIconClass}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+          </div>
 
-            {error && (
-              <p className="text-xs text-danger bg-danger/10 px-3 py-2 rounded-lg">{error}</p>
-            )}
+          <div className="flex items-center justify-between gap-3 pt-0.5">
+            <label htmlFor="remember-device" className="flex cursor-pointer items-center gap-2.5">
+              <Checkbox
+                id="remember-device"
+                checked={rememberDevice}
+                onCheckedChange={setRememberDevice}
+              />
+              <span className="text-xs text-slate-600 sm:text-sm">Lembre-se deste dispositivo</span>
+            </label>
+            <button
+              type="button"
+              className="shrink-0 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 sm:text-sm"
+            >
+              Esqueceu sua senha?
+            </button>
+          </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {loading ? "Entrando..." : "Entrar"}
-            </Button>
-          </form>
+          {error && <AuthError message={error} />}
 
-          <p className="text-center text-xs text-text-secondary mt-4">
-            admin@clinicare.com / admin123 · recepcao@clinicare.com / recep123
-          </p>
+          <button type="submit" disabled={loading} className={authSubmitClass}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {loading ? "Entrando..." : "Entrar"}
+          </button>
+        </form>
 
-          <p className="text-center text-sm text-text-secondary mt-4">
-            Nao tem conta?{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">
-              Cadastre-se
-            </Link>
-          </p>
-
-          <p className="text-center text-xs text-text-secondary mt-3">
-            <Link to="/backoffice/login" className="text-text-secondary hover:text-primary">
-              Acesso dono da plataforma (backoffice)
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Não tem uma conta?{" "}
+          <Link to="/register" className="font-semibold text-slate-900 hover:underline">
+            Crie uma conta.
+          </Link>
+        </p>
+      </AuthCard>
+    </AuthPageShell>
   )
 }
