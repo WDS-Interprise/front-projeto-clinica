@@ -31,10 +31,7 @@ export function HistoryPrescriptionCard({ record, onInsertInfo, onPrintPdf }: Pr
     (i) => !["MEDICATION", "EXAM", "VACCINE"].includes(i.type)
   )
 
-  const renderItems = (
-    items: HistoryPrescriptionRecord["prescription"]["items"],
-    emptyLabel: string
-  ) => {
+  const renderItems = (items: HistoryPrescriptionRecord["prescription"]["items"]) => {
     if (items.length === 0) return null
     return (
       <ul className="space-y-3 mt-2">
@@ -84,15 +81,15 @@ export function HistoryPrescriptionCard({ record, onInsertInfo, onPrintPdf }: Pr
         </Button>
       </div>
 
-      {medications.length > 0 && renderItems(medications, "medicamentos")}
+      {medications.length > 0 && renderItems(medications)}
       {exams.length > 0 && (
         <div className="mt-3">
           <p className="font-semibold text-text text-sm">Exames</p>
-          {renderItems(exams, "exames")}
+          {renderItems(exams)}
         </div>
       )}
-      {vaccines.length > 0 && renderItems(vaccines, "vacinas")}
-      {others.length > 0 && renderItems(others, "itens")}
+      {vaccines.length > 0 && renderItems(vaccines)}
+      {others.length > 0 && renderItems(others)}
 
       {prescription.items.length === 0 && (
         <p className="text-text-secondary italic text-sm">Nenhum item prescrito.</p>
