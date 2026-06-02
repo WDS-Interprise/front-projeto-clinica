@@ -4,6 +4,7 @@ import { differenceInYears } from "date-fns"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import DatePicker from "@/components/ui/date-picker"
 import { Switch } from "@/components/ui/switch"
 import { api } from "@/services/api"
 import { toastMessageFromApiError, fieldsFromApiError } from "@/lib/api-errors"
@@ -138,12 +139,10 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
             {fieldErrors.cpf && <FieldHint ok={false} message={fieldErrors.cpf} />}
           </div>
           <div>
-            <Input
+            <DatePicker
               label="Data de nascimento"
-              type="date"
               value={form.birthDate}
-              onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-              required
+              onChange={(birthDate) => setForm({ ...form, birthDate })}
             />
             {form.birthDate && !birthVal.ok && <FieldHint ok={false} message={birthVal.msg} />}
           </div>

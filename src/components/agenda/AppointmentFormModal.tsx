@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { Plus, User, Building2, Calendar, RotateCcw, DollarSign } from "lucide-react"
+import { Plus, User, Building2, RotateCcw, DollarSign } from "lucide-react"
 import { format } from "date-fns"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
@@ -10,9 +10,12 @@ import { isResolvableEntityId } from "@/lib/route-ids"
 import {
   addMinutesToTime,
   DEFAULT_AGENDA_SCHEDULE,
+  generateScheduleTimeOptions,
+  timeToMinutes,
   validateAppointmentSchedule,
   type AgendaSchedule,
 } from "@/lib/agenda-schedule"
+import { DateTimePicker } from "@/components/ui/date-picker"
 import type { CreateAppointmentInput, Doctor, Patient, Procedure } from "@/types"
 
 type ProcedureLine = { procedureId: string; quantity: number; unitPrice: number }
@@ -233,6 +236,11 @@ export default function AppointmentFormModal({
     }
   }
 
+  const startTimes = generateScheduleTimeOptions(schedule, type === "SCHEDULE")
+  const endTimes = generateScheduleTimeOptions(schedule, false).filter(
+    (time) => timeToMinutes(time) > timeToMinutes(startTime)
+  )
+
   return (
     <Modal open={open} onClose={onClose} title="" size="lg">
       <div className="space-y-5 max-h-[80vh] overflow-y-auto -mt-2">
@@ -409,40 +417,27 @@ export default function AppointmentFormModal({
           </>
         )}
 
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="relative">
-            <label className={labelClass}>Data</label>
-            <Calendar className="absolute left-3 top-[calc(50%+10px)] -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
-            <input
-              type="date"
-              className={`${fieldClass} pl-10 w-[160px]`}
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>&nbsp;</label>
-            <input
-              type="time"
-              className={`${fieldClass} w-[100px]`}
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-            />
-          </div>
-          <span className="text-sm text-text-secondary pb-2.5">às</span>
-          <div>
-            <label className={labelClass}>&nbsp;</label>
-            <input
-              type="time"
-              className={`${fieldClass} w-[100px]`}
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            />
-          </div>
+        <div className="space-y-3">
+          <label className={labelClass}>Data e horário</label>
+          <DateTimePicker
+            date={date}
+            onDateChange={setDate}
+            startTime={startTime}
+            endTime={endTime}
+            onStartTimeChange={(nextStart) => {
+              setStartTime(nextStart)
+              if (timeToMinutes(endTime) <= timeToMinutes(nextStart)) {
+                setEndTime(addMinutesToTime(nextStart, schedule.slotIntervalMinutes))
+              }
+            }}
+            onEndTimeChange={setEndTime}
+            startTimes={startTimes}
+            endTimes={endTimes.length ? endTimes : startTimes}
+          />
           <button
             type="button"
             onClick={handleNextFreeSlot}
-            className="text-sm text-primary font-medium flex items-center gap-1 pb-2 hover:underline whitespace-nowrap"
+            className="text-sm text-primary font-medium flex items-center gap-1 hover:underline whitespace-nowrap"
           >
             <RotateCcw className="w-4 h-4" />
             Próximo horário livre

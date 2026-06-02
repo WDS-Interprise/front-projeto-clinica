@@ -162,6 +162,10 @@ export const api = {
       roleLabel: string
       teamSize: string
       clinicName?: string
+      inviteCode?: string
+      crm?: string
+      specialty?: string
+      phone?: string
     }) =>
       request<{
         token: string
@@ -248,6 +252,85 @@ export const api = {
       request<any>(`/clinics/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     remove: (id: string) =>
       request<void>(`/clinics/${id}`, { method: "DELETE" }),
+  },
+
+  invites: {
+    preview: (token: string) =>
+      request<{
+        clinicName: string
+        email: string
+        role: string
+        roleLabel: string
+        status: string
+        canAccept: boolean
+        expiresAt: string
+      }>(`/invites/preview/${token}`),
+    accept: (
+      token: string,
+      data: {
+        name: string
+        password: string
+        cpf?: string
+        crm?: string
+        specialty?: string
+        phone?: string
+      }
+    ) =>
+      request<any>(`/invites/accept/${token}`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    acceptAuthenticated: (
+      token: string,
+      data: { crm?: string; specialty?: string; phone?: string }
+    ) =>
+      request<any>(`/invites/accept/${token}/authenticated`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    joinByCode: (data: {
+      inviteCode: string
+      roleLabel?: string
+      crm?: string
+      specialty?: string
+      phone?: string
+      cpf?: string
+    }) =>
+      request<any>("/invites/join-by-code", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    list: (clinicId: string) =>
+      request<{
+        inviteCode: string
+        invites: Array<{
+          id: string
+          email: string
+          role: string
+          roleLabel: string
+          status: string
+          expiresAt: string
+          createdAt: string
+        }>
+      }>(`/clinics/${clinicId}/invites`),
+    create: (clinicId: string, data: { email: string; role: "ADMIN" | "DOCTOR" | "RECEPTION" }) =>
+      request<{
+        invite: { id: string; email: string; role: string; roleLabel: string; status: string }
+        inviteUrl: string
+        inviteCode: string
+        emailDelivered: boolean
+      }>(`/clinics/${clinicId}/invites`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    revoke: (clinicId: string, inviteId: string) =>
+      request<{ ok: boolean }>(`/clinics/${clinicId}/invites/${inviteId}`, {
+        method: "DELETE",
+      }),
+    regenerateCode: (clinicId: string) =>
+      request<{ inviteCode: string }>(`/clinics/${clinicId}/invites/regenerate-code`, {
+        method: "POST",
+      }),
   },
 
   dashboard: {

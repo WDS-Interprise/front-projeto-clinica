@@ -70,6 +70,10 @@ export default function OnboardingPage({ onComplete }: Props) {
   const [role, setRole] = useState("")
   const [size, setSize] = useState("")
   const [clinicName, setClinicName] = useState("")
+  const [setupMode, setSetupMode] = useState<"create" | "join">("create")
+  const [inviteCode, setInviteCode] = useState("")
+  const [crm, setCrm] = useState("")
+  const [specialty, setSpecialty] = useState("Clínico Geral")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -84,14 +88,19 @@ export default function OnboardingPage({ onComplete }: Props) {
     }
   }, [navigate])
 
+  const isDoctorRole = role === "Médico" || role === "Outro profissional de saúde"
+
   const finish = async () => {
     setError("")
     setLoading(true)
     try {
       const result = await api.auth.completeOnboarding({
         roleLabel: role,
-        teamSize: size,
-        clinicName: clinicName.trim() || undefined,
+        teamSize: setupMode === "join" ? "Convite" : size,
+        clinicName: setupMode === "join" ? undefined : clinicName.trim() || undefined,
+        inviteCode: setupMode === "join" ? inviteCode.trim() : undefined,
+        crm: setupMode === "join" && isDoctorRole ? crm.trim() : undefined,
+        specialty: setupMode === "join" && isDoctorRole ? specialty.trim() : undefined,
       })
       setSession({
         token: result.token,
@@ -120,7 +129,12 @@ export default function OnboardingPage({ onComplete }: Props) {
     return null
   }
 
-  const canAdvance = step === 0 ? Boolean(role) : Boolean(size)
+  const canAdvance =
+    step === 0
+      ? Boolean(role)
+      : setupMode === "join"
+        ? Boolean(inviteCode.trim()) && (!isDoctorRole || Boolean(crm.trim()))
+        : Boolean(size)
 
   const introBlock = (
     <>
@@ -144,47 +158,154 @@ export default function OnboardingPage({ onComplete }: Props) {
       ) : (
         <>
           <h1 className="text-[15px] font-bold leading-snug text-slate-900 sm:text-left text-center">
-            Quantos profissionais da saúde trabalham na clínica?
+            {setupMode === "join"
+              ? "Entrar na clínica com código"
+              : "Quantos profissionais da saúde trabalham na clínica?"}
           </h1>
           <p className="mt-1.5 text-[11px] leading-relaxed text-slate-500 sm:text-left text-center">
-            Isso nos ajuda a preparar a experiência ideal para o tamanho da sua equipe.
+            {setupMode === "join"
+              ? "Digite o código recebido do administrador da clínica ou informado no e-mail de convite."
+              : "Isso nos ajuda a preparar a experiência ideal para o tamanho da sua equipe."}
           </p>
-          <div className="mt-3 hidden sm:block">
-            <label
-              htmlFor="clinic-name"
-              className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSetupMode("create")}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors",
+                setupMode === "create"
+                  ? "bg-[#256993] text-white"
+                  : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+              )}
             >
-              Nome da clínica (opcional)
-            </label>
-            <input
-              id="clinic-name"
-              type="text"
-              placeholder="Ex.: Clínica São Lucas"
-              value={clinicName}
-              onChange={(e) => setClinicName(e.target.value)}
-              className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
-            />
+              Criar clínica
+            </button>
+            <button
+              type="button"
+              onClick={() => setSetupMode("join")}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors",
+                setupMode === "join"
+                  ? "bg-[#256993] text-white"
+                  : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+              )}
+            >
+              Tenho código
+            </button>
           </div>
+          {setupMode === "create" && (
+            <div className="mt-3 hidden sm:block">
+              <label
+                htmlFor="clinic-name"
+                className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+              >
+                Nome da clínica (opcional)
+              </label>
+              <input
+                id="clinic-name"
+                type="text"
+                placeholder="Ex.: Clínica São Lucas"
+                value={clinicName}
+                onChange={(e) => setClinicName(e.target.value)}
+                className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
+              />
+            </div>
+          )}
+          {setupMode === "join" && (
+            <div className="mt-3 space-y-3">
+              <div>
+                <label
+                  htmlFor="invite-code"
+                  className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+                >
+                  Código da clínica
+                </label>
+                <input
+                  id="invite-code"
+                  type="text"
+                  placeholder="Ex.: A3K9X2M1"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs font-mono uppercase tracking-[0.2em] text-slate-900 placeholder:tracking-normal placeholder:font-sans placeholder:text-slate-400 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
+                />
+              </div>
+              {isDoctorRole && (
+                <>
+                  <div>
+                    <label
+                      htmlFor="crm"
+                      className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+                    >
+                      CRM
+                    </label>
+                    <input
+                      id="crm"
+                      type="text"
+                      value={crm}
+                      onChange={(e) => setCrm(e.target.value)}
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="specialty"
+                      className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+                    >
+                      Especialidade
+                    </label>
+                    <input
+                      id="specialty"
+                      type="text"
+                      value={specialty}
+                      onChange={(e) => setSpecialty(e.target.value)}
+                      className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </>
       )}
     </>
   )
 
-  const optionsGrid = (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-      {(step === 0 ? roleOptions : sizeOptions).map((option, index, list) => (
-        <OnboardingOptionCard
-          key={option.label}
-          label={option.label}
-          description={option.description}
-          icon={option.icon}
-          selected={step === 0 ? role === option.label : size === option.label}
-          onSelect={() => (step === 0 ? setRole(option.label) : setSize(option.label))}
-          className={index === list.length - 1 && list.length % 2 === 1 ? "col-span-2" : undefined}
-        />
-      ))}
-    </div>
-  )
+  const optionsGrid =
+    step === 0 || setupMode === "join" ? (
+      step === 0 ? (
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+          {roleOptions.map((option, index, list) => (
+            <OnboardingOptionCard
+              key={option.label}
+              label={option.label}
+              description={option.description}
+              icon={option.icon}
+              selected={role === option.label}
+              onSelect={() => setRole(option.label)}
+              className={index === list.length - 1 && list.length % 2 === 1 ? "col-span-2" : undefined}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs text-slate-500">
+          Preencha o código da clínica ao lado e clique em <strong>Iniciar</strong>.
+        </div>
+      )
+    ) : (
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+        {sizeOptions.map((option, index, list) => (
+          <OnboardingOptionCard
+            key={option.label}
+            label={option.label}
+            description={option.description}
+            icon={option.icon}
+            selected={size === option.label}
+            onSelect={() => setSize(option.label)}
+            className={index === list.length - 1 && list.length % 2 === 1 ? "col-span-2" : undefined}
+          />
+        ))}
+      </div>
+    )
 
   return (
     <OnboardingShell
@@ -229,7 +350,7 @@ export default function OnboardingPage({ onComplete }: Props) {
         <aside className="sm:py-1">{introBlock}</aside>
         <div className="min-w-0">
           {optionsGrid}
-          {step === 1 && (
+          {step === 1 && setupMode === "create" && (
             <div className="mt-3 sm:hidden">
               <label
                 htmlFor="clinic-name-mobile"

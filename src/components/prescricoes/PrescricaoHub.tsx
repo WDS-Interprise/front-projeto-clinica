@@ -2,6 +2,7 @@ import { FileText, Plus, RefreshCw, LayoutTemplate } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Button } from "@/components/ui/button"
+import DatePicker from "@/components/ui/date-picker"
 import { Switch } from "@/components/ui/switch"
 import { EmptyState } from "@/components/ui/empty-state"
 import type { Prescription, PrescriptionTemplate } from "@/types/prescription"
@@ -55,11 +56,9 @@ export function PrescricaoHub({
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <Switch checked={showDate} onChange={onShowDateChange} label="Mostrar data" />
-          <input
-            type="date"
+          <DatePicker
             value={prescriptionDate.slice(0, 10)}
-            onChange={(e) => onDateChange(new Date(e.target.value).toISOString())}
-            className="h-10 px-3 rounded-lg border border-border bg-surface text-sm text-text"
+            onChange={(value) => onDateChange(new Date(value).toISOString())}
           />
         </div>
       </div>

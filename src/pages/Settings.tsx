@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import TimePicker from "@/components/ui/time-picker"
 import { Building, Clock, Shield, Bell } from "lucide-react"
 
 export default function Settings() {
@@ -37,19 +38,19 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-4">
             {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"].map((day) => (
-              <div key={day} className="flex items-center justify-between py-1">
+              <div key={day} className="flex flex-wrap items-center justify-between gap-3 py-1">
                 <span className="text-sm text-text">{day}</span>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="time"
-                    defaultValue="08:00"
-                    className="h-8 w-24 rounded-lg border border-border bg-surface px-2 text-sm text-text focus:outline-none focus:border-primary"
+                  <TimePicker
+                    value="08:00"
+                    onChange={() => {}}
+                    selectClassName="w-[112px]"
                   />
                   <span className="text-xs text-text-secondary">até</span>
-                  <input
-                    type="time"
-                    defaultValue={day === "Sábado" ? "13:00" : "18:00"}
-                    className="h-8 w-24 rounded-lg border border-border bg-surface px-2 text-sm text-text focus:outline-none focus:border-primary"
+                  <TimePicker
+                    value={day === "Sábado" ? "13:00" : "18:00"}
+                    onChange={() => {}}
+                    selectClassName="w-[112px]"
                   />
                 </div>
               </div>

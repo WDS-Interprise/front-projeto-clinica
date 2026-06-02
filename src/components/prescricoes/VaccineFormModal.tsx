@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import DatePicker from "@/components/ui/date-picker"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/context/ToastContext"
 import type { VacinaProduto } from "@/types/vacina"
@@ -141,11 +142,10 @@ export function VaccineFormModal({ open, onClose, onSubmit, initialVaccine }: Pr
           onChange={(e) => set("observations", e.target.value)}
           placeholder="Informar histórico de alergias..."
         />
-        <Input
+        <DatePicker
           label="Data recomendada (opcional)"
-          type="date"
           value={form.recommendedDate}
-          onChange={(e) => set("recommendedDate", e.target.value)}
+          onChange={(recommendedDate) => set("recommendedDate", recommendedDate)}
         />
         <Switch
           checked={form.boosterRequired}
