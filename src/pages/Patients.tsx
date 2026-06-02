@@ -38,15 +38,15 @@ export default function Patients() {
     <div className="space-y-6 p-6 lg:p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text">Pacientes</h1>
+          <h1 className="text-2xl font-bold text-text">Clientes</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Gerencie o cadastro de pacientes
+            Gerencie o cadastro de clientes
           </p>
         </div>
         {hasPermission("patients:create") && (
           <Button className="gap-2" onClick={() => setFormOpen(true)}>
             <Plus className="w-4 h-4" />
-            Novo Paciente
+            Novo Cliente
           </Button>
         )}
       </div>
@@ -68,7 +68,7 @@ export default function Patients() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Paciente</th>
+                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Cliente</th>
                   <th className="text-left py-3 px-4 font-medium text-text-secondary">CPF</th>
                   <th className="text-left py-3 px-4 font-medium text-text-secondary">Contato</th>
                   <th className="text-left py-3 px-4 font-medium text-text-secondary">Convênio</th>

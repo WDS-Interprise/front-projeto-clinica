@@ -25,6 +25,35 @@ export function minutesToTime(minutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
 }
 
+export function generateTimeOptions(
+  intervalMinutes = 15,
+  start = "06:00",
+  end = "22:00"
+): string[] {
+  const slots: string[] = []
+  for (let m = timeToMinutes(start); m <= timeToMinutes(end); m += intervalMinutes) {
+    slots.push(minutesToTime(m))
+  }
+  return slots
+}
+
+export function generateScheduleTimeOptions(
+  schedule: AgendaSchedule,
+  excludeLunch = false
+): string[] {
+  return generateTimeOptions(
+    schedule.slotIntervalMinutes,
+    schedule.agendaStartTime,
+    schedule.agendaEndTime
+  ).filter((time) => {
+    if (!excludeLunch) return true
+    const m = timeToMinutes(time)
+    const lunchStart = timeToMinutes(schedule.lunchStartTime)
+    const lunchEnd = timeToMinutes(schedule.lunchEndTime)
+    return !(m >= lunchStart && m < lunchEnd)
+  })
+}
+
 export function parseAgendaSchedule(clinic: Partial<AgendaSchedule> | null | undefined): AgendaSchedule {
   return {
     agendaStartTime: clinic?.agendaStartTime ?? DEFAULT_AGENDA_SCHEDULE.agendaStartTime,

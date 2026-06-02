@@ -33,7 +33,7 @@ const allNav: NavItem[] = [
   { to: "/agenda", label: "Agenda", permission: "agenda:view" },
   {
     to: "/pacientes",
-    label: "Pacientes",
+    label: "Clientes",
     permission: "patients:view",
     activeWhen: (p) =>
       p === "/pacientes" ||
@@ -146,7 +146,7 @@ export default function AppHeader() {
                       }}
                     >
                       <UserPlus className="w-4 h-4 text-primary" />
-                      Adicionar Paciente
+                      Adicionar Cliente
                     </button>
                   )}
                   {hasPermission("users:manage") && (

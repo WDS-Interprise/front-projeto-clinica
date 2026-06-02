@@ -558,38 +558,38 @@ export default function AgendaPage() {
 
       <div className="bg-surface rounded-xl border border-border overflow-hidden shadow-sm">
 
-        <div className="grid grid-cols-8 border-b border-border bg-surface-alt text-xs font-medium text-text-secondary">
+        <div className="max-h-[560px] overflow-y-auto [scrollbar-gutter:stable]">
 
-          <div className="p-3" />
+          <div className="sticky top-0 z-10 grid grid-cols-8 border-b border-border bg-surface-alt text-xs font-medium text-text-secondary">
 
-          {weekDays.map((d) => (
+            <div className="p-3 border-r border-border" />
 
-            <div
+            {weekDays.map((d) => (
 
-              key={d.toISOString()}
+              <div
 
-              className={cn(
+                key={d.toISOString()}
 
-                "p-3 text-center border-l border-border",
+                className={cn(
 
-                isSameDay(d, new Date()) &&
-                  "bg-primary-light/50 text-primary dark:bg-primary/20 dark:text-primary"
+                  "p-3 text-center border-l border-border",
 
-              )}
+                  isSameDay(d, new Date()) &&
+                    "bg-primary-light/50 text-primary dark:bg-primary/20 dark:text-primary"
 
-            >
+                )}
 
-              <p>{format(d, "EEE", { locale: ptBR })}</p>
+              >
 
-              <p className="text-lg font-bold text-text">{format(d, "d")}</p>
+                <p>{format(d, "EEE", { locale: ptBR })}</p>
 
-            </div>
+                <p className="text-lg font-bold text-text">{format(d, "d")}</p>
 
-          ))}
+              </div>
 
-        </div>
+            ))}
 
-        <div className="max-h-[560px] overflow-y-auto">
+          </div>
 
           {agendaRows.map((row) => (
 

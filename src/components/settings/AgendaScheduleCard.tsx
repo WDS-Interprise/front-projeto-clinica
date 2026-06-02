@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input"
+import TimePicker from "@/components/ui/time-picker"
 import type { AgendaSchedule } from "@/lib/agenda-schedule"
 
 type Props = {
@@ -6,6 +7,12 @@ type Props = {
   onChange: (value: AgendaSchedule) => void
   readOnly?: boolean
 }
+
+const configTimeOptions = {
+  intervalMinutes: 15,
+  startTime: "06:00",
+  endTime: "22:00",
+} as const
 
 export default function AgendaScheduleCard({ value, onChange, readOnly = false }: Props) {
   const update = (patch: Partial<AgendaSchedule>) => onChange({ ...value, ...patch })
@@ -20,46 +27,34 @@ export default function AgendaScheduleCard({ value, onChange, readOnly = false }
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">Início do expediente</label>
-          <input
-            type="time"
-            value={value.agendaStartTime}
-            onChange={(e) => update({ agendaStartTime: e.target.value })}
-            disabled={readOnly}
-            className="flex h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text disabled:opacity-60"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">Fim do expediente</label>
-          <input
-            type="time"
-            value={value.agendaEndTime}
-            onChange={(e) => update({ agendaEndTime: e.target.value })}
-            disabled={readOnly}
-            className="flex h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text disabled:opacity-60"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">Início do almoço</label>
-          <input
-            type="time"
-            value={value.lunchStartTime}
-            onChange={(e) => update({ lunchStartTime: e.target.value })}
-            disabled={readOnly}
-            className="flex h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text disabled:opacity-60"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-text mb-1">Fim do almoço</label>
-          <input
-            type="time"
-            value={value.lunchEndTime}
-            onChange={(e) => update({ lunchEndTime: e.target.value })}
-            disabled={readOnly}
-            className="flex h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text disabled:opacity-60"
-          />
-        </div>
+        <TimePicker
+          label="Início do expediente"
+          value={value.agendaStartTime}
+          onChange={(agendaStartTime) => update({ agendaStartTime })}
+          disabled={readOnly}
+          {...configTimeOptions}
+        />
+        <TimePicker
+          label="Fim do expediente"
+          value={value.agendaEndTime}
+          onChange={(agendaEndTime) => update({ agendaEndTime })}
+          disabled={readOnly}
+          {...configTimeOptions}
+        />
+        <TimePicker
+          label="Início do almoço"
+          value={value.lunchStartTime}
+          onChange={(lunchStartTime) => update({ lunchStartTime })}
+          disabled={readOnly}
+          {...configTimeOptions}
+        />
+        <TimePicker
+          label="Fim do almoço"
+          value={value.lunchEndTime}
+          onChange={(lunchEndTime) => update({ lunchEndTime })}
+          disabled={readOnly}
+          {...configTimeOptions}
+        />
       </div>
 
       <Input

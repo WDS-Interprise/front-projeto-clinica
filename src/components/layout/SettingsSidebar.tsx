@@ -7,6 +7,7 @@ import {
   ChevronDown,
   ExternalLink,
   LogOut,
+  Mail,
   MessageCircle,
   Palette,
   Pill,
@@ -52,16 +53,11 @@ const groups: SettingsNavGroup[] = [
         icon: CalendarClock,
         permission: "clinics:manage",
       },
-    ],
-  },
-  {
-    title: "Integrações",
-    items: [
       {
-        to: "/configuracoes/whatsapp",
-        label: "WhatsApp",
-        description: "Conexões, templates e lembretes",
-        icon: MessageCircle,
+        to: "/configuracoes/convites",
+        label: "Convites",
+        description: "Código da clínica e e-mail",
+        icon: Mail,
         permission: "clinics:manage",
       },
     ],
@@ -75,6 +71,18 @@ const groups: SettingsNavGroup[] = [
         description: "Profissionais e recepção",
         icon: Users,
         permission: "users:manage",
+      },
+    ],
+  },
+  {
+    title: "Integrações",
+    items: [
+      {
+        to: "/configuracoes/whatsapp",
+        label: "WhatsApp",
+        description: "Conexões, templates e lembretes",
+        icon: MessageCircle,
+        permission: "clinics:manage",
       },
     ],
   },

@@ -21,6 +21,8 @@ import UsuariosPage from "@/pages/configuracoes/UsuariosPage"
 import UsuarioFormPage from "@/pages/configuracoes/UsuarioFormPage"
 import ClinicasPage from "@/pages/configuracoes/ClinicasPage"
 import AgendaConfigPage from "@/pages/configuracoes/AgendaConfigPage"
+import ConvitesConfigPage from "@/pages/configuracoes/ConvitesConfigPage"
+import AcceptInvitePage from "@/pages/AcceptInvitePage"
 import AparenciaPage from "@/pages/configuracoes/AparenciaPage"
 import MinhaContaPage from "@/pages/configuracoes/MinhaContaPage"
 import WhatsappPage from "@/pages/configuracoes/WhatsappPage"
@@ -94,6 +96,7 @@ export default function App() {
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/convite/:token" element={<AcceptInvitePage />} />
 
           <Route path="/backoffice/login" element={<BackofficeLogin />} />
           <Route
@@ -245,6 +248,14 @@ export default function App() {
               element={
                 <PermissionRoute permission="clinics:manage">
                   <AgendaConfigPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="configuracoes/convites"
+              element={
+                <PermissionRoute permission="clinics:manage">
+                  <ConvitesConfigPage />
                 </PermissionRoute>
               }
             />

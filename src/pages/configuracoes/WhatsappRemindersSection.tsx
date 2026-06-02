@@ -84,8 +84,9 @@ export default function WhatsappRemindersSection() {
           Responder automaticamente mensagens recebidas no WhatsApp
         </label>
         <p className="text-xs text-text-secondary">
-          A IA pode consultar agenda, agendar consultas, enviar lembretes e notificar médicos.
-          Quando um atendente enviar mensagem manualmente, a IA pausa naquela conversa.
+          Com OpenRouter no servidor, a IA é ativada automaticamente ao receber mensagens.
+          Ela atende a recepção (agenda, cadastro), reenvia prescrições finalizadas em PDF e pausa
+          só quando um atendente envia mensagem manual — ao paciente responder, a IA volta a atender.
         </p>
       </div>
 
