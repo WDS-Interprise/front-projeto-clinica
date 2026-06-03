@@ -22,7 +22,8 @@ env:
   DEPLOY_TMP: /tmp/clinmax-front-deploy
   NGINX_SITE: clinmax-www
   FRONT_PORT: "3551"
-  SSH_PORT: ${{ secrets.PORT || '22' }}
+  # Porta do serviço SSH (sshd), NÃO a porta da API (3550). Secret opcional: SSH_PORT (padrão 22).
+  SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
 
 jobs:
   deploy:
@@ -68,9 +69,34 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.HOST }}
           SSH_USER: ${{ secrets.USERNAME }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          LEGACY_PORT_SECRET: ${{ secrets.PORT }}
         run: |
           test -n "$SSH_HOST" || (echo "Secret HOST ausente" && exit 1)
           test -n "$SSH_USER" || (echo "Secret USERNAME ausente" && exit 1)
+          test -n "${{ secrets.SSH_PRIVATE_KEY }}" || (echo "Secret SSH_PRIVATE_KEY ausente" && exit 1)
+          case "$SSH_HOST" in
+            *clinmax*|*www.*|*api.*)
+              echo "AVISO: HOST parece domínio ($SSH_HOST). Use o IP da VPS (ex.: 147.93.66.14), não URL Cloudflare."
+              ;;
+          esac
+          if [ -n "$LEGACY_PORT_SECRET" ] && [ "$LEGACY_PORT_SECRET" != "22" ] && [ "$LEGACY_PORT_SECRET" != "2222" ]; then
+            echo "AVISO: secret PORT=$LEGACY_PORT_SECRET no GitHub NÃO é mais usado para SSH."
+            echo "Se era 3550/3551, isso causava 'Connection timed out'. SSH usa SSH_PORT=$SSH_PORT."
+            echo "Remova ou corrija o secret PORT no Environment Production."
+          fi
+          for bad in 3550 3551 5432 5433 3001 5173; do
+            if [ "$SSH_PORT" = "$bad" ]; then
+              echo "ERRO: SSH_PORT=$SSH_PORT é porta de app/banco, não de SSH. Defina secret SSH_PORT=22."
+              exit 1
+            fi
+          done
+
+      - name: Testar SSH na VPS
+        run: |
+          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+            -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH_OK && hostname"
 
       - name: Enviar arquivos para VPS
         uses: nick-fields/retry@v4

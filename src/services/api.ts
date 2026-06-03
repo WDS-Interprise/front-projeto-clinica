@@ -35,8 +35,13 @@ export type WhatsappChat = {
   phoneDigits: string
   lastMessage: string | null
   lastMessageAt: string | null
+  lastMessageFromMe: boolean
+  contactName: string | null
+  profilePictureUrl: string | null
   unreadCount: number
   aiPaused: boolean
+  aiComposing?: boolean
+  contactComposing?: boolean
   patient?: { id: string; name: string; phone: string; whatsapp: string | null } | null
   connection?: { id: string; name: string; status: string }
 }
@@ -539,6 +544,8 @@ export const api = {
         method: "POST",
         body: JSON.stringify(data),
       }),
+    chatAvatarUrl: (chatId: string) =>
+      `${BASE.replace(/\/$/, "")}/whatsapp/chats/${encodeURIComponent(chatId)}/avatar`,
     getChatMessages: (chatId: string) =>
       request<{ chat: WhatsappChat; messages: WhatsappMessage[] }>(
         `/whatsapp/chats/${chatId}/messages`
@@ -547,6 +554,11 @@ export const api = {
       request<WhatsappChat>(`/whatsapp/chats/${chatId}/ai`, {
         method: "PATCH",
         body: JSON.stringify({ aiPaused }),
+      }),
+    setComposing: (chatId: string, active: boolean) =>
+      request<{ ok: boolean }>(`/whatsapp/chats/${chatId}/composing`, {
+        method: "POST",
+        body: JSON.stringify({ active }),
       }),
     sendMessage: (
       connectionId: string,
