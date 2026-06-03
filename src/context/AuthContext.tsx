@@ -41,21 +41,26 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState | null>(null)
 
+function readJsonStorage<T>(key: string, fallback: T): T {
+  const raw = localStorage.getItem(key)
+  if (!raw) return fallback
+  try {
+    return JSON.parse(raw) as T
+  } catch {
+    localStorage.removeItem(key)
+    return fallback
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    const raw = localStorage.getItem("user")
-    return raw ? JSON.parse(raw) : null
-  })
+  const [user, setUser] = useState<AuthUser | null>(() => readJsonStorage<AuthUser | null>("user", null))
   const [clinicId, setClinicId] = useState<string | null>(
     () => localStorage.getItem("clinicId")
   )
   const [clinicName, setClinicName] = useState<string | null>(
     () => localStorage.getItem("clinicName")
   )
-  const [permissions, setPermissions] = useState<string[]>(() => {
-    const raw = localStorage.getItem("permissions")
-    return raw ? JSON.parse(raw) : []
-  })
+  const [permissions, setPermissions] = useState<string[]>(() => readJsonStorage<string[]>("permissions", []))
   const [linkedDoctorIds, setLinkedDoctorIds] = useState<string[] | undefined>()
   const [loading, setLoading] = useState(!!localStorage.getItem("token"))
 
