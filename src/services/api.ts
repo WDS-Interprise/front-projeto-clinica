@@ -1,5 +1,19 @@
 const BASE = import.meta.env.VITE_API_BASE ?? "/api"
 
+function apiNetworkErrorMessage(): string {
+  if (import.meta.env.PROD) {
+    return `Não foi possível conectar à API (${BASE}). O serviço em api.clinmax.com.br pode estar fora do ar — isso não depende do backend no seu PC.`
+  }
+  return "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3001)."
+}
+
+function apiUnavailableMessage(): string {
+  if (import.meta.env.PROD) {
+    return `API indisponível (${BASE}). Verifique na VPS se o backend está rodando (PM2, porta 3550).`
+  }
+  return "Servidor indisponível. Verifique se o backend está rodando em http://localhost:3001."
+}
+
 export type ApiFieldErrors = Partial<Record<"name" | "email" | "cpf", string>>
 
 export type WhatsappTemplate = {
@@ -101,9 +115,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   try {
     res = await fetch(`${BASE}${path}`, { ...options, headers })
   } catch {
-    throw new ApiError(
-      "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3001)."
-    )
+    throw new ApiError(apiNetworkErrorMessage())
   }
 
   if (res.status === 204) return undefined as T
@@ -120,9 +132,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     if (res.status === 502 || res.status === 503 || res.status === 504) {
-      throw new ApiError(
-        "Servidor indisponível. Verifique se o backend está rodando em http://localhost:3001."
-      )
+      throw new ApiError(apiUnavailableMessage())
     }
     throw new ApiError(data.error || "Erro na requisicao", data.fields)
   }
