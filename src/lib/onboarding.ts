@@ -33,13 +33,13 @@ export function shouldSkipOnboarding(): boolean {
     return true
   }
 
-  if (isSelfRegisteredUser()) {
-    return false
-  }
-
   const clinicId = localStorage.getItem("clinicId")
   if (clinicId && clinicId !== "none") {
     return true
+  }
+
+  if (isSelfRegisteredUser()) {
+    return false
   }
 
   const user = JSON.parse(localStorage.getItem("user") || "{}") as { role?: string }

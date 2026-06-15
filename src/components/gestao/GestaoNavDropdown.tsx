@@ -2,26 +2,27 @@ import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
-  BookOpen,
+  BarChart3,
   ChevronDown,
-  Pill,
-  Phone,
-  ScrollText,
+  ClipboardList,
+  Package,
+  Smile,
+  Wallet,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
-import { outrosItems, canAccessOutrosItem, isOutrosPath } from "@/lib/outros-nav"
+import { gestaoNavItemsForHeader, canAccessGestaoItem, isGestaoPath } from "@/lib/gestao-nav"
 
 const itemIcons: Record<string, LucideIcon> = {
-  Bulas: Pill,
-  "CID 10": BookOpen,
-  "CID 11": BookOpen,
-  Contatos: Phone,
-  "Logs de agenda": ScrollText,
+  Finanças: Wallet,
+  Relatórios: BarChart3,
+  Estoque: Package,
+  TISS: ClipboardList,
+  Pesquisa: Smile,
 }
 
-export function OutrosNavDropdown() {
+export function GestaoNavDropdown() {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
   const location = useLocation()
@@ -30,10 +31,18 @@ export function OutrosNavDropdown() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
 
-  const items = outrosItems.filter((item) => canAccessOutrosItem(hasPermission, item))
+  const items = gestaoNavItemsForHeader().filter((item) =>
+    canAccessGestaoItem(hasPermission, {
+      to: item.to,
+      label: item.label,
+      description: "",
+      anyPermission: item.anyPermission,
+    })
+  )
+
   if (items.length === 0) return null
 
-  const active = isOutrosPath(location.pathname)
+  const active = isGestaoPath(location.pathname)
 
   useEffect(() => {
     setOpen(false)
@@ -82,26 +91,23 @@ export function OutrosNavDropdown() {
             : "text-text-secondary hover:text-text hover:bg-surface-alt"
         )}
       >
-        Outros
+        Gestão
         <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
       </button>
 
       {open &&
         createPortal(
           <>
-            <div
-              className="fixed inset-0 z-[100]"
-              aria-hidden
-              onClick={() => setOpen(false)}
-            />
+            <div className="fixed inset-0 z-[100]" aria-hidden onClick={() => setOpen(false)} />
             <div
               ref={menuRef}
-              className="fixed z-[101] min-w-[200px] rounded-xl border border-border bg-surface shadow-xl py-1.5"
+              className="fixed z-[101] min-w-[220px] rounded-xl border border-border bg-surface shadow-xl py-1.5"
               style={{ top: menuPos.top, left: menuPos.left }}
             >
               {items.map((item) => {
-                const Icon = itemIcons[item.label] ?? BookOpen
-                const isActive = location.pathname === item.to
+                const Icon = itemIcons[item.label] ?? Wallet
+                const isActive =
+                  location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
                 return (
                   <button
                     key={item.to}

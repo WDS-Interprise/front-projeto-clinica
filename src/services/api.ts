@@ -88,6 +88,69 @@ export type WhatsappConnection = {
   updatedAt: string
 }
 
+export type FinanceTransaction = {
+  id: string
+  type: "INCOME" | "EXPENSE" | "TRANSFER"
+  status: "PENDING" | "PAID" | "CANCELLED"
+  description: string
+  amount: number
+  date: string
+  dueDate?: string | null
+  paidAt?: string | null
+  insurancePlan?: string | null
+  notes?: string | null
+  account?: { id: string; name: string } | null
+  transferFrom?: { id: string; name: string } | null
+  transferTo?: { id: string; name: string } | null
+  category?: { id: string; name: string; kind: string } | null
+  costCenter?: { id: string; name: string } | null
+  paymentMethod?: { id: string; name: string } | null
+  patient?: { id: string; name: string } | null
+  doctor?: { id: string; name: string } | null
+  procedure?: { id: string; name: string } | null
+}
+
+export type FinanceSummary = {
+  period: { from: string; to: string }
+  balance: number
+  accounts: Array<{ id: string; name: string; balance: number }>
+  incomePaid: number
+  incomePending: number
+  expensePaid: number
+  expensePending: number
+  balancePeriod: number
+  byInsurance: Array<{ label: string; value: number }>
+  byCategory: Array<{ label: string; value: number }>
+  recentTransactions: FinanceTransaction[]
+}
+
+export type FinanceLookup = {
+  accounts: Array<{ id: string; name: string; initialBalance: number; active: boolean }>
+  categories: Array<{ id: string; name: string; kind: "INCOME" | "EXPENSE"; active: boolean }>
+  costCenters: Array<{ id: string; name: string; active: boolean }>
+  paymentMethods: Array<{ id: string; name: string; active: boolean }>
+}
+
+export type AttendanceReport = {
+  period: { from: string; to: string }
+  total: number
+  byStatus: Array<{ label: string; value: number }>
+  byInsurance: Array<{ label: string; value: number }>
+  byDoctor: Array<{ id: string; name: string; count: number }>
+  rows: Array<{
+    id: string
+    date: string
+    startTime: string
+    status: string
+    insurancePlan: string
+    patient: { id: string; name: string; insurancePlan?: string } | null
+    doctor: { id: string; name: string; specialty: string }
+    procedures: Array<{ name: string; quantity: number; unitPrice: number }>
+    billingTotal: number | null
+    billingStatus: string | null
+  }>
+}
+
 export class ApiError extends Error {
   fields?: ApiFieldErrors
 
@@ -969,6 +1032,182 @@ export const api = {
         page: number
         totalPages: number
       }>(`/outros/logs?${q}`)
+    },
+  },
+
+  finance: {
+    summary: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<FinanceSummary>(`/finance/summary?${q}`)
+    },
+    listTransactions: (params?: {
+      type?: "INCOME" | "EXPENSE" | "TRANSFER"
+      status?: "PENDING" | "PAID"
+      search?: string
+      dateFrom?: string
+      dateTo?: string
+      accountId?: string
+      limit?: number
+    }) => {
+      const q = new URLSearchParams()
+      if (params?.type) q.set("type", params.type)
+      if (params?.status) q.set("status", params.status)
+      if (params?.search) q.set("search", params.search)
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      if (params?.accountId) q.set("accountId", params.accountId)
+      if (params?.limit) q.set("limit", String(params.limit))
+      return request<FinanceTransaction[]>(`/finance/transactions?${q}`)
+    },
+    createTransaction: (data: {
+      type: "INCOME" | "EXPENSE" | "TRANSFER"
+      description: string
+      amount: number
+      date: string
+      dueDate?: string
+      status?: "PENDING" | "PAID"
+      accountId?: string
+      transferFromId?: string
+      transferToId?: string
+      categoryId?: string
+      costCenterId?: string
+      paymentMethodId?: string
+      patientId?: string
+      doctorId?: string
+      procedureId?: string
+      appointmentId?: string
+      insurancePlan?: string
+      notes?: string
+    }) =>
+      request<FinanceTransaction>("/finance/transactions", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    lookup: async (): Promise<FinanceLookup> => {
+      const [accounts, categories, costCenters, paymentMethods] = await Promise.all([
+        request<FinanceLookup["accounts"]>("/finance/accounts"),
+        request<FinanceLookup["categories"]>("/finance/categories"),
+        request<FinanceLookup["costCenters"]>("/finance/cost-centers"),
+        request<FinanceLookup["paymentMethods"]>("/finance/payment-methods"),
+      ])
+      return { accounts, categories, costCenters, paymentMethods }
+    },
+    cashFlow: (params?: { dateFrom?: string; dateTo?: string; accountId?: string; mode?: "daily" | "monthly" }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      if (params?.accountId) q.set("accountId", params.accountId)
+      if (params?.mode) q.set("mode", params.mode)
+      return request<{ period: { from: string; to: string }; mode: string; rows: Array<{ period: string; income: number; expense: number; balance: number }>; endingBalance: number }>(`/finance/cash-flow?${q}`)
+    },
+    analysis: (params: { type: "INCOME" | "EXPENSE"; dateFrom?: string; dateTo?: string; groupBy?: "category" | "account" | "insurance" }) => {
+      const q = new URLSearchParams()
+      q.set("type", params.type)
+      if (params.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params.dateTo) q.set("dateTo", params.dateTo)
+      if (params.groupBy) q.set("groupBy", params.groupBy)
+      return request<{ type: string; period: { from: string; to: string }; total: number; groups: Array<{ label: string; value: number }> }>(`/finance/analysis?${q}`)
+    },
+    getSettings: () => request<{ clinicId: string; defaultAccountId: string | null; defaultCostCenterId: string | null; defaultPaymentMethodId: string | null; autoGenerateOnAppointment: boolean }>("/finance/settings"),
+    updateSettings: (data: { defaultAccountId?: string | null; defaultCostCenterId?: string | null; defaultPaymentMethodId?: string | null; autoGenerateOnAppointment?: boolean }) =>
+      request("/finance/settings", { method: "PUT", body: JSON.stringify(data) }),
+    createAccount: (data: { name: string; initialBalance?: number }) =>
+      request("/finance/accounts", { method: "POST", body: JSON.stringify(data) }),
+    createCategory: (data: { name: string; kind: "INCOME" | "EXPENSE" }) =>
+      request("/finance/categories", { method: "POST", body: JSON.stringify(data) }),
+    createCostCenter: (data: { name: string }) =>
+      request("/finance/cost-centers", { method: "POST", body: JSON.stringify(data) }),
+    createPaymentMethod: (data: { name: string }) =>
+      request("/finance/payment-methods", { method: "POST", body: JSON.stringify(data) }),
+  },
+
+  inventory: {
+    listProducts: (params?: { search?: string; filter?: "all" | "low" | "expiring" | "expired" }) => {
+      const q = new URLSearchParams()
+      if (params?.search) q.set("search", params.search)
+      if (params?.filter) q.set("filter", params.filter)
+      return request<Array<{ id: string; name: string; sku: string | null; unit: string; minStock: number; currentStock: number; expiryDate: string | null; active: boolean }>>(`/inventory/products?${q}`)
+    },
+    createProduct: (data: { name: string; sku?: string; unit?: string; minStock?: number; currentStock?: number; expiryDate?: string }) =>
+      request("/inventory/products", { method: "POST", body: JSON.stringify(data) }),
+    moveStock: (data: { productId: string; type: "IN" | "OUT" | "ADJUST"; quantity: number; notes?: string }) =>
+      request("/inventory/movements", { method: "POST", body: JSON.stringify(data) }),
+  },
+
+  tiss: {
+    listGuides: (params?: { status?: string; search?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.status) q.set("status", params.status)
+      if (params?.search) q.set("search", params.search)
+      return request<Array<{ id: string; guideNumber: string | null; status: string; insurancePlan: string; procedureName: string | null; amount: number | null; patient: { id: string; name: string } | null; doctor: { id: string; name: string } | null; createdAt: string }>>(`/tiss/guides?${q}`)
+    },
+    createGuide: (data: { appointmentId?: string; patientId?: string; insurancePlan?: string; procedureName?: string; amount?: number; notes?: string }) =>
+      request("/tiss/guides", { method: "POST", body: JSON.stringify(data) }),
+    updateStatus: (id: string, status: string) =>
+      request(`/tiss/guides/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  },
+
+  satisfaction: {
+    list: (params?: { sendStatus?: string; dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.sendStatus) q.set("sendStatus", params.sendStatus)
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<Array<{ id: string; rating: number | null; comment: string | null; sendStatus: string; sentAt: string | null; answeredAt: string | null; patient: { id: string; name: string; phone: string } | null; createdAt: string }>>(`/satisfaction?${q}`)
+    },
+    summary: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<{ total: number; average: number; distribution: Array<{ rating: number; count: number }> }>(`/satisfaction/summary?${q}`)
+    },
+    create: (data?: { appointmentId?: string; patientId?: string }) =>
+      request("/satisfaction", { method: "POST", body: JSON.stringify(data ?? {}) }),
+    markSent: (id: string) => request(`/satisfaction/${id}/send`, { method: "POST", body: "{}" }),
+    submitAnswer: (id: string, data: { rating: number; comment?: string }) =>
+      request(`/satisfaction/${id}/answer`, { method: "POST", body: JSON.stringify(data) }),
+  },
+
+  reports: {
+    attendance: (params?: {
+      dateFrom?: string
+      dateTo?: string
+      doctorId?: string
+      insurancePlan?: string
+      status?: string
+    }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      if (params?.doctorId) q.set("doctorId", params.doctorId)
+      if (params?.insurancePlan) q.set("insurancePlan", params.insurancePlan)
+      if (params?.status) q.set("status", params.status)
+      return request<AttendanceReport>(`/reports/attendance?${q}`)
+    },
+    noShows: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<{ total: number; rows: Array<{ id: string; date: string; startTime: string; patient: { id: string; name: string; phone: string } | null; doctor: { id: string; name: string } }> }>(`/reports/no-shows?${q}`)
+    },
+    birthdays: (month?: number) => {
+      const q = new URLSearchParams()
+      if (month) q.set("month", String(month))
+      return request<{ month: number; total: number; rows: Array<{ id: string; name: string; day: number; phone: string; email: string | null }> }>(`/reports/birthdays?${q}`)
+    },
+    cid: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<{ total: number; byCid: Array<{ code: string; description: string; count: number }>; rows: Array<{ id: string; date: string; cidCode: string | null; cidDescription: string | null; patient: { id: string; name: string } | null }> }>(`/reports/cid?${q}`)
+    },
+    repasse: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<{ rows: Array<{ id: string; name: string; total: number; count: number }> }>(`/reports/repasse?${q}`)
     },
   },
 }

@@ -122,7 +122,9 @@ export interface PanelMetrics {
   byInsurance: Array<{ label: string; count: number }>
   procedures: Array<{ label: string; count: number }>
   appointmentsInPeriod: number
-  avgDurationMinutes: number
+  avgDurationMinutes: number | null
+  birthdaysToday?: Array<{ id: string; name: string; phone: string; age: number }>
+  ageDistribution?: Array<{ label: string; count: number }>
 }
 
 export interface TodayPatientSlot {

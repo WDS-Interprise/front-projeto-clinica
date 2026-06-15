@@ -160,11 +160,50 @@ export default function PainelPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-text-secondary">Duração média do atendimento</p>
-                <p className="text-3xl font-bold text-text">{metrics.avgDurationMinutes} min</p>
+                <p className="text-3xl font-bold text-text">
+                  {metrics.avgDurationMinutes != null ? `${metrics.avgDurationMinutes} min` : "—"}
+                </p>
+                {metrics.avgDurationMinutes == null && metrics.appointmentsInPeriod === 0 && (
+                  <p className="text-xs text-text-secondary mt-1">
+                    Sem atendimentos concluídos nos últimos 30 dias.
+                  </p>
+                )}
                 <p className="text-sm text-text-secondary mt-4">Atendimentos no período</p>
                 <p className="text-2xl font-bold text-primary">{metrics.appointmentsInPeriod}</p>
               </CardContent>
             </Card>
+
+            {metrics.ageDistribution && metrics.ageDistribution.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Distribuição etária (cadastro)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {metrics.ageDistribution.map((item) => (
+                    <div key={item.label} className="flex justify-between text-sm">
+                      <span>{item.label} anos</span>
+                      <span className="font-semibold">{item.count}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {metrics.birthdaysToday && metrics.birthdaysToday.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Aniversariantes do dia</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {metrics.birthdaysToday.map((p) => (
+                    <div key={p.id} className="flex justify-between text-sm">
+                      <span>{p.name}</span>
+                      <span className="text-text-secondary">{p.age} anos</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>

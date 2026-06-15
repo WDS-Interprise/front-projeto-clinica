@@ -27,6 +27,18 @@ export const outrosItems: OutrosItem[] = [
     description: "Classificação — 11ª revisão",
     anyPermission: ["records:view", "prescriptions:write"],
   },
+  {
+    to: "/outros/contatos",
+    label: "Contatos",
+    description: "Pacientes, profissionais e equipe",
+    anyPermission: ["patients:view"],
+  },
+  {
+    to: "/outros/logs",
+    label: "Logs de agenda",
+    description: "Auditoria de alterações",
+    anyPermission: ["users:manage"],
+  },
 ]
 
 export function canAccessOutrosItem(

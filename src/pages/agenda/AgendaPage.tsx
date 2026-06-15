@@ -678,7 +678,7 @@ export default function AgendaPage() {
                           className="w-full h-full opacity-0 hover:opacity-100 hover:bg-primary-light/30 dark:hover:bg-primary/25 rounded text-[10px] text-primary"
 
                           onClick={() => openNewAt(day, hour)}
-
+                          aria-label={`Agendar ${format(day, "EEEE dd/MM", { locale: ptBR })} às ${hour}`}
                         >
 
                           +

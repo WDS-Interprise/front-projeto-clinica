@@ -15,6 +15,9 @@ export type Permission =
   | "users:manage"
   | "clinics:manage"
   | "whatsapp:send"
+  | "finance:view"
+  | "finance:manage"
+  | "reports:view"
 
 export function can(permissions: string[] | undefined, perm: Permission): boolean {
   return permissions?.includes(perm) ?? false

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react"
-import { Plus, User, Building2, RotateCcw, DollarSign } from "lucide-react"
+import { Plus, User, Building2, RotateCcw, DollarSign, UserPlus } from "lucide-react"
 import { format } from "date-fns"
+import { useNavigate } from "react-router-dom"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -65,6 +66,7 @@ export default function AppointmentFormModal({
   waitingListEntryId,
   schedule = DEFAULT_AGENDA_SCHEDULE,
 }: Props) {
+  const navigate = useNavigate()
   const [type, setType] = useState<"SCHEDULE" | "BLOCK">("SCHEDULE")
   const [doctorId, setDoctorId] = useState("")
   const [catalog, setCatalog] = useState<Procedure[]>([])
@@ -81,8 +83,13 @@ export default function AppointmentFormModal({
   const [insurancePlan, setInsurancePlan] = useState("")
 
   const [date, setDate] = useState(format(defaultDate ?? new Date(), "yyyy-MM-dd"))
-  const [startTime, setStartTime] = useState(defaultStart ?? "08:15")
-  const [endTime, setEndTime] = useState("08:30")
+  const [startTime, setStartTime] = useState(defaultStart ?? schedule.agendaStartTime)
+  const [endTime, setEndTime] = useState(
+    defaultStart
+      ? addMinutesToTime(defaultStart, schedule.slotIntervalMinutes)
+      : addMinutesToTime(schedule.agendaStartTime, schedule.slotIntervalMinutes)
+  )
+  const [patientFieldError, setPatientFieldError] = useState(false)
   const [recurrence, setRecurrence] = useState<CreateAppointmentInput["recurrence"]>("NONE")
   const [notes, setNotes] = useState("")
   const [paymentLink, setPaymentLink] = useState(false)
@@ -174,6 +181,7 @@ export default function AppointmentFormModal({
 
   const handleSave = async () => {
     setError("")
+    setPatientFieldError(false)
     if (!doctorId) {
       setError("Profissional nao configurado")
       return
@@ -181,6 +189,7 @@ export default function AppointmentFormModal({
     if (type === "SCHEDULE") {
       if (!patientId && patientSearch.length < 2) {
         setError("Busque e selecione um paciente")
+        setPatientFieldError(true)
         return
       }
       if (!insurancePlan) {
@@ -325,17 +334,36 @@ export default function AppointmentFormModal({
             </div>
 
             <div ref={searchRef} className="relative">
-              <label className={labelClass}>Paciente</label>
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <label className={labelClass} htmlFor="appointment-patient-search">
+                  Paciente
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose()
+                    navigate("/pacientes", { state: { openNewPatient: true } })
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  Cadastrar paciente
+                </button>
+              </div>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                 <input
+                  id="appointment-patient-search"
                   type="text"
-                  className={`${fieldClass} pl-10`}
+                  className={`${fieldClass} pl-10 ${patientFieldError ? "border-danger ring-1 ring-danger/30" : ""}`}
                   placeholder="Digite 3 letras para buscar..."
                   value={patientSearch}
+                  aria-invalid={patientFieldError}
+                  aria-describedby={patientFieldError ? "appointment-patient-error" : undefined}
                   onChange={(e) => {
                     setPatientSearch(e.target.value)
                     setPatientId("")
+                    setPatientFieldError(false)
                   }}
                   onFocus={() => patientSearch.length >= 3 && setShowResults(true)}
                 />
@@ -477,7 +505,11 @@ export default function AppointmentFormModal({
         </div>
 
         {error && (
-          <p className="text-sm text-danger bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <p
+            id={patientFieldError ? "appointment-patient-error" : undefined}
+            role="alert"
+            className="text-sm text-danger bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+          >
             {error}
           </p>
         )}

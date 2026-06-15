@@ -15,6 +15,7 @@ import {
   Sparkles,
   UserCircle,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -51,6 +52,13 @@ const groups: SettingsNavGroup[] = [
         label: "Horários da agenda",
         description: "Expediente, almoço e slots",
         icon: CalendarClock,
+        permission: "clinics:manage",
+      },
+      {
+        to: "/configuracoes/financeiro",
+        label: "Financeiro",
+        description: "Contas, categorias e padrões",
+        icon: Wallet,
         permission: "clinics:manage",
       },
       {

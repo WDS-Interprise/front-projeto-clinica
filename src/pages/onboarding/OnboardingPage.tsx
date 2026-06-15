@@ -20,6 +20,7 @@ import {
   shouldShowOnboarding,
 } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
+import { useToast } from "@/context/ToastContext"
 
 const TOTAL_STEPS = 2
 
@@ -65,17 +66,20 @@ type Props = {
 
 export default function OnboardingPage({ onComplete }: Props) {
   const navigate = useNavigate()
-  const { setSession } = useAuth()
+  const { setSession, clinicId, clinicName: currentClinicName } = useAuth()
+  const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [role, setRole] = useState("")
   const [size, setSize] = useState("")
-  const [clinicName, setClinicName] = useState("")
+  const [newClinicName, setNewClinicName] = useState("")
   const [setupMode, setSetupMode] = useState<"create" | "join">("create")
   const [inviteCode, setInviteCode] = useState("")
   const [crm, setCrm] = useState("")
   const [specialty, setSpecialty] = useState("Clínico Geral")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+
+  const hasExistingClinic = Boolean(clinicId && clinicId !== "none")
 
   const progress = useMemo(
     () => (step / (TOTAL_STEPS + 1)) * 100,
@@ -97,7 +101,7 @@ export default function OnboardingPage({ onComplete }: Props) {
       const result = await api.auth.completeOnboarding({
         roleLabel: role,
         teamSize: setupMode === "join" ? "Convite" : size,
-        clinicName: setupMode === "join" ? undefined : clinicName.trim() || undefined,
+        clinicName: setupMode === "join" ? undefined : newClinicName.trim() || undefined,
         inviteCode: setupMode === "join" ? inviteCode.trim() : undefined,
         crm: setupMode === "join" && isDoctorRole ? crm.trim() : undefined,
         specialty: setupMode === "join" && isDoctorRole ? specialty.trim() : undefined,
@@ -110,6 +114,7 @@ export default function OnboardingPage({ onComplete }: Props) {
         clinicName: result.clinicName,
       })
       markSelfRegisteredOnboardingDone()
+      toast("Configuração concluída!")
       onComplete?.()
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Erro ao salvar configuração"
@@ -195,18 +200,24 @@ export default function OnboardingPage({ onComplete }: Props) {
           </div>
           {setupMode === "create" && (
             <div className="mt-3 hidden sm:block">
+              {hasExistingClinic ? (
+                <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+                  Sua clínica atual é <strong>{currentClinicName || "sem nome"}</strong>. Se informar um
+                  novo nome abaixo, a clínica será renomeada ao concluir.
+                </p>
+              ) : null}
               <label
                 htmlFor="clinic-name"
-                className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
+                className="mb-1 mt-2 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
               >
-                Nome da clínica (opcional)
+                {hasExistingClinic ? "Renomear clínica (opcional)" : "Nome da clínica (opcional)"}
               </label>
               <input
                 id="clinic-name"
                 type="text"
                 placeholder="Ex.: Clínica São Lucas"
-                value={clinicName}
-                onChange={(e) => setClinicName(e.target.value)}
+                value={newClinicName}
+                onChange={(e) => setNewClinicName(e.target.value)}
                 className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
               />
             </div>
@@ -352,18 +363,24 @@ export default function OnboardingPage({ onComplete }: Props) {
           {optionsGrid}
           {step === 1 && setupMode === "create" && (
             <div className="mt-3 sm:hidden">
+              {hasExistingClinic ? (
+                <p className="mb-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+                  Clínica atual: <strong>{currentClinicName || "sem nome"}</strong>. Novo nome abaixo
+                  renomeia ao concluir.
+                </p>
+              ) : null}
               <label
                 htmlFor="clinic-name-mobile"
                 className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-slate-500"
               >
-                Nome da clínica (opcional)
+                {hasExistingClinic ? "Renomear clínica (opcional)" : "Nome da clínica (opcional)"}
               </label>
               <input
                 id="clinic-name-mobile"
                 type="text"
                 placeholder="Ex.: Clínica São Lucas"
-                value={clinicName}
-                onChange={(e) => setClinicName(e.target.value)}
+                value={newClinicName}
+                onChange={(e) => setNewClinicName(e.target.value)}
                 className="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#256993]/50 focus:outline-none focus:ring-2 focus:ring-[#256993]/20"
               />
             </div>
