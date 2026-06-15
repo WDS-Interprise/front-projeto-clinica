@@ -93,10 +93,23 @@ jobs:
           done
 
       - name: Testar SSH na VPS
-        run: |
-          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
-            -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
-            ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH_OK && hostname"
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 3
+          max_attempts: 3
+          retry_wait_seconds: 20
+          command: |
+            set -e
+            ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=45 \
+              -i ~/.ssh/deploy_key -p ${{ env.SSH_PORT }} \
+              ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo SSH_OK && hostname" \
+            || {
+              echo "::error::SSH timeout — o runner do GitHub não alcançou a VPS."
+              echo "Confira no Environment Production: HOST=IP da VPS (ex. 147.93.66.14), SSH_PORT=22."
+              echo "No painel Hostinger: firewall deve liberar TCP 22 para IPs do GitHub Actions (ou 0.0.0.0/0)."
+              echo "Teste local: ssh -p 22 USER@147.93.66.14"
+              exit 1
+            }
 
       - name: Enviar arquivos para VPS
         uses: nick-fields/retry@v4

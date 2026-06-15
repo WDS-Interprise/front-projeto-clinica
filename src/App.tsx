@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import AppShell from "@/components/layout/AppShell"
 import Login from "@/pages/Login"
 import Register from "@/pages/Register"
+import GoogleCallbackPage from "@/pages/auth/GoogleCallbackPage"
+import ModuleUnavailablePage from "@/pages/ModuleUnavailablePage"
+import LegacyRouteRedirect from "@/components/routing/LegacyRouteRedirect"
 import Patients from "@/pages/Patients"
 import Doctors from "@/pages/Doctors"
 import BackofficeLogin from "@/pages/backoffice/BackofficeLogin"
@@ -33,6 +36,14 @@ import Cid10Page from "@/pages/outros/Cid10Page"
 import Cid11Page from "@/pages/outros/Cid11Page"
 import ContatosPage from "@/pages/outros/ContatosPage"
 import LogsPage from "@/pages/outros/LogsPage"
+import FinancasPage from "@/pages/gestao/FinancasPage"
+import ExtratoPage from "@/pages/gestao/ExtratoPage"
+import RelatoriosPage from "@/pages/gestao/RelatoriosPage"
+import FluxoCaixaPage from "@/pages/gestao/FluxoCaixaPage"
+import FinanceConfigPage from "@/pages/configuracoes/FinanceConfigPage"
+import EstoquePage from "@/pages/gestao/EstoquePage"
+import TissPage from "@/pages/gestao/TissPage"
+import PesquisaSatisfacaoPage from "@/pages/gestao/PesquisaSatisfacaoPage"
 import { getBackofficeToken } from "@/services/backoffice-api"
 import { ToastProvider } from "@/context/ToastContext"
 import { ThemeProvider } from "@/context/ThemeContext"
@@ -96,6 +107,7 @@ export default function App() {
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/convite/:token" element={<AcceptInvitePage />} />
 
           <Route path="/backoffice/login" element={<BackofficeLogin />} />
@@ -204,6 +216,91 @@ export default function App() {
               }
             />
             <Route
+              path="gestao/financas"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <FinancasPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/financas/extrato"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <ExtratoPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/financas/receitas"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <ExtratoPage fixedType="INCOME" pageTitle="Receitas" pageDescription="Lançamentos de receita da clínica." />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/financas/despesas"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <ExtratoPage fixedType="EXPENSE" pageTitle="Despesas" pageDescription="Lançamentos de despesa da clínica." />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/financas/fluxo-de-caixa"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <FluxoCaixaPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/relatorios"
+              element={
+                <PermissionRoute permission="reports:view" fallback="/agenda">
+                  <RelatoriosPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/relatorios/atendimento"
+              element={<Navigate to="/gestao/relatorios" replace />}
+            />
+            <Route
+              path="gestao/estoque"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <EstoquePage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/tiss"
+              element={
+                <PermissionRoute permission="finance:view" fallback="/agenda">
+                  <TissPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="gestao/pesquisa-satisfacao"
+              element={
+                <PermissionRoute permission="reports:view" fallback="/agenda">
+                  <PesquisaSatisfacaoPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="gestao" element={<Navigate to="/gestao/financas" replace />} />
+            <Route path="financas/*" element={<LegacyRouteRedirect />} />
+            <Route path="finance" element={<LegacyRouteRedirect />} />
+            <Route path="relatorios/*" element={<LegacyRouteRedirect />} />
+            <Route path="reports" element={<LegacyRouteRedirect />} />
+            <Route path="prontuarios" element={<LegacyRouteRedirect />} />
+            <Route path="prontuarios/*" element={<LegacyRouteRedirect />} />
+            <Route path="medical-records" element={<LegacyRouteRedirect />} />
+            <Route path="configuracoes" element={<LegacyRouteRedirect />} />
+            <Route
               path="configuracoes/usuarios"
               element={
                 <PermissionRoute permission="users:manage">
@@ -259,6 +356,14 @@ export default function App() {
                 </PermissionRoute>
               }
             />
+            <Route
+              path="configuracoes/financeiro"
+              element={
+                <PermissionRoute permission="clinics:manage">
+                  <FinanceConfigPage />
+                </PermissionRoute>
+              }
+            />
             <Route path="configuracoes/aparencia" element={<AparenciaPage />} />
             <Route path="configuracoes/conta" element={<MinhaContaPage />} />
             <Route
@@ -282,6 +387,7 @@ export default function App() {
                 </PermissionRoute>
               }
             />
+            <Route path="*" element={<ModuleUnavailablePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/context/AuthContext"
 import { OutrosNavDropdown } from "@/components/outros/OutrosNavDropdown"
+import { GestaoNavDropdown } from "@/components/gestao/GestaoNavDropdown"
 import ThemeToggle from "@/components/ui/ThemeToggle"
 import NotificationsMenu from "@/components/layout/NotificationsMenu"
 import UserMenu from "@/components/layout/UserMenu"
@@ -33,7 +34,7 @@ const allNav: NavItem[] = [
   { to: "/agenda", label: "Agenda", permission: "agenda:view" },
   {
     to: "/pacientes",
-    label: "Clientes",
+    label: "Pacientes",
     permission: "patients:view",
     activeWhen: (p) =>
       p === "/pacientes" ||
@@ -48,7 +49,6 @@ const allNav: NavItem[] = [
     permission: "whatsapp:send",
     activeWhen: (p) => p === "/mensagens",
   },
-  { to: "/configuracoes/usuarios", label: "Gestão", permission: "users:manage" },
   { to: "/configuracoes/clinicas", label: "Configurações", permission: "clinics:manage" },
 ]
 
@@ -100,6 +100,7 @@ export default function AppHeader() {
               </NavLink>
             )
           })}
+          <GestaoNavDropdown />
           <OutrosNavDropdown />
         </nav>
 
@@ -146,7 +147,7 @@ export default function AppHeader() {
                       }}
                     >
                       <UserPlus className="w-4 h-4 text-primary" />
-                      Adicionar Cliente
+                      Adicionar paciente
                     </button>
                   )}
                   {hasPermission("users:manage") && (

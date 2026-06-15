@@ -65,15 +65,21 @@ function SocialButton({
   icon,
   label,
   ariaLabel,
+  onClick,
+  disabled,
 }: {
   icon: React.ReactNode
   label: string
   ariaLabel: string
+  onClick?: () => void
+  disabled?: boolean
 }) {
   return (
     <button
       type="button"
-      className="flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
       aria-label={ariaLabel}
     >
       {icon}
@@ -277,13 +283,21 @@ export function AuthLogo({ compact = false }: { compact?: boolean }) {
   )
 }
 
-export function AuthSocialButtons() {
+export function AuthSocialButtons({
+  onGoogleClick,
+  googleLoading,
+}: {
+  onGoogleClick?: () => void
+  googleLoading?: boolean
+} = {}) {
   return (
     <div className="mb-6 grid min-w-0 grid-cols-2 gap-2.5">
       <SocialButton
         icon={<GoogleIcon className="h-4 w-4 shrink-0" />}
-        label="Google"
+        label={googleLoading ? "Redirecionando..." : "Google"}
         ariaLabel="Iniciar sessão com o Google"
+        onClick={onGoogleClick}
+        disabled={googleLoading}
       />
       <SocialButton
         icon={<MicrosoftIcon className="h-4 w-4 shrink-0" />}

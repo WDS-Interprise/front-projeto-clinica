@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  MOCK_NOTIFICATIONS,
   NOTIFICATIONS_READ_STATE_KEY,
 } from "@/data/mock-notifications"
 import type { Notification } from "@/types/notification"
@@ -28,11 +27,11 @@ function mergeReadState(items: Notification[]): Notification[] {
 
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>(() =>
-    mergeReadState(MOCK_NOTIFICATIONS)
+    mergeReadState([])
   )
 
   useEffect(() => {
-    setNotifications(mergeReadState(MOCK_NOTIFICATIONS))
+    setNotifications(mergeReadState([]))
   }, [])
 
   const unreadCount = useMemo(

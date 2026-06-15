@@ -18,6 +18,7 @@ import {
 import { api } from "@/services/api"
 import { applyAuthRedirectFlags } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
+import { getGoogleAuthStartUrl } from "@/lib/api-origin"
 
 const REMEMBER_EMAIL_KEY = "clinmax_remember_email"
 
@@ -28,6 +29,7 @@ export default function Login() {
   const [rememberDevice, setRememberDevice] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
   const { setSession } = useAuth()
 
@@ -76,6 +78,12 @@ export default function Login() {
     }
   }
 
+  const handleGoogleLogin = () => {
+    setError("")
+    setGoogleLoading(true)
+    window.location.href = getGoogleAuthStartUrl()
+  }
+
   return (
     <AuthPageShell footer={<AuthBackofficeLink />}>
       <AuthCard>
@@ -87,7 +95,7 @@ export default function Login() {
           <p className="mt-1.5 text-sm text-slate-500">Faça login na sua conta agora</p>
         </div>
 
-        <AuthSocialButtons />
+        <AuthSocialButtons onGoogleClick={handleGoogleLogin} googleLoading={googleLoading} />
         <AuthDivider text="ou faça login com" />
 
         <form onSubmit={handleSubmit} className="space-y-4">

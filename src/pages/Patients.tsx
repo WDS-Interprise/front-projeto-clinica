@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Search, Mail, Phone, MoreHorizontal } from "lucide-react"
+import { EmptyState } from "@/components/ui/empty-state"
+import { Plus, Search, Mail, Phone, FileText, Users } from "lucide-react"
 import { formatPhone, formatCPF, formatDate } from "@/lib/utils"
 import { api } from "@/services/api"
 import { useAuth } from "@/context/AuthContext"
@@ -11,6 +12,7 @@ import type { Patient } from "@/types"
 
 export default function Patients() {
   const location = useLocation()
+  const navigate = useNavigate()
   const { hasPermission } = useAuth()
   const [search, setSearch] = useState("")
   const [patients, setPatients] = useState<Patient[]>([])
@@ -38,15 +40,15 @@ export default function Patients() {
     <div className="space-y-6 p-6 lg:p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text">Clientes</h1>
+          <h1 className="text-2xl font-bold text-text">Pacientes</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Gerencie o cadastro de clientes
+            Cadastro e busca de pacientes da clínica
           </p>
         </div>
         {hasPermission("patients:create") && (
           <Button className="gap-2" onClick={() => setFormOpen(true)}>
             <Plus className="w-4 h-4" />
-            Novo Cliente
+            Novo paciente
           </Button>
         )}
       </div>
@@ -58,78 +60,109 @@ export default function Patients() {
             <input
               type="text"
               placeholder="Buscar por nome, e-mail ou CPF..."
+              aria-label="Buscar pacientes"
               className="w-full h-10 pl-10 pr-4 rounded-lg border border-border bg-surface text-sm text-text placeholder:text-text-secondary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Cliente</th>
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">CPF</th>
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Contato</th>
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Convênio</th>
-                  <th className="text-left py-3 px-4 font-medium text-text-secondary">Status</th>
-                  <th className="w-10"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {patients.map((patient) => (
-                  <tr
-                    key={patient.id}
-                    className="border-b border-border hover:bg-surface-alt transition-colors"
-                  >
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
-                          {patient.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                        </div>
-                        <div>
-                          <p className="font-medium text-text">{patient.name}</p>
-                          <p className="text-xs text-text-secondary">
-                            {formatDate(patient.birthDate, { day: "numeric", month: "long", year: "numeric" })}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-text-secondary">
-                      {formatCPF(patient.cpf)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col gap-1">
-                        {patient.email && (
-                          <div className="flex items-center gap-1 text-text-secondary">
-                            <Mail className="w-3 h-3" />
-                            <span className="text-xs">{patient.email}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 text-text-secondary">
-                          <Phone className="w-3 h-3" />
-                          <span className="text-xs">{formatPhone(patient.phone)}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-text-secondary">
-                      {patient.insurancePlan ?? "Particular"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`text-xs font-medium ${patient.active !== false ? "text-green-700" : "text-text-secondary"}`}>
-                        {patient.active !== false ? "Ativo" : "Inativo"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <button className="p-1 rounded hover:bg-surface-alt text-text-secondary hover:text-text transition-colors">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </button>
-                    </td>
+          {patients.length === 0 ? (
+            <EmptyState
+              icon={<Users className="h-10 w-10 text-primary" />}
+              title={search ? "Nenhum paciente encontrado" : "Nenhum paciente cadastrado"}
+              description={
+                search
+                  ? "Tente outro termo de busca ou cadastre um novo paciente."
+                  : "Cadastre o primeiro paciente para agendar consultas e abrir prontuários."
+              }
+              actionLabel={hasPermission("patients:create") ? "Cadastrar paciente" : undefined}
+              onAction={hasPermission("patients:create") ? () => setFormOpen(true) : undefined}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 font-medium text-text-secondary">Paciente</th>
+                    <th className="text-left py-3 px-4 font-medium text-text-secondary">CPF</th>
+                    <th className="text-left py-3 px-4 font-medium text-text-secondary">Contato</th>
+                    <th className="text-left py-3 px-4 font-medium text-text-secondary">Convênio</th>
+                    <th className="text-left py-3 px-4 font-medium text-text-secondary">Status</th>
+                    <th className="w-24 text-right py-3 px-4 font-medium text-text-secondary">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {patients.map((patient) => (
+                    <tr
+                      key={patient.id}
+                      className="border-b border-border hover:bg-surface-alt transition-colors"
+                    >
+                      <td className="py-3 px-4">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/prontuario/${patient.id}`)}
+                          className="flex items-center gap-3 text-left w-full rounded-lg hover:opacity-90"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shrink-0">
+                            {patient.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-text">{patient.name}</p>
+                            <p className="text-xs text-text-secondary">
+                              {formatDate(patient.birthDate, {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </p>
+                          </div>
+                        </button>
+                      </td>
+                      <td className="py-3 px-4 text-text-secondary">
+                        {patient.cpf ? formatCPF(patient.cpf) : "—"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col gap-1">
+                          {patient.email && (
+                            <div className="flex items-center gap-1 text-text-secondary">
+                              <Mail className="w-3 h-3" />
+                              <span className="text-xs">{patient.email}</span>
+                            </div>
+                          )}
+                          {patient.phone && (
+                            <div className="flex items-center gap-1 text-text-secondary">
+                              <Phone className="w-3 h-3" />
+                              <span className="text-xs">{formatPhone(patient.phone)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-text-secondary">
+                        {patient.insurancePlan ?? "Particular"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`text-xs font-medium ${patient.active !== false ? "text-green-700" : "text-text-secondary"}`}
+                        >
+                          {patient.active !== false ? "Ativo" : "Inativo"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Link
+                          to={`/prontuario/${patient.id}`}
+                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary-light"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          Prontuário
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

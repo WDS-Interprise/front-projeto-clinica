@@ -60,23 +60,42 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [showHints, setShowHints] = useState(false)
 
   const nameVal = useMemo(() => validateName(form.name), [form.name])
-  const cpfVal = useMemo(() => validateCPF(form.cpf), [form.cpf])
+  const cpfVal = useMemo(() => (form.cpf.trim() ? validateCPF(form.cpf) : { ok: true, msg: "" }), [form.cpf])
   const emailVal = useMemo(() => validateEmailOptional(form.email), [form.email])
-  const phoneVal = useMemo(() => validatePhone(form.phone), [form.phone])
+  const phoneVal = useMemo(
+    () => (form.phone.trim() ? validatePhone(form.phone) : { ok: true, msg: "" }),
+    [form.phone]
+  )
   const whatsappVal = useMemo(() => validatePhoneOptional(form.whatsapp), [form.whatsapp])
   const phoneHomeVal = useMemo(() => validatePhoneOptional(form.phoneHome), [form.phoneHome])
   const birthVal = useMemo(() => validateBirthDate(form.birthDate), [form.birthDate])
 
+  const hasContact =
+    phoneDigits(form.phone).length >= 10 || cpfDigits(form.cpf).length === 11
+
   const allOk =
     nameVal.ok &&
-    cpfVal.ok &&
+    birthVal.ok &&
     emailVal.ok &&
     phoneVal.ok &&
+    cpfVal.ok &&
     whatsappVal.ok &&
     phoneHomeVal.ok &&
-    birthVal.ok
+    hasContact
+
+  const missingFields = useMemo(() => {
+    const missing: string[] = []
+    if (!nameVal.ok) missing.push("Nome completo")
+    if (!birthVal.ok) missing.push("Data de nascimento")
+    if (!hasContact) missing.push("Telefone ou CPF")
+    if (form.cpf.trim() && !cpfVal.ok) missing.push("CPF válido")
+    if (form.phone.trim() && !phoneVal.ok) missing.push("Telefone válido")
+    if (form.email.trim() && !emailVal.ok) missing.push("E-mail válido")
+    return missing
+  }, [nameVal, birthVal, hasContact, cpfVal, phoneVal, emailVal, form.cpf, form.phone, form.email])
 
   const age =
     form.birthDate && birthVal.ok
@@ -85,7 +104,10 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!allOk) return
+    if (!allOk) {
+      setShowHints(true)
+      return
+    }
 
     setLoading(true)
     setFieldErrors({})
@@ -93,8 +115,8 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
       await api.patients.create({
         ...form,
         name: form.name.trim(),
-        cpf: cpfDigits(form.cpf),
-        phone: phoneDigits(form.phone),
+        cpf: form.cpf.trim() ? cpfDigits(form.cpf) : "",
+        phone: form.phone.trim() ? phoneDigits(form.phone) : "",
         whatsapp: form.whatsapp ? phoneDigits(form.whatsapp) : "",
         phoneHome: form.phoneHome ? phoneDigits(form.phoneHome) : "",
         email: form.email.trim(),
@@ -131,8 +153,7 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
               label="CPF"
               value={form.cpf}
               onChange={(e) => setForm({ ...form, cpf: formatCPFInput(e.target.value) })}
-              placeholder="000.000.000-00"
-              required
+              placeholder="000.000.000-00 (opcional se houver telefone)"
               maxLength={14}
             />
             {form.cpf.length > 0 && !cpfVal.ok && <FieldHint ok={false} message={cpfVal.msg} />}
@@ -172,8 +193,7 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
               label="Telefone"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: maskPhoneInput(e.target.value) })}
-              placeholder="(11) 99999-9999"
-              required
+              placeholder="(11) 99999-9999 (opcional se houver CPF)"
             />
             {form.phone.length > 0 && !phoneVal.ok && <FieldHint ok={false} message={phoneVal.msg} />}
             {fieldErrors.phone && <FieldHint ok={false} message={fieldErrors.phone} />}
@@ -248,11 +268,25 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
           onChange={(v) => setForm({ ...form, active: v })}
         />
 
+        {showHints && missingFields.length > 0 && (
+          <div
+            role="alert"
+            className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+          >
+            <p className="font-medium">Preencha os campos obrigatórios:</p>
+            <ul className="mt-1 list-disc pl-4">
+              {missingFields.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={loading || !allOk}>
+          <Button type="submit" disabled={loading}>
             {loading ? "Salvando..." : "Salvar"}
           </Button>
         </div>
