@@ -381,7 +381,7 @@ export default function SettingsSidebar() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-hidden p-3">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-3">
         {visibleGroups.map((group, index) => (
           <div key={group.title}>
             {index > 0 && <div className="mb-4 border-t border-border/70" />}
