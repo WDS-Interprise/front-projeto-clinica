@@ -11,10 +11,14 @@ export function resolveTheme(): Theme {
   return getStoredTheme() ?? "light"
 }
 
-export function applyTheme(theme: Theme) {
+export function applyThemeToDocument(theme: Theme) {
   const root = document.documentElement
   root.classList.toggle("dark", theme === "dark")
   root.style.colorScheme = theme
+}
+
+export function applyTheme(theme: Theme) {
+  applyThemeToDocument(theme)
   localStorage.setItem(THEME_STORAGE_KEY, theme)
 }
 
