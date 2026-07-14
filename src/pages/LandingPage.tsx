@@ -7,6 +7,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import AppLogo from "@/components/brand/AppLogo"
+import { useForceLightTheme } from "@/hooks/useForceLightTheme"
 import {
   BRAND_ACCENT,
   BRAND_BLUE,
@@ -376,6 +377,8 @@ function LandingFooter() {
 }
 
 export default function LandingPage() {
+  useForceLightTheme()
+
   useEffect(() => {
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = "auto"
