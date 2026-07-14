@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import {
-  Hospital,
   MessageSquare,
   ChevronDown,
   Plus,
@@ -14,11 +13,11 @@ import { useAuth } from "@/context/AuthContext"
 import { OutrosNavDropdown } from "@/components/outros/OutrosNavDropdown"
 import { GestaoNavDropdown } from "@/components/gestao/GestaoNavDropdown"
 import ThemeToggle from "@/components/ui/ThemeToggle"
+import AppLogo from "@/components/brand/AppLogo"
 import NotificationsMenu from "@/components/layout/NotificationsMenu"
 import UserMenu from "@/components/layout/UserMenu"
 import HeaderIconButton from "@/components/layout/HeaderIconButton"
 import { useUnreadMessages } from "@/hooks/useUnreadMessages"
-import { APP_NAME } from "@/lib/brand"
 import type { Permission } from "@/lib/permissions"
 
 type NavItem = {
@@ -66,16 +65,11 @@ export default function AppHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border bg-surface/95 backdrop-blur">
       <div className="h-full px-4 lg:px-6 flex items-center gap-6">
-        <NavLink to={mainNav[0]?.to ?? "/agenda"} className="flex items-center gap-2.5 shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <Hospital className="w-4 h-4 text-white" />
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-bold text-text leading-tight">{APP_NAME}</p>
-            <p className="text-[10px] text-text-secondary leading-tight">
-              {clinicName || "Clínica Geral"}
-            </p>
-          </div>
+        <NavLink to={mainNav[0]?.to ?? "/agenda"} className="flex items-center gap-2.5 shrink-0 min-w-0">
+          <AppLogo size="xs" />
+          <p className="hidden lg:block text-[10px] text-text-secondary leading-tight truncate max-w-[10rem]">
+            {clinicName || "Clínica Geral"}
+          </p>
         </NavLink>
 
         <nav className="hidden lg:flex items-center gap-1 flex-1 min-w-0 overflow-x-auto">

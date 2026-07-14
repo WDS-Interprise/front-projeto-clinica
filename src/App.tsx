@@ -51,6 +51,7 @@ import { AuthProvider } from "@/context/AuthContext"
 import { UserAvatarProvider } from "@/context/UserAvatarContext"
 import PermissionRoute from "@/components/PermissionRoute"
 import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
+import LandingPage from "@/pages/LandingPage"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
 
@@ -75,11 +76,11 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   return <Navigate to="/agenda" replace />
 }
 
-function RootRedirect() {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />
+function RootRoute() {
+  if (isAuthenticated()) {
+    return <Navigate to={getAuthHome()} replace />
   }
-  return <Navigate to={getAuthHome()} replace />
+  return <LandingPage />
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -104,7 +105,7 @@ export default function App() {
       <UserAvatarProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<RootRedirect />} />
+          <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />

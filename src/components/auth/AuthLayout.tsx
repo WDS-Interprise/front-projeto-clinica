@@ -9,8 +9,8 @@ import {
   Stethoscope,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import AppLogo from "@/components/brand/AppLogo"
 import { cn } from "@/lib/utils"
-import { APP_NAME, APP_TAGLINE } from "@/lib/brand"
 
 export const authInputClass =
   "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
@@ -171,14 +171,8 @@ function AuthClinicShowcase() {
     <div className="relative flex min-h-[280px] flex-1 flex-col justify-between overflow-hidden lg:min-h-screen lg:border-r lg:border-slate-200/80">
       <AuthFloatingIcons />
       <div className="relative z-10 flex flex-1 flex-col justify-start px-6 py-8 sm:px-10 lg:px-12 lg:pt-14 lg:pb-10 xl:px-16 xl:pt-16">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#256993] to-[#1a4f6e] text-sm font-bold text-white shadow-lg shadow-[#256993]/20 ring-1 ring-[#256993]/15">
-            cl
-          </div>
-          <div>
-            <p className="text-lg font-bold tracking-tight text-slate-900">{APP_NAME}</p>
-            <p className="text-xs text-slate-500">{APP_TAGLINE}</p>
-          </div>
+        <div className="mb-8">
+          <AppLogo size="xl" />
         </div>
 
         <div className="max-w-lg">
@@ -272,14 +266,10 @@ export function AuthCard({
 
 export function AuthLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <div
-      className={cn(
-        "mx-auto flex items-center justify-center rounded-full bg-[#256993] font-semibold tracking-tight text-white shadow-md shadow-[#256993]/25",
-        compact ? "mb-3 h-9 w-9 text-xs" : "mb-5 h-11 w-11 text-sm"
-      )}
-    >
-      cl
-    </div>
+    <AppLogo
+      size={compact ? "sm" : "md"}
+      className={cn("mx-auto object-center", compact ? "mb-3" : "mb-5")}
+    />
   )
 }
 

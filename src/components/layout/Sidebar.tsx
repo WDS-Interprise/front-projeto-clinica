@@ -5,11 +5,10 @@ import {
   Calendar,
   Stethoscope,
   Settings,
-  Hospital,
   LogOut,
 } from "lucide-react"
+import AppLogo from "@/components/brand/AppLogo"
 import { cn } from "@/lib/utils"
-import { APP_NAME, APP_TAGLINE } from "@/lib/brand"
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -36,13 +35,7 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-surface flex flex-col">
       <div className="flex items-center gap-3 px-6 h-16 border-b border-border">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-          <Hospital className="w-4 h-4 text-white" />
-        </div>
-        <div>
-          <h1 className="text-sm font-bold text-text">{APP_NAME}</h1>
-          <p className="text-xs text-text-secondary">{APP_TAGLINE}</p>
-        </div>
+        <AppLogo size="xs" />
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
