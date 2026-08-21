@@ -153,7 +153,7 @@ export function validateAppointmentSchedule(
     return "Horario fora do expediente da clinica"
   }
   if (overlapsLunch(startTime, endTime, schedule)) {
-    return "Horario de almoco — nao e possivel agendar consultas"
+    return "Horario de almoco. nao e possivel agendar consultas"
   }
   return null
 }

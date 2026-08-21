@@ -8,7 +8,7 @@ interface DrawerProps {
   title: string
   children: ReactNode
   footer?: ReactNode
-  width?: "md" | "lg"
+  width?: "md" | "lg" | "xl" | "full"
   /** Use "stack" quando o drawer abre sobre outro drawer (ex.: WhatsApp na agenda). */
   layer?: "base" | "stack"
 }
@@ -35,19 +35,23 @@ export function Drawer({
     <div
       className={cn(
         "fixed inset-0 flex justify-end",
-        layer === "stack" ? "z-[60]" : "z-50"
+        layer === "stack" ? "z-[60]" : "z-50",
+        width === "full" && "top-16 left-64 right-0 bottom-0"
       )}
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/40"
+        className={cn(
+          "absolute bg-black/40",
+          width === "full" ? "inset-0 top-16 left-64" : "inset-0"
+        )}
         aria-label="Fechar"
         onClick={onClose}
       />
       <aside
         className={cn(
           "relative h-full bg-surface shadow-2xl flex flex-col animate-in slide-in-from-right duration-200",
-          width === "lg" ? "w-full max-w-lg" : "w-full max-w-md"
+          width === "full" ? "w-full" : width === "xl" ? "w-full max-w-5xl" : width === "lg" ? "w-full max-w-2xl" : "w-full max-w-md"
         )}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -60,7 +64,7 @@ export function Drawer({
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
+        <div className={cn("flex-1 overflow-y-auto", width === "full" ? "p-5" : "px-6 py-5")}>{children}</div>
         {footer && (
           <div className="border-t border-border px-6 py-4 bg-surface-alt">{footer}</div>
         )}

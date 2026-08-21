@@ -6,7 +6,7 @@ import { HistoryRecordShell } from "./HistoryRecordShell"
 function formatItemHeadline(item: HistoryPrescriptionRecord["prescription"]["items"][0]) {
   const parts = [item.name]
   if (item.presentation?.trim()) parts.push(item.presentation.trim())
-  let line = parts.join(" — ")
+  let line = parts.join(". ")
   if (item.quantity?.trim()) line += ` · ${item.quantity.trim()}`
   return line
 }

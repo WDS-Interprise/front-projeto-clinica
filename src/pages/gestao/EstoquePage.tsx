@@ -113,10 +113,10 @@ export default function EstoquePage() {
             {products.map((p) => (
               <tr key={p.id} className="border-t border-border">
                 <td className="p-3 font-medium">{p.name}</td>
-                <td className="p-3 text-text-secondary">{p.sku ?? "—"}</td>
+                <td className="p-3 text-text-secondary">{p.sku ?? "-"}</td>
                 <td className={`p-3 text-right font-medium ${p.currentStock <= p.minStock ? "text-danger" : ""}`}>{p.currentStock} {p.unit}</td>
                 <td className="p-3 text-right">{p.minStock}</td>
-                <td className="p-3">{p.expiryDate ? format(new Date(p.expiryDate), "dd/MM/yyyy") : "—"}</td>
+                <td className="p-3">{p.expiryDate ? format(new Date(p.expiryDate), "dd/MM/yyyy") : "-"}</td>
                 <td className="p-3 text-right">
                   {canManage && (
                     <div className="flex gap-1 justify-end">

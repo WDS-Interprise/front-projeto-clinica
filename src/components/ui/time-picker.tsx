@@ -1,6 +1,6 @@
-import { ChevronDown, Clock } from "lucide-react"
+import { Clock } from "lucide-react"
 
-import { fieldInputClass, fieldLabelClass } from "@/lib/form-classes"
+import { fieldLabelClass, fieldSelectClass } from "@/lib/form-classes"
 import { generateTimeOptions } from "@/lib/agenda-schedule"
 import { cn } from "@/lib/utils"
 
@@ -42,8 +42,8 @@ export default function TimePicker({
           onChange={(event) => onChange(event.target.value)}
           disabled={disabled}
           className={cn(
-            fieldInputClass,
-            "cursor-pointer appearance-none pl-10 pr-10 font-medium tabular-nums",
+            fieldSelectClass,
+            "pl-10 font-medium tabular-nums",
             selectClassName
           )}
         >
@@ -55,7 +55,6 @@ export default function TimePicker({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
       </div>
     </div>
   )

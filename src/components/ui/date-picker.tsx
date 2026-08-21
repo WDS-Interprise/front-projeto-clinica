@@ -118,7 +118,7 @@ export function DateTimePicker({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   const selectedDate = toDate(date)
-  const summary = `${formatDisplayDate(date) || "Selecionar data"} · ${startTime} – ${endTime}`
+  const summary = `${formatDisplayDate(date) || "Selecionar data"} - ${startTime} - ${endTime}`
 
   const handleDateSelect = (nextDate?: Date) => {
     if (!nextDate) return
@@ -126,18 +126,18 @@ export function DateTimePicker({
   }
 
   return (
-    <div className={cn("overflow-hidden rounded-lg border border-border bg-surface", className)}>
+    <div className={cn("overflow-hidden rounded-[4px] border border-[#D5DEE7] bg-white", className)}>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
         className={cn(
-          "flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition-colors",
-          "hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-60",
-          open && "border-b border-border bg-surface-alt"
+          "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-[#334155] transition-colors",
+          "hover:bg-[#F8FAFC] disabled:cursor-not-allowed disabled:opacity-60",
+          open && "border-b border-[#E8EDF2] bg-[#F8FAFC]"
         )}
       >
-        <span className="font-medium">{summary}</span>
+        <span>{summary}</span>
         <ChevronDown
           className={cn(
             "h-4 w-4 shrink-0 text-text-secondary transition-transform duration-200",
@@ -148,7 +148,7 @@ export function DateTimePicker({
 
       {open && (
         <div className="space-y-4 p-4">
-          <div className="inline-flex overflow-hidden rounded-lg border border-border">
+          <div className="inline-flex overflow-hidden rounded-[4px] border border-[#D5DEE7]">
             <Calendar
               mode="single"
               selected={selectedDate}

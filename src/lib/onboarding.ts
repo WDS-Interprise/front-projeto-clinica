@@ -1,3 +1,5 @@
+import { defaultHomePath } from "@/lib/permissions"
+
 export const ONBOARDING_KEY = "clinichub_onboarding_done"
 export const SELF_REGISTER_KEY = "clinichub_self_register"
 export const AUTH_HOME_KEY = "clinichub_auth_home"
@@ -19,13 +21,7 @@ export function getAuthHome(): string {
   }
 
   const user = JSON.parse(localStorage.getItem("user") || "{}") as { role?: string }
-  const clinicId = localStorage.getItem("clinicId")
-
-  if (clinicId && clinicId !== "none" && user.role === "RECEPTION") {
-    return "/agenda"
-  }
-
-  return "/dashboard"
+  return defaultHomePath(user.role)
 }
 
 export function shouldSkipOnboarding(): boolean {

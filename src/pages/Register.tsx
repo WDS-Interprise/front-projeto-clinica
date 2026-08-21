@@ -148,15 +148,11 @@ export default function Register() {
     ok ? <Check className="h-3 w-3 shrink-0 text-emerald-600" /> : <X className="h-3 w-3 shrink-0 text-slate-400" />
 
   return (
-    <AuthPageShell wide>
+    <AuthPageShell>
       <AuthCard>
-        <div className="mb-5 text-center">
-          <AuthLogo compact />
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Criar conta</h1>
-          <p className="mt-1 text-sm text-slate-500">Preencha os dados para se cadastrar</p>
-        </div>
+        <AuthLogo />
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label htmlFor="name" className={cn(authLabelClass, "text-xs")}>
@@ -233,8 +229,8 @@ export default function Register() {
           </div>
 
           {password.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="mb-1.5 flex items-center gap-2">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+              <div className="mb-1 flex items-center gap-2">
                 <div className="flex h-1 flex-1 gap-0.5">
                   {[1, 2, 3, 4].map((step) => (
                     <div
@@ -250,7 +246,7 @@ export default function Register() {
                   {strength.label}
                 </span>
               </div>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+              <div className="flex flex-wrap gap-x-2.5 gap-y-0.5">
                 {passwordRules.map((rule) => {
                   const ok = rule.test(password)
                   return (
@@ -287,9 +283,9 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-slate-500">
+        <p className="mt-4 pb-1 text-center text-xs text-slate-500">
           Já tem conta?{" "}
-          <Link to="/login" className="font-semibold text-slate-900 hover:underline">
+          <Link to="/login" className="font-semibold text-[#00A86B] hover:underline">
             Fazer login
           </Link>
         </p>

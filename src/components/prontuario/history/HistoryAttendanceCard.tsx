@@ -35,7 +35,7 @@ function buildPrintHtml(record: HistoryAttendanceRecord): string {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Atendimento</title>
 <style>body{font-family:Arial,sans-serif;padding:24px;color:#111;font-size:12px;line-height:1.5}
 h1{font-size:16px;margin:0 0 8px}p{margin:0 0 12px}</style></head><body>
-<h1>Atendimento — ${record.professionalName}</h1>
+<h1>Atendimento. ${record.professionalName}</h1>
 <p><strong>Horário:</strong> ${record.time}</p>
 ${body || "<p>Sem conteúdo clínico registrado.</p>"}
 </body></html>`
@@ -88,6 +88,22 @@ export function HistoryAttendanceCard({ record, onInsertInfo }: Props) {
           <ClinicalBlock label="Condutas" value={a.conduct} />
           <ClinicalBlock label="Prescrevo" value={a.prescriptionSummary} />
           <ClinicalBlock label="Observações" value={a.notes} />
+          {(record.addendums ?? []).map((addendum) => (
+            <div key={addendum.id} className="mt-4 border-t border-border pt-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
+                Adendo
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                {new Date(addendum.createdAt).toLocaleString("pt-BR")} • {addendum.authorName}
+              </p>
+              {addendum.reason ? (
+                <p className="text-xs text-text-secondary mt-1">Motivo: {addendum.reason}</p>
+              ) : null}
+              <p className="text-text-secondary whitespace-pre-wrap leading-relaxed mt-1">
+                {addendum.body}
+              </p>
+            </div>
+          ))}
         </>
       )}
     </HistoryRecordShell>

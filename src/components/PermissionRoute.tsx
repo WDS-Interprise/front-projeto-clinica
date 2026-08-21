@@ -1,17 +1,18 @@
 import { Navigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
-import type { Permission } from "@/lib/permissions"
+import { defaultHomePath, type Permission } from "@/lib/permissions"
 
 export default function PermissionRoute({
   permission,
   children,
-  fallback = "/agenda",
+  fallback,
 }: {
   permission: Permission
   children: React.ReactNode
   fallback?: string
 }) {
-  const { loading, hasPermission } = useAuth()
+  const { loading, hasPermission, user } = useAuth()
+  const home = fallback ?? defaultHomePath(user?.role)
 
   if (loading) {
     return (
@@ -22,7 +23,7 @@ export default function PermissionRoute({
   }
 
   if (!hasPermission(permission)) {
-    return <Navigate to={fallback} replace />
+    return <Navigate to={home} replace />
   }
 
   return <>{children}</>

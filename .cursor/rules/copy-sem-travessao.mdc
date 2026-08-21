@@ -1,0 +1,21 @@
+---
+description: Proíbe travessão e meia-risca em qualquer texto da interface e da API
+alwaysApply: true
+---
+
+# Copy sem travessão
+
+Nunca use travessão (`—`, U+2014) nem meia-risca (`–`, U+2013) em texto visível, toast, placeholder, meta, e-mail, PDF, comentário de UI ou mensagem de API.
+
+## Preferir
+
+- Ponto ou dois-pontos: `O código localiza a clínica. O admin define o cargo.`
+- Vírgula: `Agenda, pacientes e comunicação.`
+- Hífen ASCII `-` só em intervalo técnico (`08:00-18:00`) ou valor vazio (`-`).
+- Título: `ClinMax: Gestão clínica` (não `ClinMax — Gestão`).
+
+## Proibido
+
+- `Clínica — código`
+- `08:00–18:00` (use `08:00-18:00`)
+- Placeholder `—` (use `-`)

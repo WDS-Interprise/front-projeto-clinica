@@ -61,7 +61,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
     if (res.status === 502 || res.status === 503 || res.status === 504) {
       throw new ApiError(
-        "Servidor indisponível (502). Verifique se o backend está rodando em http://localhost:3001 — apenas uma instância por vez."
+        "Servidor indisponível (502). Verifique se o backend está rodando em http://localhost:3001. Apenas uma instância por vez."
       )
     }
     throw new ApiError(data.error || `Erro na requisição (${res.status})`, data.fields)
@@ -79,6 +79,50 @@ export interface BackofficeMetrics {
     totalDoctors: number
     totalRecords: number
     totalUsers: number
+  }
+  saas?: {
+    activeClinics: number
+    totalClinics: number
+    inactiveClinics: number
+    whatsappConnected: number
+    clinicsWithWhatsapp: number
+    offlineIntegrations: number
+    pendingJoinRequests: number
+    pendingInvites: number
+    platformRevenueTotal: number
+    platformRevenueMonth: number
+    subscriptionMrr?: number
+    subscriptionArr?: number
+    subscriptionRevenueMonth?: number
+    subscriptionReceivable?: number
+    subscriptionOverdue?: number
+    trialSubscriptions?: number
+    pastDueSubscriptions?: number
+    activeSubscriptions?: number
+    clinicsGrowthTrend: Array<{ month: string; value: number }>
+    patientsGrowthTrend: Array<{ month: string; value: number }>
+    revenueTrend: Array<{ month: string; value: number }>
+    subscriptionRevenueTrend?: Array<{ month: string; value: number }>
+    clinicDistribution: Array<{ name: string; count: number; percent: number }>
+    recentClinics: Array<{
+      id: string
+      name: string
+      status: string
+      users: number
+      patients: number
+      appointments: number
+      whatsapp: string
+      createdAt: string
+    }>
+    platformActivities: Array<{ text: string; detail: string; time: string }>
+    paymentStatusDistribution: Array<{ name: string; count: number; percent: number; value: number }>
+    kpiTrends: {
+      activeClinics: number[]
+      patients: number[]
+      users: number[]
+      whatsappConnected: number[]
+      joinRequests: number[]
+    }
   }
   usersByRole: Array<{ role: string; count: number }>
   appointmentsByStatus: Array<{ status: string; count: number }>
@@ -106,6 +150,12 @@ export type BackofficeClinic = {
   email: string | null
   active: boolean
   _count: { users: number; patients: number; appointments: number }
+  subscription?: {
+    planId: string
+    planName: string
+    planSlug: string
+    status: string
+  } | null
 }
 
 export type BackofficeUser = {
@@ -188,5 +238,58 @@ export const backofficeApi = {
     } catch {
       return {}
     }
+  },
+
+  plans: {
+    list: () => request<any[]>("/backoffice/plans"),
+    get: (id: string) => request<any>(`/backoffice/plans/${id}`),
+    create: (data: Record<string, unknown>) =>
+      request("/backoffice/plans", { method: "POST", body: JSON.stringify(data) }),
+    update: (id: string, data: Record<string, unknown>) =>
+      request(`/backoffice/plans/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    duplicate: (id: string) => request(`/backoffice/plans/${id}/duplicate`, { method: "POST", body: "{}" }),
+  },
+
+  subscriptions: {
+    list: (params?: { status?: string; search?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.status) q.set("status", params.status)
+      if (params?.search) q.set("search", params.search)
+      return request<any[]>(`/backoffice/subscriptions?${q}`)
+    },
+    get: (id: string) => request<any>(`/backoffice/subscriptions/${id}`),
+    changePlan: (id: string, data: { planId: string; billingCycle?: string }) =>
+      request(`/backoffice/subscriptions/${id}/plan`, { method: "PUT", body: JSON.stringify(data) }),
+    extendTrial: (id: string, days: number) =>
+      request(`/backoffice/subscriptions/${id}/extend-trial`, { method: "POST", body: JSON.stringify({ days }) }),
+    grantCourtesy: (id: string, until: string) =>
+      request(`/backoffice/subscriptions/${id}/courtesy`, { method: "POST", body: JSON.stringify({ until }) }),
+    cancel: (id: string, atPeriodEnd = true) =>
+      request(`/backoffice/subscriptions/${id}/cancel`, { method: "POST", body: JSON.stringify({ atPeriodEnd }) }),
+    reactivate: (id: string) =>
+      request(`/backoffice/subscriptions/${id}/reactivate`, { method: "POST", body: "{}" }),
+    suspend: (id: string) => request(`/backoffice/subscriptions/${id}/suspend`, { method: "POST", body: "{}" }),
+    createInvoice: (id: string) =>
+      request(`/backoffice/subscriptions/${id}/invoices`, { method: "POST", body: "{}" }),
+  },
+
+  billing: {
+    list: (params?: { status?: string; search?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.status) q.set("status", params.status)
+      if (params?.search) q.set("search", params.search)
+      return request<{ invoices: any[]; summary: any }>(`/backoffice/billing?${q}`)
+    },
+  },
+
+  clinicDetail: {
+    get: (id: string) => request<any>(`/backoffice/clinics/${id}`),
+    usage: (id: string) => request<any>(`/backoffice/clinics/${id}/usage`),
+  },
+
+  platformSettings: {
+    get: () => request<any>("/backoffice/platform-settings"),
+    update: (data: Record<string, unknown>) =>
+      request("/backoffice/platform-settings", { method: "PUT", body: JSON.stringify(data) }),
   },
 }

@@ -75,7 +75,7 @@ export function CidDetailCard({
           <div>
             <dt className="text-text-secondary">Capítulo</dt>
             <dd className="text-text">
-              {capitulo ? `${capitulo} — ` : ""}
+              {capitulo ? `${capitulo}. ` : ""}
               {capituloDesc}
             </dd>
           </div>
@@ -84,7 +84,7 @@ export function CidDetailCard({
           <div>
             <dt className="text-text-secondary">Grupo</dt>
             <dd className="text-text">
-              {grupo ? `${grupo} — ` : ""}
+              {grupo ? `${grupo}. ` : ""}
               {grupoDesc}
             </dd>
           </div>
@@ -93,7 +93,7 @@ export function CidDetailCard({
           <div>
             <dt className="text-text-secondary">Bloco</dt>
             <dd className="text-text">
-              {bloco ? `${bloco} — ` : ""}
+              {bloco ? `${bloco}. ` : ""}
               {blocoDesc}
             </dd>
           </div>
@@ -102,7 +102,7 @@ export function CidDetailCard({
           <div>
             <dt className="text-text-secondary">Categoria</dt>
             <dd className="text-text">
-              {categoria ? `${categoria} — ` : ""}
+              {categoria ? `${categoria}. ` : ""}
               {categoriaDesc}
             </dd>
           </div>
@@ -129,7 +129,7 @@ export function CidDetailCard({
             {inss.temIrpf && <li>• Possui relação com IRPF{inss.fonteIrpf ? ` (${inss.fonteIrpf})` : ""}</li>}
             {inss.temNtep && <li>• Pode ter relação com NTEP{inss.fonteNtep ? ` (${inss.fonteNtep})` : ""}</li>}
           </ul>
-          <p className="text-xs text-text-secondary mt-2">Apoio administrativo — não substitui avaliação clínica.</p>
+          <p className="text-xs text-text-secondary mt-2">Apoio administrativo. Não substitui avaliação clínica.</p>
         </div>
       )}
     </div>

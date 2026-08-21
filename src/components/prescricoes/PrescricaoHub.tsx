@@ -66,7 +66,7 @@ export function PrescricaoHub({
       <div className="rounded-xl border border-border bg-surface p-4 space-y-3">
         <h2 className="text-sm font-semibold text-text">Criar prescrição</h2>
         <div className="flex flex-wrap gap-3">
-        <Button variant="secondary" className="gap-2" disabled title="Biblioteca vazia — em breve">
+        <Button variant="secondary" className="gap-2" disabled title="Biblioteca vazia. Em breve">
           <LayoutTemplate className="w-4 h-4" />
           Usar modelo
         </Button>

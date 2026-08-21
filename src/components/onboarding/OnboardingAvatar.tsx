@@ -1,23 +1,17 @@
-import { Stethoscope } from "lucide-react"
+import type { OnboardingIcon } from "@/components/onboarding/OnboardingOptionCard"
+import { Building2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Props = {
   className?: string
+  icon?: OnboardingIcon
 }
 
-export function OnboardingAvatar({ className }: Props) {
+export function OnboardingAvatar({ className, icon: Icon = Building2 }: Props) {
   return (
-    <div className={cn("flex shrink-0 justify-center sm:justify-start", className)}>
-      <div className="relative">
-        <div
-          className="absolute inset-0 scale-110 rounded-full bg-[#256993]/15 blur-lg"
-          aria-hidden
-        />
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#256993]/15 to-[#256993]/5 ring-2 ring-[#256993]/20">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-slate-200">
-            <Stethoscope className="h-4 w-4 text-[#256993]" strokeWidth={1.75} />
-          </div>
-        </div>
+    <div className={cn("flex shrink-0", className)}>
+      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#00A86B] bg-white">
+        <Icon className="h-5 w-5 text-[#00A86B]" strokeWidth={1.5} />
       </div>
     </div>
   )

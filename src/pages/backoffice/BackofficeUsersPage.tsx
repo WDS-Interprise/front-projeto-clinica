@@ -144,7 +144,7 @@ export default function BackofficeUsersPage() {
                   <td className="p-3">{u.email}</td>
                   <td className="p-3">{roleLabels[u.role] ?? u.role}</td>
                   <td className="p-3 text-xs">
-                    {u.clinics.map((c) => c.name).join(", ") || "—"}
+                    {u.clinics.map((c) => c.name).join(", ") || "-"}
                   </td>
                   <td className="p-3">{u.isAccountAdmin ? "Sim" : "Não"}</td>
                   <td className="p-3">{u.active ? "Sim" : "Não"}</td>

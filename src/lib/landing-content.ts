@@ -1,15 +1,22 @@
 import type { LucideIcon } from "lucide-react"
 import {
   BarChart3,
+  Building2,
   CalendarClock,
-  ClipboardList,
-  FileText,
+  CalendarDays,
+  CirclePlus,
+  CreditCard,
+  DollarSign,
+  FilePlus,
+  Flower2,
+  FolderOpen,
+  HeartHandshake,
+  HeartPulse,
   MessageCircle,
-  Pill,
-  ShieldCheck,
-  Stethoscope,
+  Plus,
+  TrendingUp,
+  UserRound,
   Users,
-  Wallet,
 } from "lucide-react"
 
 export type LandingFeature = {
@@ -19,128 +26,191 @@ export type LandingFeature = {
 }
 
 export type LandingStep = {
-  step: string
+  icon: LucideIcon
   title: string
   description: string
 }
 
-export type LandingRole = {
-  icon: LucideIcon
-  title: string
-  bullets: string[]
-}
-
-export const LANDING_STATS = [
-  { value: "100%", label: "Fluxo digital", detail: "Sem papel na rotina clínica" },
-  { value: "24/7", label: "Acesso seguro", detail: "Dados na nuvem com controle por perfil" },
-  { value: "WhatsApp", label: "Comunicação", detail: "Lembretes e mensagens automáticas" },
-  { value: "TISS", label: "Convênios", detail: "Gestão financeira integrada" },
-] as const
-
 export const LANDING_FEATURES: LandingFeature[] = [
   {
     icon: CalendarClock,
-    title: "Agenda inteligente",
+    title: "Agendamento online",
     description:
-      "Horários, confirmações, fila do dia e logs de alterações para recepção e profissionais.",
+      "Pacientes agendam 24h por dia e você reduz faltas com lembretes automáticos.",
   },
   {
-    icon: FileText,
+    icon: FolderOpen,
     title: "Prontuário eletrônico",
-    description:
-      "Histórico clínico completo, evoluções e documentos vinculados ao paciente em um só lugar.",
+    description: "Histórico clínico completo, acessível de qualquer lugar com segurança.",
   },
   {
-    icon: Pill,
-    title: "Prescrições digitais",
-    description:
-      "Medicamentos, exames e vacinas com consulta integrada a bulas e referências clínicas.",
+    icon: FilePlus,
+    title: "Receitas e exames",
+    description: "Emita receitas, solicitação de exames e atestados de forma rápida e digital.",
+  },
+  {
+    icon: DollarSign,
+    title: "Financeiro integrado",
+    description: "Controle de recebimentos, despesas e relatórios financeiros em tempo real.",
   },
   {
     icon: MessageCircle,
     title: "WhatsApp integrado",
-    description:
-      "Lembretes de consulta, templates de mensagem e comunicação direta com pacientes.",
-  },
-  {
-    icon: Wallet,
-    title: "Finanças e fluxo de caixa",
-    description:
-      "Receitas, despesas, extrato e relatórios financeiros para gestão do consultório.",
+    description: "Comunique-se com seus pacientes de forma prática e segura.",
   },
   {
     icon: BarChart3,
     title: "Relatórios e indicadores",
-    description:
-      "Painel com métricas de atendimento, satisfação do paciente e desempenho da clínica.",
-  },
-  {
-    icon: ClipboardList,
-    title: "Estoque e TISS",
-    description:
-      "Controle de materiais e recursos para operadoras de saúde e convênios.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Permissões por perfil",
-    description:
-      "Médicos, recepção e administradores com acessos definidos por função na clínica.",
+    description: "Acompanhe o desempenho da sua clínica com dashboards intuitivos.",
   },
 ]
 
 export const LANDING_STEPS: LandingStep[] = [
   {
-    step: "01",
-    title: "Cadastre sua clínica",
-    description:
-      "Crie sua conta, configure usuários, convites e personalize a aparência do sistema.",
+    icon: Building2,
+    title: "1. Cadastre sua clínica",
+    description: "Crie sua conta e personalize as informações da sua clínica em poucos minutos.",
   },
   {
-    step: "02",
-    title: "Organize a operação",
+    icon: CalendarDays,
+    title: "2. Configure sua agenda",
     description:
-      "Importe pacientes, configure a agenda, prontuário e integrações como WhatsApp.",
-  },
-  {
-    step: "03",
-    title: "Atenda com fluidez",
-    description:
-      "Do check-in à prescrição e cobrança — tudo registrado e acessível em tempo real.",
-  },
-]
-
-export const LANDING_ROLES: LandingRole[] = [
-  {
-    icon: Stethoscope,
-    title: "Profissionais de saúde",
-    bullets: [
-      "Prontuário e prescrições no fluxo do atendimento",
-      "Consulta rápida a CID-10, CID-11 e bulas",
-      "Histórico clínico sempre disponível",
-    ],
+      "Defina horários, serviços e profissionais para começar a receber agendamentos.",
   },
   {
     icon: Users,
-    title: "Recepção e equipe",
-    bullets: [
-      "Agenda visual com confirmações e lembretes",
-      "Cadastro de pacientes e contatos",
-      "Comunicação via WhatsApp integrada",
-    ],
+    title: "3. Atenda e registre",
+    description: "Atenda seus pacientes e registre tudo no prontuário eletrônico com facilidade.",
   },
   {
-    icon: BarChart3,
-    title: "Gestão da clínica",
-    bullets: [
-      "Finanças, extrato e fluxo de caixa",
-      "Relatórios e pesquisa de satisfação",
-      "Usuários, permissões e multi-clínicas",
-    ],
+    icon: TrendingUp,
+    title: "4. Acompanhe e cresça",
+    description: "Acompanhe resultados, melhore processos e faça sua clínica crescer.",
   },
+]
+
+export const LANDING_HERO_TRUST = [
+  { icon: CreditCard, label: "Sem cartão para testar" },
+  { icon: Users, label: "Multi-usuários" },
+  { icon: MessageCircle, label: "WhatsApp integrado" },
+] as const
+
+/** Faixa de clínicas (prova social ilustrativa até parcerias reais). */
+export const LANDING_TRUST_CLINICS: { icon: LucideIcon; name: string }[] = [
+  { icon: Plus, name: "Clínica Vitalis" },
+  { icon: HeartHandshake, name: "Instituto Bem Estar" },
+  { icon: UserRound, name: "Clínica Harmonia" },
+  { icon: Flower2, name: "Clínica Pró-Saúde" },
+  { icon: CirclePlus, name: "Saúde & Cuidado" },
+  { icon: HeartPulse, name: "Clínica Vida" },
 ]
 
 export const LANDING_NAV = [
   { id: "funcionalidades", label: "Funcionalidades" },
   { id: "como-funciona", label: "Como funciona" },
-  { id: "para-quem", label: "Para quem" },
+  { id: "planos", label: "Planos" },
 ] as const
+
+export type LandingPlan = {
+  name: string
+  description: string
+  price: string
+  period: string
+  highlighted: boolean
+  badge?: string
+  features: string[]
+}
+
+export const LANDING_PLANS: LandingPlan[] = [
+  {
+    name: "Básico",
+    description: "Ideal para profissionais que estão começando.",
+    price: "79",
+    period: "/mês",
+    highlighted: false,
+    features: [
+      "Agendamento online",
+      "Prontuário eletrônico",
+      "WhatsApp integrado",
+      "Relatórios básicos",
+    ],
+  },
+  {
+    name: "Profissional",
+    description: "Para clínicas que querem mais controle e eficiência.",
+    price: "149",
+    period: "/mês",
+    highlighted: true,
+    badge: "Mais escolhido",
+    features: [
+      "Tudo do plano Básico",
+      "Financeiro integrado",
+      "Receitas e exames",
+      "Relatórios avançados",
+    ],
+  },
+  {
+    name: "Avançado",
+    description: "Para clínicas que buscam o máximo de desempenho.",
+    price: "249",
+    period: "/mês",
+    highlighted: false,
+    features: [
+      "Tudo do plano Profissional",
+      "Indicadores personalizados",
+      "Suporte prioritário",
+      "Treinamento de equipe",
+    ],
+  },
+]
+
+export const LANDING_SPECIALIST_EMAIL = "contato@clinmax.com.br"
+
+export const LANDING_FOOTER_BLURB =
+  "Gestão clínica e prontuário eletrônico para consultórios e equipes que querem mais tempo para cuidar de pessoas."
+
+export const LANDING_FOOTER_COLUMNS = [
+  {
+    title: "Produto",
+    links: [
+      { label: "Funcionalidades", href: "#funcionalidades" },
+      { label: "Como funciona", href: "#como-funciona" },
+      { label: "Planos", href: "#planos" },
+      { label: "Integrações", href: "#funcionalidades" },
+    ],
+  },
+  {
+    title: "Empresa",
+    links: [
+      { label: "Sobre nós", href: "#funcionalidades" },
+      { label: "Blog", href: "#contato" },
+      { label: "Carreiras", href: "#contato" },
+      { label: "Contato", href: "#contato" },
+    ],
+  },
+  {
+    title: "Suporte",
+    links: [
+      { label: "Central de ajuda", href: "#contato" },
+      { label: "Tutoriais", href: "#como-funciona" },
+      { label: "Status do sistema", href: "#contato" },
+      { label: "Suporte", href: "#contato" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Política de privacidade", href: "#contato" },
+      { label: "Termos de uso", href: "#contato" },
+      { label: "LGPD", href: "#contato" },
+      { label: "Segurança", href: "#contato" },
+    ],
+  },
+] as const
+
+
+
+
+
+
+

@@ -72,7 +72,7 @@ export default function Records() {
                     </div>
                     <div>
                       <p className="text-xs font-medium text-text-secondary mb-1">Observações</p>
-                      <p className="text-text-secondary">{record.notes || "—"}</p>
+                      <p className="text-text-secondary">{record.notes || "-"}</p>
                     </div>
                   </div>
                 </div>

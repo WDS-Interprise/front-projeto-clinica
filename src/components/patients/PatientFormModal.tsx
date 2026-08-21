@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Check, X } from "lucide-react"
 import { differenceInYears } from "date-fns"
 import { Modal } from "@/components/ui/modal"
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import DatePicker from "@/components/ui/date-picker"
 import { Switch } from "@/components/ui/switch"
-import { api } from "@/services/api"
+import { api, ApiError } from "@/services/api"
 import { toastMessageFromApiError, fieldsFromApiError } from "@/lib/api-errors"
 import { useToast } from "@/context/ToastContext"
 import {
@@ -27,7 +27,8 @@ import { cn } from "@/lib/utils"
 interface Props {
   open: boolean
   onClose: () => void
-  onSaved: () => void
+  onSaved: (patient?: import("@/types").Patient) => void
+  initialName?: string
 }
 
 function FieldHint({ ok, message }: { ok: boolean; message: string }) {
@@ -55,12 +56,23 @@ const emptyForm = {
   active: true,
 }
 
-export default function PatientFormModal({ open, onClose, onSaved }: Props) {
+export default function PatientFormModal({ open, onClose, onSaved, initialName }: Props) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [showHints, setShowHints] = useState(false)
+  const [existing, setExisting] = useState<ApiError["existing"] | null>(null)
+  const [duplicateKind, setDuplicateKind] = useState<"block" | "warn" | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    setForm({ ...emptyForm, name: initialName ?? "" })
+    setExisting(null)
+    setDuplicateKind(null)
+    setFieldErrors({})
+    setShowHints(false)
+  }, [open, initialName])
 
   const nameVal = useMemo(() => validateName(form.name), [form.name])
   const cpfVal = useMemo(() => (form.cpf.trim() ? validateCPF(form.cpf) : { ok: true, msg: "" }), [form.cpf])
@@ -111,8 +123,9 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
 
     setLoading(true)
     setFieldErrors({})
+    setExisting(null)
     try {
-      await api.patients.create({
+      const created = await api.patients.create({
         ...form,
         name: form.name.trim(),
         cpf: form.cpf.trim() ? cpfDigits(form.cpf) : "",
@@ -120,21 +133,27 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
         whatsapp: form.whatsapp ? phoneDigits(form.whatsapp) : "",
         phoneHome: form.phoneHome ? phoneDigits(form.phoneHome) : "",
         email: form.email.trim(),
+        force: duplicateKind === "warn",
       })
       toast("Paciente cadastrado com sucesso!")
-      onSaved()
+      onSaved(created)
       onClose()
-      setForm(emptyForm)
     } catch (err: unknown) {
-      setFieldErrors(fieldsFromApiError(err))
-      toast(toastMessageFromApiError(err, "Erro ao salvar paciente"), "error")
+      if (err instanceof ApiError && err.existing) {
+        setExisting(err.existing)
+        setDuplicateKind(err.code === "PATIENT_POSSIBLE_DUPLICATE" ? "warn" : "block")
+        toast(err.message, "error")
+      } else {
+        setFieldErrors(fieldsFromApiError(err))
+        toast(toastMessageFromApiError(err, "Erro ao salvar paciente"), "error")
+      }
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Adicionar paciente" size="lg">
+    <Modal open={open} onClose={onClose} title="Adicionar paciente" size="lg" zIndexClass="z-[80]">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Input
@@ -279,6 +298,35 @@ export default function PatientFormModal({ open, onClose, onSaved }: Props) {
                 <li key={f}>{f}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {existing && (
+          <div className="rounded-lg border border-[#B9DBF8] bg-[#F1F8FF] px-3 py-3 text-sm text-[#1E4A73]">
+            <p className="font-medium">
+              {duplicateKind === "warn"
+                ? `Há um cadastro com o mesmo contato: ${existing.name}. Pode ser coincidência.`
+                : `Encontramos ${existing.name}. Usar este paciente?`}
+            </p>
+            <p className="mt-1 text-xs text-[#5A6B64]">
+              {existing.phone || existing.email || existing.cpf || "Cadastro já existe nesta clínica."}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  onSaved(existing as import("@/types").Patient)
+                  onClose()
+                }}
+              >
+                Usar este paciente
+              </Button>
+              {duplicateKind === "warn" && (
+                <Button type="submit" variant="secondary">
+                  Cadastrar mesmo assim
+                </Button>
+              )}
+            </div>
           </div>
         )}
 

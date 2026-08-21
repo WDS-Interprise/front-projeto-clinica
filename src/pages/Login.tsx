@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   AuthBackofficeLink,
@@ -10,8 +10,8 @@ import {
   AuthLogo,
   AuthPageShell,
   AuthSocialButtons,
-  authInputClass,
-  authInputWithIconClass,
+  authInputWithBothIconsClass,
+  authInputWithLeadingIconClass,
   authLabelClass,
   authSubmitClass,
 } from "@/components/auth/AuthLayout"
@@ -48,14 +48,15 @@ export default function Login() {
 
     try {
       const result = await api.auth.login(email, password)
-      const clinicName = result.clinics?.[0]?.name
+      const activeClinic = result.clinics?.find((c) => c.id === result.clinicId) ?? result.clinics?.[0]
 
       setSession({
         token: result.token,
         user: result.user,
         clinicId: result.clinicId,
         permissions: result.permissions ?? [],
-        clinicName,
+        clinicName: activeClinic?.name,
+        clinics: result.clinics,
       })
 
       if (rememberDevice) {
@@ -87,46 +88,41 @@ export default function Login() {
   return (
     <AuthPageShell footer={<AuthBackofficeLink />}>
       <AuthCard>
-        <div className="mb-7 text-center">
-          <AuthLogo />
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-            Bem-vindo ao Clinmax
-          </h1>
-          <p className="mt-1.5 text-sm text-slate-500">Faça login na sua conta agora</p>
-        </div>
+        <AuthLogo />
 
-        <AuthSocialButtons onGoogleClick={handleGoogleLogin} googleLoading={googleLoading} />
-        <AuthDivider text="ou faça login com" />
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-2.5">
           <div className="space-y-1.5">
             <label htmlFor="email" className={authLabelClass}>
-              E-mail<span className="text-slate-900">*</span>
+              E-mail
             </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="exemplo@clinmax.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className={authInputClass}
-            />
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className={authInputWithLeadingIconClass}
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="password" className={authLabelClass}>
-              Senha<span className="text-slate-900">*</span>
+              Senha
             </label>
             <div className="relative">
+              <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Digite sua senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className={authInputWithIconClass}
+                className={authInputWithBothIconsClass}
               />
               <button
                 type="button"
@@ -146,13 +142,13 @@ export default function Login() {
                 checked={rememberDevice}
                 onCheckedChange={setRememberDevice}
               />
-              <span className="text-xs text-slate-600 sm:text-sm">Lembre-se deste dispositivo</span>
+              <span className="text-xs text-slate-600 sm:text-sm">Lembrar de mim</span>
             </label>
             <button
               type="button"
-              className="shrink-0 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 sm:text-sm"
+              className="shrink-0 text-xs font-medium text-[#00A86B] transition-colors hover:text-[#00915c] sm:text-sm"
             >
-              Esqueceu sua senha?
+              Esqueci minha senha
             </button>
           </div>
 
@@ -164,10 +160,13 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <AuthDivider text="ou continue com" />
+        <AuthSocialButtons onGoogleClick={handleGoogleLogin} googleLoading={googleLoading} />
+
+        <p className="mt-4 shrink-0 text-center text-xs leading-5 text-slate-500">
           Não tem uma conta?{" "}
-          <Link to="/register" className="font-semibold text-slate-900 hover:underline">
-            Crie uma conta.
+          <Link to="/register" className="font-semibold text-[#00A86B] hover:underline">
+            Criar conta
           </Link>
         </p>
       </AuthCard>

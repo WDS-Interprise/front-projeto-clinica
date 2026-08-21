@@ -12,13 +12,22 @@ export type Permission =
   | "records:view"
   | "records:write"
   | "prescriptions:write"
+  | "clinical_tools:view"
   | "users:manage"
   | "clinics:manage"
+  | "invites:manage"
   | "whatsapp:send"
+  | "finance:operational"
   | "finance:view"
   | "finance:manage"
   | "reports:view"
 
 export function can(permissions: string[] | undefined, perm: Permission): boolean {
   return permissions?.includes(perm) ?? false
+}
+
+export function defaultHomePath(role?: string): string {
+  if (role === "FINANCE") return "/gestao/financas"
+  if (role === "DOCTOR" || role === "RECEPTION") return "/agenda"
+  return "/dashboard"
 }

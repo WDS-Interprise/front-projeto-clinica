@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { History } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { History, BookOpen } from "lucide-react"
 import { Stepper } from "@/components/ui/stepper"
 import { Tabs } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,9 @@ import { ExamSearchPanel } from "@/components/prescricoes/ExamSearchPanel"
 import { VaccineSearchPanel } from "@/components/prescricoes/VaccineSearchPanel"
 import { VaccineFormModal } from "@/components/prescricoes/VaccineFormModal"
 import { PrescriptionHistoryModal } from "@/components/prescricoes/PrescriptionHistoryModal"
+import { BulaDetailDrawer } from "@/components/outros/BulaDetailDrawer"
 import { useToast } from "@/context/ToastContext"
+import { useLocation } from "react-router-dom"
 import type { MedicamentoProduto, MedicamentoSubstancia } from "@/types/medicamento"
 import type { VacinaProduto } from "@/types/vacina"
 import type { Prescription, PrescriptionItemType } from "@/types/prescription"
@@ -63,6 +65,7 @@ export function PrescricaoStepPrescrever({
   onAdvance,
 }: Props) {
   const { toast } = useToast()
+  const location = useLocation()
   const [tab, setTab] = useState<PrescriptionItemType>("MEDICATION")
   const [freeText, setFreeText] = useState("")
   const [quickName, setQuickName] = useState("")
@@ -72,6 +75,18 @@ export function PrescricaoStepPrescrever({
   const [selectedProduct, setSelectedProduct] = useState<MedicamentoProduto | null>(null)
   const [selectedSubstance, setSelectedSubstance] = useState<string | undefined>()
   const [selectedVaccine, setSelectedVaccine] = useState<VacinaProduto | null>(null)
+  const [bulaDrawerOpen, setBulaDrawerOpen] = useState(false)
+  const [bulaSearchTerm, setBulaSearchTerm] = useState("")
+  const pendingConsumed = useRef(false)
+
+  useEffect(() => {
+    const pending = (location.state as { pendingMedication?: MedicationFormValues } | null)
+      ?.pendingMedication
+    if (!pending || pendingConsumed.current) return
+    pendingConsumed.current = true
+    onAddItem("MEDICATION", pending)
+    window.history.replaceState({}, document.title)
+  }, [location.state, onAddItem])
 
   const allItems = prescription.items
 
@@ -211,6 +226,19 @@ export function PrescricaoStepPrescrever({
                             {line}
                           </p>
                         ))}
+                        {item.type === "MEDICATION" && (
+                          <button
+                            type="button"
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                            onClick={() => {
+                              setBulaSearchTerm(item.name)
+                              setBulaDrawerOpen(true)
+                            }}
+                          >
+                            <BookOpen className="h-3.5 w-3.5" />
+                            Ver bula
+                          </button>
+                        )}
                       </div>
                       <button
                         type="button"
@@ -256,6 +284,12 @@ export function PrescricaoStepPrescrever({
         onClose={() => setHistoryOpen(false)}
         prescriptions={recentPrescriptions}
         onRenew={onRenewFromHistory}
+      />
+
+      <BulaDetailDrawer
+        open={bulaDrawerOpen}
+        onClose={() => setBulaDrawerOpen(false)}
+        searchTerm={bulaSearchTerm}
       />
 
       <div className="flex justify-between pt-4 border-t border-border">

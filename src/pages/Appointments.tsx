@@ -117,9 +117,9 @@ export default function Appointments() {
                       <p className="text-sm font-mono font-bold text-primary">{apt.time}</p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text">{apt.patient?.name ?? "—"}</p>
+                      <p className="text-sm font-medium text-text">{apt.patient?.name ?? "-"}</p>
                       <p className="text-xs text-text-secondary">
-                        {apt.doctor.name} — {apt.doctor.specialty}
+                        {apt.doctor.name}. {apt.doctor.specialty}
                       </p>
                     </div>
                     <Badge status={apt.status.toLowerCase() as any} />

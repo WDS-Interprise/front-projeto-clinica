@@ -211,7 +211,7 @@ export default function WaitingListDrawer({
                         setSearchResults([])
                       }}
                     >
-                      {p.name} — {p.phone}
+                      {p.name}. {p.phone}
                     </button>
                   </li>
                 ))}
@@ -263,7 +263,7 @@ export default function WaitingListDrawer({
             <li key={e.id} className="rounded-lg border border-border p-3 space-y-2">
               <div className="flex justify-between gap-2">
                 <div>
-                  <p className="font-medium text-sm">{e.patient?.name ?? "—"}</p>
+                  <p className="font-medium text-sm">{e.patient?.name ?? "-"}</p>
                   <p className="text-xs text-text-secondary">{e.patient?.phone}</p>
                   {e.doctor && (
                     <p className="text-xs text-text-secondary mt-1">

@@ -45,10 +45,10 @@ export default function Dashboard() {
   }, [])
 
   const statCards = [
-    { label: "Total de Pacientes", value: stats?.totalPatients ?? "—", icon: Users, color: "text-primary bg-primary-light" },
-    { label: "Consultas Hoje", value: stats?.appointmentsToday ?? "—", icon: Calendar, color: "text-accent bg-green-50" },
-    { label: "Médicos Ativos", value: stats?.doctorsAvailable ?? "—", icon: Stethoscope, color: "text-secondary bg-indigo-50" },
-    { label: "Total de Consultas", value: stats?.totalAppointments ?? "—", icon: DollarSign, color: "text-warning bg-yellow-50" },
+    { label: "Total de Pacientes", value: stats?.totalPatients ?? "-", icon: Users, color: "text-primary bg-primary-light" },
+    { label: "Consultas Hoje", value: stats?.appointmentsToday ?? "-", icon: Calendar, color: "text-accent bg-green-50" },
+    { label: "Médicos Ativos", value: stats?.doctorsAvailable ?? "-", icon: Stethoscope, color: "text-secondary bg-indigo-50" },
+    { label: "Total de Consultas", value: stats?.totalAppointments ?? "-", icon: DollarSign, color: "text-warning bg-yellow-50" },
   ]
 
   const formatPhone = (phone: string) =>
@@ -109,7 +109,7 @@ export default function Dashboard() {
                         {apt.patient.name}
                       </p>
                       <p className="text-xs text-text-secondary">
-                        {apt.doctor.name} — {apt.doctor.specialty}
+                        {apt.doctor.name}. {apt.doctor.specialty}
                       </p>
                     </div>
                     <Badge status={apt.status as any} />

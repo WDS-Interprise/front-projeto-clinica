@@ -14,6 +14,13 @@ import BackofficeUsersPage from "@/pages/backoffice/BackofficeUsersPage"
 import BackofficeUserFormPage from "@/pages/backoffice/BackofficeUserFormPage"
 import BackofficePatientsPage from "@/pages/backoffice/BackofficePatientsPage"
 import BackofficePlatformPage from "@/pages/backoffice/BackofficePlatformPage"
+import BackofficeAssinaturasPage from "@/pages/backoffice/BackofficeAssinaturasPage"
+import BackofficeCobrancasPage from "@/pages/backoffice/BackofficeCobrancasPage"
+import BackofficePlanosPage from "@/pages/backoffice/BackofficePlanosPage"
+import BackofficeClinicDetailPage from "@/pages/backoffice/BackofficeClinicDetailPage"
+import BackofficeIntegracoesPage from "@/pages/backoffice/BackofficeIntegracoesPage"
+import BackofficeIaPage from "@/pages/backoffice/BackofficeIaPage"
+import BackofficeRelatoriosPage from "@/pages/backoffice/BackofficeRelatoriosPage"
 import BackofficeLayout from "@/components/layout/BackofficeLayout"
 import PainelPage from "@/pages/painel/PainelPage"
 import AgendaPage from "@/pages/agenda/AgendaPage"
@@ -26,9 +33,13 @@ import ClinicasPage from "@/pages/configuracoes/ClinicasPage"
 import AgendaConfigPage from "@/pages/configuracoes/AgendaConfigPage"
 import ConvitesConfigPage from "@/pages/configuracoes/ConvitesConfigPage"
 import AcceptInvitePage from "@/pages/AcceptInvitePage"
+import AguardandoAcessoPage from "@/pages/AguardandoAcessoPage"
 import AparenciaPage from "@/pages/configuracoes/AparenciaPage"
 import MinhaContaPage from "@/pages/configuracoes/MinhaContaPage"
 import WhatsappPage from "@/pages/configuracoes/WhatsappPage"
+import InteligenciaArtificialPage from "@/pages/configuracoes/InteligenciaArtificialPage"
+import CargosPage from "@/pages/configuracoes/CargosPage"
+import PlanoAssinaturaPage from "@/pages/configuracoes/PlanoAssinaturaPage"
 import MensagensPage from "@/pages/mensagens/MensagensPage"
 import BulasPage from "@/pages/outros/BulasPage"
 import BulaDetailPage from "@/pages/outros/BulaDetailPage"
@@ -49,9 +60,11 @@ import { ToastProvider } from "@/context/ToastContext"
 import { ThemeProvider } from "@/context/ThemeContext"
 import { AuthProvider } from "@/context/AuthContext"
 import { UserAvatarProvider } from "@/context/UserAvatarContext"
+import PlanFeatureRoute from "@/components/routing/PlanFeatureRoute"
 import PermissionRoute from "@/components/PermissionRoute"
 import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
 import LandingPage from "@/pages/LandingPage"
+import { defaultHomePath } from "@/lib/permissions"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
 
@@ -60,7 +73,7 @@ function isAuthenticated() {
 }
 
 function DashboardRoute({ children }: { children: React.ReactNode }) {
-  const { loading, hasPermission } = useAuth()
+  const { loading, hasPermission, user } = useAuth()
 
   if (loading) {
     return (
@@ -71,9 +84,7 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (hasPermission("dashboard:view")) return <>{children}</>
-  if (getAuthHome() === "/dashboard") return <>{children}</>
-
-  return <Navigate to="/agenda" replace />
+  return <Navigate to={defaultHomePath(user?.role)} replace />
 }
 
 function RootRoute() {
@@ -110,6 +121,14 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/convite/:token" element={<AcceptInvitePage />} />
+          <Route
+            path="/aguardando-acesso"
+            element={
+              <ProtectedRoute>
+                <AguardandoAcessoPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/backoffice/login" element={<BackofficeLogin />} />
           <Route
@@ -122,9 +141,16 @@ export default function App() {
           >
             <Route index element={<BackofficeDashboard />} />
             <Route path="clinicas" element={<BackofficeClinicsPage />} />
+            <Route path="clinicas/:id" element={<BackofficeClinicDetailPage />} />
+            <Route path="planos" element={<BackofficePlanosPage />} />
+            <Route path="assinaturas" element={<BackofficeAssinaturasPage />} />
+            <Route path="cobrancas" element={<BackofficeCobrancasPage />} />
             <Route path="usuarios" element={<BackofficeUsersPage />} />
             <Route path="usuarios/novo" element={<BackofficeUserFormPage />} />
             <Route path="usuarios/:id" element={<BackofficeUserFormPage />} />
+            <Route path="integracoes" element={<BackofficeIntegracoesPage />} />
+            <Route path="ia-automacao" element={<BackofficeIaPage />} />
+            <Route path="relatorios" element={<BackofficeRelatoriosPage />} />
             <Route path="pacientes" element={<BackofficePatientsPage />} />
             <Route path="plataforma" element={<BackofficePlatformPage />} />
           </Route>
@@ -153,41 +179,89 @@ export default function App() {
                 </DashboardRoute>
               }
             />
-            <Route path="agenda" element={<AgendaPage />} />
+            <Route
+              path="agenda"
+              element={
+                <PermissionRoute permission="agenda:view">
+                  <AgendaPage />
+                </PermissionRoute>
+              }
+            />
             <Route
               path="mensagens"
               element={
                 <PermissionRoute permission="whatsapp:send">
-                  <MensagensPage />
+                  <PlanFeatureRoute feature="WHATSAPP">
+                    <MensagensPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
-            <Route path="pacientes" element={<Patients />} />
-            <Route path="pacientes/:id" element={<Patients />} />
-            <Route path="prontuario/:pacienteId" element={<ProntuarioPage />} />
-            <Route path="atendimento/:id" element={<AtendimentoPage />} />
-            <Route path="prescricoes/:atendimentoId" element={<PrescricoesPage />} />
-            <Route path="outros" element={<Navigate to="/outros/bulas" replace />} />
+            <Route
+              path="pacientes"
+              element={
+                <PermissionRoute permission="patients:view">
+                  <Patients />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="pacientes/:id"
+              element={
+                <PermissionRoute permission="patients:view">
+                  <Patients />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="prontuario/:pacienteId"
+              element={
+                <PermissionRoute permission="records:view">
+                  <ProntuarioPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="atendimento/:id"
+              element={
+                <PermissionRoute permission="records:write">
+                  <AtendimentoPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="prescricoes/:atendimentoId"
+              element={
+                <PermissionRoute permission="prescriptions:write">
+                  <PrescricoesPage />
+                </PermissionRoute>
+              }
+            />
+            <Route path="outros" element={<Navigate to="/outros/contatos" replace />} />
             <Route
               path="outros/bulas"
               element={
-                <PermissionRoute permission="records:view" fallback="/agenda">
-                  <BulasPage />
+                <PermissionRoute permission="clinical_tools:view">
+                  <PlanFeatureRoute feature="CLINICAL_TOOLS">
+                    <BulasPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="outros/bulas/:bulaId"
               element={
-                <PermissionRoute permission="records:view" fallback="/agenda">
-                  <BulaDetailPage />
+                <PermissionRoute permission="clinical_tools:view">
+                  <PlanFeatureRoute feature="CLINICAL_TOOLS">
+                    <BulaDetailPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="outros/contatos"
               element={
-                <PermissionRoute permission="patients:view" fallback="/agenda">
+                <PermissionRoute permission="patients:view" >
                   <ContatosPage />
                 </PermissionRoute>
               }
@@ -195,23 +269,27 @@ export default function App() {
             <Route
               path="outros/cid-10"
               element={
-                <PermissionRoute permission="records:view" fallback="/agenda">
-                  <Cid10Page />
+                <PermissionRoute permission="clinical_tools:view">
+                  <PlanFeatureRoute feature="CLINICAL_TOOLS">
+                    <Cid10Page />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="outros/cid-11"
               element={
-                <PermissionRoute permission="records:view" fallback="/agenda">
-                  <Cid11Page />
+                <PermissionRoute permission="clinical_tools:view">
+                  <PlanFeatureRoute feature="CLINICAL_TOOLS">
+                    <Cid11Page />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="outros/logs"
               element={
-                <PermissionRoute permission="users:manage" fallback="/agenda">
+                <PermissionRoute permission="users:manage" >
                   <LogsPage />
                 </PermissionRoute>
               }
@@ -219,48 +297,60 @@ export default function App() {
             <Route
               path="gestao/financas"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <FinancasPage />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="FINANCE">
+                    <FinancasPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/financas/extrato"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <ExtratoPage />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="FINANCE">
+                    <ExtratoPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/financas/receitas"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <ExtratoPage fixedType="INCOME" pageTitle="Receitas" pageDescription="Lançamentos de receita da clínica." />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="FINANCE">
+                    <ExtratoPage fixedType="INCOME" pageTitle="Receitas" pageDescription="Lançamentos de receita da clínica." />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/financas/despesas"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <ExtratoPage fixedType="EXPENSE" pageTitle="Despesas" pageDescription="Lançamentos de despesa da clínica." />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="FINANCE">
+                    <ExtratoPage fixedType="EXPENSE" pageTitle="Despesas" pageDescription="Lançamentos de despesa da clínica." />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/financas/fluxo-de-caixa"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <FluxoCaixaPage />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="FINANCE">
+                    <FluxoCaixaPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/relatorios"
               element={
-                <PermissionRoute permission="reports:view" fallback="/agenda">
-                  <RelatoriosPage />
+                <PermissionRoute permission="reports:view" >
+                  <PlanFeatureRoute feature="REPORTS">
+                    <RelatoriosPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
@@ -271,24 +361,30 @@ export default function App() {
             <Route
               path="gestao/estoque"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <EstoquePage />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="INVENTORY">
+                    <EstoquePage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/tiss"
               element={
-                <PermissionRoute permission="finance:view" fallback="/agenda">
-                  <TissPage />
+                <PermissionRoute permission="finance:view" >
+                  <PlanFeatureRoute feature="TISS">
+                    <TissPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
             <Route
               path="gestao/pesquisa-satisfacao"
               element={
-                <PermissionRoute permission="reports:view" fallback="/agenda">
-                  <PesquisaSatisfacaoPage />
+                <PermissionRoute permission="reports:view" >
+                  <PlanFeatureRoute feature="SATISFACTION">
+                    <PesquisaSatisfacaoPage />
+                  </PlanFeatureRoute>
                 </PermissionRoute>
               }
             />
@@ -352,7 +448,7 @@ export default function App() {
             <Route
               path="configuracoes/convites"
               element={
-                <PermissionRoute permission="clinics:manage">
+                <PermissionRoute permission="invites:manage">
                   <ConvitesConfigPage />
                 </PermissionRoute>
               }
@@ -366,7 +462,31 @@ export default function App() {
               }
             />
             <Route path="configuracoes/aparencia" element={<AparenciaPage />} />
+            <Route
+              path="configuracoes/plano"
+              element={
+                <PermissionRoute permission="clinics:manage">
+                  <PlanoAssinaturaPage />
+                </PermissionRoute>
+              }
+            />
             <Route path="configuracoes/conta" element={<MinhaContaPage />} />
+            <Route
+              path="configuracoes/inteligencia-artificial"
+              element={
+                <PermissionRoute permission="clinics:manage">
+                  <InteligenciaArtificialPage />
+                </PermissionRoute>
+              }
+            />
+            <Route
+              path="configuracoes/cargos"
+              element={
+                <PermissionRoute permission="users:manage">
+                  <CargosPage />
+                </PermissionRoute>
+              }
+            />
             <Route
               path="configuracoes/whatsapp"
               element={
@@ -375,7 +495,7 @@ export default function App() {
                 </PermissionRoute>
               }
             />
-            {/* Rotas legadas — redirecionam para a nova estrutura */}
+            {/* Rotas legadas. redirecionam para a nova estrutura */}
             <Route path="patients" element={<Navigate to="/pacientes" replace />} />
             <Route path="appointments" element={<Navigate to="/agenda" replace />} />
             <Route path="doctors" element={<Doctors />} />
@@ -383,7 +503,7 @@ export default function App() {
             <Route
               path="settings"
               element={
-                <PermissionRoute permission="clinics:manage" fallback="/agenda">
+                <PermissionRoute permission="clinics:manage" >
                   <Navigate to="/configuracoes/clinicas" replace />
                 </PermissionRoute>
               }

@@ -25,7 +25,7 @@ export function receiptSummaryLine(prescription: Prescription): string {
   if (counts.exam) parts.push(`${counts.exam} exame${counts.exam > 1 ? "s" : ""}`)
   if (counts.vaccine) parts.push(`${counts.vaccine} vacina${counts.vaccine > 1 ? "s" : ""}`)
   if (counts.freeText) parts.push(`${counts.freeText} texto${counts.freeText > 1 ? "s" : ""} livre${counts.freeText > 1 ? "s" : ""}`)
-  return `${label}${parts.length ? ` — ${parts.join(", ")}` : ""}`
+  return `${label}${parts.length ? `. ${parts.join(", ")}` : ""}`
 }
 
 export function latestWhatsAppShare(prescription: Prescription) {

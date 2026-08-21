@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import { createPortal } from "react-dom"
 import {
   ChevronDown,
   HelpCircle,
@@ -13,8 +14,8 @@ import {
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
 import UserAvatar from "@/components/user/UserAvatar"
-import { useClickOutside } from "@/hooks/useClickOutside"
 import { useUserAvatar } from "@/hooks/useUserAvatar"
+import { useAnchoredDropdown } from "@/hooks/useAnchoredDropdown"
 import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
 
@@ -43,11 +44,8 @@ export default function UserMenu() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { imageUrl, name } = useUserAvatar()
-  const [open, setOpen] = useState(false)
+  const { anchorRef, menuRef, open, toggle, close, menuStyle } = useAnchoredDropdown("right")
   const [logoutOpen, setLogoutOpen] = useState(false)
-
-  const close = useCallback(() => setOpen(false), [])
-  const ref = useClickOutside<HTMLDivElement>(open, close)
 
   useEffect(() => {
     if (!logoutOpen) return
@@ -71,22 +69,30 @@ export default function UserMenu() {
 
   return (
     <>
-      <div ref={ref} className="relative border-l border-border pl-2 ml-1">
+      <div className="relative ml-1 pl-2">
         <button
+          ref={anchorRef}
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
           aria-expanded={open}
           aria-haspopup="menu"
           className={cn(
-            "flex cursor-pointer items-center gap-2 rounded-xl border border-transparent py-1.5 pl-2 pr-2 transition-all duration-200",
-            "hover:border-border/80 hover:bg-surface-alt/80",
-            open && "border-border bg-surface-alt"
+            "flex cursor-pointer items-center gap-2.5 rounded-xl py-1 pr-1.5 pl-1 transition-colors",
+            "hover:bg-[#F3F7F5]",
+            open && "bg-[#F3F7F5]"
           )}
         >
-          <UserAvatar name={name} imageUrl={imageUrl} size="sm" />
-          <div className="hidden max-w-[140px] text-left md:block">
-            <p className="truncate text-xs font-medium text-text">{user.name}</p>
-            <p className="truncate text-[10px] text-text-secondary">{roleLabel}</p>
+          <UserAvatar
+            name={name}
+            imageUrl={imageUrl}
+            size="sm"
+            className="border-0 bg-[#006B4D] bg-none shadow-none"
+          />
+          <div className="hidden max-w-[168px] text-left md:block">
+            <p className="truncate text-[11px] font-bold tracking-wide text-[#1B2E26] uppercase">
+              {user.name}
+            </p>
+            <p className="truncate text-[11px] text-[#7A8A82]">{roleLabel}</p>
           </div>
           <ChevronDown
             className={cn(
@@ -96,14 +102,19 @@ export default function UserMenu() {
           />
         </button>
 
-        {open && (
-          <div
-            role="menu"
-            className={cn(
-              "absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,320px)] overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-xl",
-              "animate-in fade-in zoom-in-95 duration-200"
-            )}
-          >
+        {open &&
+          createPortal(
+            <>
+              <div className="fixed inset-0 z-[100]" aria-hidden onClick={close} />
+              <div
+                ref={menuRef}
+                role="menu"
+                className={cn(
+                  "fixed z-[101] w-[min(100vw-2rem,320px)] overflow-hidden rounded-2xl border border-border/80 bg-surface shadow-xl",
+                  "animate-in fade-in zoom-in-95 duration-200"
+                )}
+                style={menuStyle}
+              >
             <div className="border-b border-border px-4 py-4">
               <div className="flex items-center gap-3">
                 <UserAvatar name={user.name} imageUrl={imageUrl} size="lg" />
@@ -150,8 +161,10 @@ export default function UserMenu() {
                 Sair
               </button>
             </div>
-          </div>
-        )}
+              </div>
+            </>,
+            document.body
+          )}
       </div>
 
       <Modal

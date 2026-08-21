@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Trash2, MessageCircle, DollarSign, Loader2 } from "lucide-react"
+import { Trash2, Calendar, Clock, Stethoscope, Building2, ChevronLeft, CheckCircle } from "lucide-react"
 import { Drawer } from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { api } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
@@ -13,13 +12,13 @@ import { useAuth } from "@/context/AuthContext"
 import { useConfirm } from "@/hooks/useConfirm"
 import WhatsappSendDrawer from "@/components/whatsapp/WhatsappSendDrawer"
 import type { Appointment } from "@/types"
-import { cn } from "@/lib/utils"
+import type { ClinmaxPayCharge } from "@/services/api"
 
 const statusOptions = [
   { value: "SCHEDULED", label: "Agendado" },
   { value: "CONFIRMED", label: "Confirmado" },
-  { value: "IN_PROGRESS", label: "Em atendimento" },
-  { value: "COMPLETED", label: "Atendido" },
+  { value: "IN_PROGRESS", label: "Em atendimento", clinical: true },
+  { value: "COMPLETED", label: "Atendido", clinical: true },
   { value: "NO_SHOW", label: "Faltou" },
   { value: "CANCELLED", label: "Cancelado" },
   { value: "RESCHEDULED", label: "Remarcado" },
@@ -37,12 +36,15 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
   const { confirm, ConfirmDialog } = useConfirm()
   const { hasPermission } = useAuth()
   const canStartClinical = hasPermission("records:write")
+  const canOpenRecord = hasPermission("records:view")
+  const canCharge = hasPermission("finance:operational") || hasPermission("finance:manage")
+  const canWhatsapp = hasPermission("whatsapp:send")
+  const canManageAgenda = hasPermission("agenda:manage")
   const [apt, setApt] = useState<Appointment | null>(null)
   const [chargeValue, setChargeValue] = useState("")
+  const [pay, setPay] = useState<ClinmaxPayCharge | null>(null)
   const [loading, setLoading] = useState(false)
   const [whatsappOpen, setWhatsappOpen] = useState(false)
-  const [sendingReminder, setSendingReminder] = useState(false)
-  const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(null)
   const reminderInFlight = useRef(false)
 
   const load = () => {
@@ -60,14 +62,14 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
 
   useEffect(() => {
     load()
-  }, [appointmentId])
-
-  useEffect(() => {
-    if (!appointmentId) return
-    api.whatsapp
-      .getSettings()
-      .then((s) => setWhatsappConnected(s.connections.some((c) => c.status === "CONNECTED")))
-      .catch(() => setWhatsappConnected(false))
+    if (!appointmentId || !canCharge) {
+      setPay(null)
+      return
+    }
+    api.appointments
+      .getPay(appointmentId)
+      .then((r) => setPay(r.pay))
+      .catch(() => setPay(null))
   }, [appointmentId])
 
   if (!appointmentId) return null
@@ -76,321 +78,193 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
     ?.split(" ")
     .map((n) => n[0])
     .join("")
-    .slice(0, 2) ?? "—"
-
-  const handleStatus = async (status: Appointment["status"]) => {
-    if (!apt) return
-    setLoading(true)
-    try {
-      await api.appointments.update(apt.id, { status })
-      toast("Status atualizado")
-      load()
-      onUpdated()
-    } catch (e: unknown) {
-      toast(e instanceof Error ? e.message : "Erro", "error")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCharge = async () => {
-    if (!apt) return
-    try {
-      await api.appointments.charge(apt.id, Number(chargeValue))
-      toast("Cobrança gerada")
-      load()
-      onUpdated()
-    } catch (e: unknown) {
-      toast(e instanceof Error ? e.message : "Erro", "error")
-    }
-  }
-
-  const handleReceipt = async () => {
-    if (!apt) return
-    try {
-      await api.appointments.receipt(apt.id)
-      toast("Recebimento lançado")
-      load()
-      onUpdated()
-    } catch (e: unknown) {
-      toast(e instanceof Error ? e.message : "Erro", "error")
-    }
-  }
-
-  const patientWhatsappPhone = () => {
-    const w = apt?.patient?.whatsapp?.replace(/\D/g, "")
-    const p = apt?.patient?.phone?.replace(/\D/g, "")
-    return w || p || ""
-  }
-
-  const handleReminder = async () => {
-    if (!apt || reminderInFlight.current) return
-    if (!patientWhatsappPhone()) {
-      toast("Cadastre o WhatsApp ou telefone do paciente", "error")
-      return
-    }
-    reminderInFlight.current = true
-    setSendingReminder(true)
-    try {
-      await api.appointments.reminder(apt.id)
-      toast("Lembrete enviado no WhatsApp do paciente!")
-      load()
-      onUpdated()
-    } catch (e: unknown) {
-      toast(toastMessageFromApiError(e, "Erro ao enviar lembrete"), "error")
-    } finally {
-      setSendingReminder(false)
-      reminderInFlight.current = false
-    }
-  }
-
-  const goToWhatsappSettings = () => {
-    onClose()
-    navigate("/configuracoes/whatsapp")
-  }
-
-  const handleDelete = async () => {
-    if (!apt) return
-    const ok = await confirm({
-      title: "Excluir agendamento",
-      message: "Excluir este agendamento?",
-      confirmLabel: "Excluir",
-      variant: "danger",
-    })
-    if (!ok) return
-    try {
-      await api.appointments.remove(apt.id)
-      toast("Agendamento removido")
-      onUpdated()
-      onClose()
-    } catch (e: unknown) {
-      toast(e instanceof Error ? e.message : "Erro", "error")
-    }
-  }
+    .slice(0, 2) ?? "-"
 
   const aptDate = apt?.date ? new Date(apt.date) : new Date()
 
   return (
     <>
-    <Drawer
-      open={!!appointmentId}
-      onClose={onClose}
-      title="Detalhes do agendamento"
-      width="lg"
-      footer={
-        apt && (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="p-2 rounded-lg border border-border text-text-secondary hover:text-danger"
-                title="Excluir"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-              <Button variant="secondary" className="flex-1 gap-2" onClick={handleReceipt}>
-                <DollarSign className="w-4 h-4" />
-                Lançar recebimento
-              </Button>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="secondary" className="flex-1" onClick={onClose}>
-                Editar agendamento
-              </Button>
-              {apt.patientId && canStartClinical && (
-                <Button
-                  className="flex-1"
-                  onClick={() => {
-                    api.appointments.update(apt.id, { status: "IN_PROGRESS" }).then(() => {
-                      navigate(`/atendimento/${apt.id}`)
-                    })
-                  }}
-                >
-                  Iniciar atendimento
-                </Button>
-              )}
-            </div>
-          </div>
-        )
-      }
-    >
-      {!apt ? (
-        <p className="text-sm text-text-secondary">Carregando...</p>
-      ) : (
-        <div className="space-y-6">
-          {apt.type === "BLOCK" ? (
-            <p className="text-sm font-medium text-text">Horário bloqueado</p>
-          ) : (
-            <div className="flex gap-4">
-              <div className="w-14 h-14 rounded-full bg-border flex items-center justify-center text-lg font-bold text-text-secondary">
-                {initials}
+      <Drawer
+        open={!!appointmentId}
+        onClose={onClose}
+        title=""
+        width="full"
+      >
+        {!apt ? (
+          <p className="text-sm text-[#64748B]">Carregando...</p>
+        ) : (
+          <div className="bg-[#F8FAFC] min-h-full">
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1 text-[12px] font-medium text-[#2563EB] mb-[14px]"
+            >
+              <ChevronLeft className="w-4 h-4" /> Voltar para a agenda
+            </button>
+
+            <div className="flex justify-between items-start mb-[18px]">
+              <div>
+                <h2 className="text-[24px] leading-[32px] font-bold text-[#0F172A]">Detalhes do agendamento</h2>
+                <p className="text-[12px] leading-[18px] text-[#64748B] mt-1">Visualize e gerencie as informações do agendamento.</p>
               </div>
-              <div className="flex-1">
-                <p className="text-lg font-semibold text-primary">{apt.patient?.name}</p>
-                <p className="text-sm text-text-secondary">
-                  {apt.patient?.whatsapp || apt.patient?.phone || "Sem telefone"}
-                </p>
-                <div
-                  className={cn(
-                    "mt-2 flex flex-col items-stretch gap-1 rounded-lg border p-2",
-                    whatsappConnected === false
-                      ? "border-danger/40 bg-danger/5"
-                      : "border-border bg-surface"
-                  )}
-                >
-                  {whatsappConnected === false ? (
-                    <button
-                      type="button"
-                      onClick={goToWhatsappSettings}
-                      className="flex h-8 w-full items-center justify-start gap-2 rounded-md border border-danger/40 px-2 text-xs font-semibold uppercase tracking-wide text-danger transition-colors hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40"
-                    >
-                      <MessageCircle className="h-4 w-4 shrink-0" />
-                      WhatsApp não conectado — conectar agora
-                    </button>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={handleReminder}
-                      disabled={sendingReminder || !patientWhatsappPhone() || whatsappConnected !== true}
-                      variant="secondary"
-                      size="sm"
-                      className="h-8 justify-start border-success/40 text-success hover:bg-success/10 hover:text-success focus-visible:ring-success/60"
-                    >
-                      {sendingReminder ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <MessageCircle className="w-4 h-4" />
-                      )}
-                      {sendingReminder ? "Enviando..." : "ENVIAR LEMBRETE DE CONSULTA"}
-                    </Button>
-                  )}
-                  {whatsappConnected !== false && (
-                    <button
-                      type="button"
-                      onClick={() => setWhatsappOpen(true)}
-                      disabled={!patientWhatsappPhone()}
-                      className="rounded-md px-2 py-1 text-left text-[10px] text-text-secondary hover:bg-surface-alt hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-50"
-                    >
-                      Editar mensagem antes de enviar
-                    </button>
-                  )}
+              <span className="inline-flex items-center h-[24px] px-[10px] rounded-full border border-[#93C5FD] bg-[#EFF6FF] text-[11px] font-medium text-[#2563EB]">
+                {statusOptions.find((s) => s.value === apt.status)?.label || "Agendado"}
+              </span>
+            </div>
+
+            {/* Resumo Paciente */}
+            <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className="flex items-center gap-[14px]">
+                <div className="w-[48px] h-[48px] rounded-full bg-[#E2E8F0] flex items-center justify-center text-[16px] font-bold text-[#64748B]">
+                  {initials}
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold text-[#0EA5E9] uppercase">{apt.patient?.name}</p>
+                  <p className="text-[12px] text-[#64748B] mt-[3px]">{apt.patient?.phone}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-0 mt-[22px] pt-[18px] border-t border-[#E2E8F0]">
+                <div className="px-[20px]">
+                  <div className="flex items-center gap-2 text-[#334155] mb-[4px]">
+                    <Calendar className="w-[20px] h-[20px]" />
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748B] mb-[4px]">Data</div>
+                  <div className="text-[12px] font-medium text-[#334155]">{format(aptDate, "dd/MM/yyyy", { locale: ptBR })}</div>
+                </div>
+                <div className="px-[20px] border-l border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#334155] mb-[4px]">
+                    <Clock className="w-[20px] h-[20px]" />
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748B] mb-[4px]">Horário</div>
+                  <div className="text-[12px] font-medium text-[#334155]">{apt.startTime ?? apt.time} - {apt.endTime}</div>
+                </div>
+                <div className="px-[20px] border-l border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#334155] mb-[4px]">
+                    <Stethoscope className="w-[20px] h-[20px]" />
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748B] mb-[4px]">Tipo</div>
+                  <div className="text-[12px] font-medium text-[#334155]">Consulta</div>
+                </div>
+                <div className="px-[20px] border-l border-[#E2E8F0]">
+                  <div className="flex items-center gap-2 text-[#334155] mb-[4px]">
+                    <Building2 className="w-[20px] h-[20px]" />
+                  </div>
+                  <div className="text-[11px] font-medium text-[#64748B] mb-[4px]">Convênio</div>
+                  <div className="text-[12px] font-medium text-[#334155]">{apt.insurancePlan ?? "Particular"}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid Detalhes */}
+            <div className="grid grid-cols-[1fr_1fr] gap-[16px] mt-[16px]">
+              <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-[18px] min-h-[290px]">
+                <h3 className="text-[14px] font-semibold text-[#0F172A] mb-[16px]">Informações do agendamento</h3>
+                
+                <div className="mb-[14px]">
+                  <div className="text-[10px] font-medium text-[#64748B] mb-[6px]">STATUS</div>
+                  <select
+                    className="w-full h-[40px] border border-[#DCE3EC] rounded-[7px] px-[12px] bg-white text-[12px] text-[#334155] focus:outline-none focus:border-[#38BDF8] focus:shadow-[0_0_0_3px_rgba(14,165,233,0.10)]"
+                    value={apt.status}
+                    onChange={() => void 0}
+                    disabled={!canManageAgenda}
+                  >
+                    {statusOptions
+                      .filter((s) => !("clinical" in s && s.clinical) || canStartClinical)
+                      .map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div className="mt-[14px]">
+                  <div className="text-[10px] text-[#64748B] mb-[4px]">Convênio</div>
+                  <div className="text-[12px] font-medium text-[#334155]">{apt.insurancePlan ?? "Particular"}</div>
+                </div>
+                
+                <div className="mt-[14px]">
+                  <div className="text-[10px] text-[#64748B] mb-[4px]">Profissional</div>
+                  <div className="text-[12px] font-medium text-[#334155]">{apt.doctor.name}</div>
+                </div>
+                
+                <div className="mt-[14px]">
+                  <div className="text-[10px] text-[#64748B] mb-[4px]">Local de atendimento</div>
+                  <div className="text-[12px] font-medium text-[#334155]">Clínica Principal - Unidade Centro</div>
+                </div>
+
+                <div className="mt-[14px]">
+                  <div className="text-[10px] text-[#64748B] mb-[4px]">Observações</div>
+                  <div className="w-full min-h-[78px] p-[10px_12px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[7px] text-[11px] text-[#64748B]">
+                    {apt.notes || "Nenhuma observação informada."}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-[#E2E8F0] rounded-[12px] p-[18px] min-h-[290px]">
+                <h3 className="text-[14px] font-semibold text-[#0F172A] mb-[20px]">Histórico do agendamento</h3>
+                
+                <div className="space-y-[6px]">
+                  <div className="flex items-start gap-4">
+                    <div className="w-[30px] h-[30px] rounded-full bg-[#EFF6FF] flex items-center justify-center text-[#0EA5E9]">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-[#334155]">Agendamento criado</p>
+                      <p className="text-[10px] text-[#64748B] mt-[3px]">{format(new Date(apt.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+                      <p className="text-[10px] text-[#64748B] mt-[2px]">por Administrador</p>
+                    </div>
+                  </div>
+                  <div className="ml-[14px] w-[1px] h-[36px] border-l border-dashed border-[#CBD5E1]" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-[30px] h-[30px] rounded-full bg-[#ECFDF5] flex items-center justify-center text-[#10B981]">
+                      <CheckCircle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-[#334155]">Agendamento confirmado</p>
+                      <p className="text-[10px] text-[#64748B] mt-[3px]">{format(new Date(apt.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+                      <p className="text-[10px] text-[#64748B] mt-[2px]">por Administrador</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Barra de Ações */}
+            <div className="mt-[16px] h-[66px] bg-white border border-[#E2E8F0] rounded-[10px] p-[12px_14px] flex items-center justify-between">
+              <button className="h-[36px] px-[12px] flex items-center gap-[7px] bg-transparent border-none text-[11px] font-medium text-[#EF4444] rounded-[7px] hover:bg-[#FEF2F2]">
+                <Trash2 className="w-4 h-4" /> Cancelar agendamento
+              </button>
+              <div className="flex items-center gap-[10px]">
+                {canManageAgenda && (
+                  <button className="h-[36px] px-[16px] bg-white border border-[#DCE3EC] rounded-[7px] text-[11px] font-medium text-[#334155] shadow-[0_1px_2px_rgba(15,23,42,0.03)] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]">
+                    Editar agendamento
+                  </button>
+                )}
+                {canOpenRecord && apt.patientId && (
                   <button
                     type="button"
-                    onClick={() => {
-                      onClose()
-                      navigate("/configuracoes/whatsapp?tab=templates")
-                    }}
-                    className="rounded-md px-2 py-1 text-left text-[10px] text-text-secondary hover:bg-surface-alt hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                    className="h-[36px] px-[16px] bg-white border border-[#DCE3EC] rounded-[7px] text-[11px] font-medium text-[#334155] shadow-[0_1px_2px_rgba(15,23,42,0.03)] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]"
+                    onClick={() => navigate(`/prontuario/${apt.patientId}`)}
                   >
-                    Gerenciar templates
+                    Abrir prontuário
                   </button>
-                </div>
-                {apt.reminderSentAt && (
-                  <p className="text-[10px] text-text-secondary mt-1">
-                    Lembrete enviado em{" "}
-                    {format(new Date(apt.reminderSentAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                  </p>
+                )}
+                {canStartClinical && (
+                  <button
+                    type="button"
+                    className="h-[36px] px-[18px] bg-[#0EA5E9] border border-[#0EA5E9] rounded-[7px] text-[11px] font-semibold text-white shadow-[0_2px_4px_rgba(14,165,233,0.18)] hover:bg-[#0284C7] hover:border-[#0284C7]"
+                    onClick={() => navigate(`/atendimento/${apt.id}`)}
+                  >
+                    {apt.status === "IN_PROGRESS" ? "Continuar atendimento" : "Iniciar atendimento"}
+                  </button>
                 )}
               </div>
             </div>
-          )}
-
-          <p className="text-sm text-text">
-            {format(aptDate, "EEEE, d 'de' MMMM", { locale: ptBR })} — {apt.startTime ?? apt.time} às{" "}
-            {apt.endTime}
-          </p>
-
-          <div>
-            <label className="text-xs font-medium text-text-secondary">Status</label>
-            <select
-              className="mt-1 h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
-              value={apt.status}
-              disabled={loading}
-              onChange={(e) => handleStatus(e.target.value as Appointment["status"])}
-            >
-              {statusOptions.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
           </div>
-
-          <p className="text-sm">
-            <span className="text-text-secondary">Convênio:</span>{" "}
-            <strong>{apt.insurancePlan ?? "Particular"}</strong>
-          </p>
-
-          <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
-            <p className="text-xs font-semibold text-text-secondary uppercase">Cobrar agendamento</p>
-            <div className="flex gap-2 items-center">
-              <span className="text-sm text-text">Valor</span>
-              <input
-                type="number"
-                className="h-10 flex-1 rounded-lg border border-border bg-surface-alt px-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary/50"
-                value={chargeValue}
-                onChange={(e) => setChargeValue(e.target.value)}
-              />
-            </div>
-            <Button
-              type="button"
-              onClick={handleCharge}
-              variant="secondary"
-              size="sm"
-              className="h-8 w-fit"
-            >
-              <DollarSign className="w-4 h-4" /> Gerar cobrança
-            </Button>
-            <p className="text-xs text-text-secondary">
-              Status cobrança: {apt.billingStatus ?? "PENDING"}
-            </p>
-          </div>
-
-          {apt.procedures && apt.procedures.length > 0 && (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-text-secondary border-b border-border">
-                  <th className="py-2">Procedimento</th>
-                  <th className="py-2">Quant.</th>
-                  <th className="py-2 text-right">Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {apt.procedures.map((line) => (
-                  <tr key={line.id ?? line.procedureId} className="border-b border-border">
-                    <td className="py-2">{line.name}</td>
-                    <td className="py-2">{line.quantity}</td>
-                    <td className="py-2 text-right">
-                      R$ {(line.subtotal ?? line.quantity * line.unitPrice).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-                <tr>
-                  <td colSpan={2} className="py-2 font-semibold">
-                    Total
-                  </td>
-                  <td className="py-2 text-right font-bold text-primary">
-                    R$ {(apt.totalAmount ?? 0).toFixed(2)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          )}
-
-          <Badge status={apt.status.toLowerCase() as "scheduled"} />
-        </div>
-      )}
-    </Drawer>
-    {apt && (
-      <WhatsappSendDrawer
-        open={whatsappOpen}
-        onClose={() => setWhatsappOpen(false)}
-        appointment={apt}
-        onSent={load}
-      />
-    )}
-    <ConfirmDialog />
+        )}
+      </Drawer>
+      <ConfirmDialog />
     </>
   )
 }
