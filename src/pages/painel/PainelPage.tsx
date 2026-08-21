@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils"
 
 const MINT = "#E8F6EE"
 const GREEN = "#007D5C"
-const GREEN_SOFT = "#2ECC71"
 const TEAL = "#14B8A6"
 
 function formatPct(n: number) {

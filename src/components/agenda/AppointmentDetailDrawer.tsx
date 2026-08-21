@@ -1,18 +1,14 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Trash2, Calendar, Clock, Stethoscope, Building2, ChevronLeft, CheckCircle } from "lucide-react"
 import { Drawer } from "@/components/ui/drawer"
-import { Button } from "@/components/ui/button"
 import { api } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
 import { useAuth } from "@/context/AuthContext"
-import { useConfirm } from "@/hooks/useConfirm"
-import WhatsappSendDrawer from "@/components/whatsapp/WhatsappSendDrawer"
 import type { Appointment } from "@/types"
-import type { ClinmaxPayCharge } from "@/services/api"
 
 const statusOptions = [
   { value: "SCHEDULED", label: "Agendado" },
@@ -30,22 +26,14 @@ interface Props {
   onUpdated: () => void
 }
 
-export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpdated }: Props) {
+export default function AppointmentDetailDrawer({ appointmentId, onClose }: Props) {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { confirm, ConfirmDialog } = useConfirm()
   const { hasPermission } = useAuth()
   const canStartClinical = hasPermission("records:write")
   const canOpenRecord = hasPermission("records:view")
-  const canCharge = hasPermission("finance:operational") || hasPermission("finance:manage")
-  const canWhatsapp = hasPermission("whatsapp:send")
   const canManageAgenda = hasPermission("agenda:manage")
   const [apt, setApt] = useState<Appointment | null>(null)
-  const [chargeValue, setChargeValue] = useState("")
-  const [pay, setPay] = useState<ClinmaxPayCharge | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [whatsappOpen, setWhatsappOpen] = useState(false)
-  const reminderInFlight = useRef(false)
 
   const load = () => {
     if (!appointmentId) return
@@ -53,7 +41,6 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
       .getById(appointmentId)
       .then((data) => {
         setApt(data)
-        setChargeValue(String(data.totalAmount ?? 0))
       })
       .catch((err: unknown) => {
         toast(toastMessageFromApiError(err, "Erro ao carregar agendamento"), "error")
@@ -62,14 +49,6 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
 
   useEffect(() => {
     load()
-    if (!appointmentId || !canCharge) {
-      setPay(null)
-      return
-    }
-    api.appointments
-      .getPay(appointmentId)
-      .then((r) => setPay(r.pay))
-      .catch(() => setPay(null))
   }, [appointmentId])
 
   if (!appointmentId) return null
@@ -264,7 +243,6 @@ export default function AppointmentDetailDrawer({ appointmentId, onClose, onUpda
           </div>
         )}
       </Drawer>
-      <ConfirmDialog />
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -215,7 +215,9 @@ export default function AppointmentDetailView({ appointmentId, onBack, onUpdated
                     confirmLabel: "Sim, cancelar",
                     cancelLabel: "Não, manter",
                     variant: "danger",
-                    onConfirm: async () => {
+                  })
+                    .then(async (confirmed) => {
+                      if (!confirmed) return
                       try {
                         await api.appointments.update(appointmentId, { status: "CANCELLED" })
                         toast("Agendamento cancelado.")
@@ -224,8 +226,7 @@ export default function AppointmentDetailView({ appointmentId, onBack, onUpdated
                       } catch (err) {
                         toast(toastMessageFromApiError(err, "Erro ao cancelar agendamento"), "error")
                       }
-                    },
-                  })
+                    })
                 }}
               >
                 <Trash2 className="w-4 h-4" /> Cancelar agendamento

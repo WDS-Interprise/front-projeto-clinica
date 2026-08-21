@@ -272,6 +272,7 @@ export function BulaDetailView({
           {visibleSections
             .filter((s) => s.key !== "overview")
             .map(({ id, key, label }) => {
+              if (key === "overview") return null
               const value = detail.secoes[key]
               if (sectionLength(value) === 0) return null
               return (

@@ -44,7 +44,7 @@ export default function CargosPage() {
   useEffect(() => {
     if (selected) {
       setEditName(selected.name)
-      setEditPerms(selected.permissions)
+      setEditPerms(selected.permissions as Permission[])
     }
   }, [selectedId, selected])
 

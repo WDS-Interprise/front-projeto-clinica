@@ -136,7 +136,6 @@ export default function AppointmentFormModal({
   const [address, setAddress] = useState("")
   const [insuranceCard, setInsuranceCard] = useState("")
   const [patientNotes, setPatientNotes] = useState("")
-  const [forceCreate, setForceCreate] = useState(false)
   const [existingMatch, setExistingMatch] = useState<ApiError["existing"] | null>(null)
   const [duplicateKind, setDuplicateKind] = useState<"block" | "warn" | null>(null)
   const searchRef = useRef<HTMLDivElement>(null)
@@ -396,7 +395,7 @@ export default function AppointmentFormModal({
         insuranceCard,
         notes: patientNotes,
         active: true,
-        force: force || forceCreate,
+        force,
       })
       toast("Paciente cadastrado com sucesso!")
       selectPatient(created as Patient)

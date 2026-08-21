@@ -604,7 +604,7 @@ function AppointmentCard({
                 ;(fn as () => void)()
               }}
             >
-              {label}
+              {label as string}
             </button>
           ))}
           <div className="my-1 border-t border-[#E8EDF2]" />
