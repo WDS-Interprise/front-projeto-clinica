@@ -28,7 +28,7 @@ export default function ThemeToggle({ className, compact = false }: Props) {
       {isDark ? (
         <Moon className={cn("text-primary", compact ? "w-4 h-4" : "w-3.5 h-3.5")} />
       ) : (
-        <Sun className={cn("text-warning", compact ? "w-4 h-4" : "w-3.5 h-3.5")} />
+        <Sun className={cn(compact ? "h-5 w-5" : "h-3.5 w-3.5 text-warning")} />
       )}
       {!compact && (
         <span className="hidden sm:inline">{theme === "dark" ? "Escuro" : "Claro"}</span>

@@ -11,7 +11,9 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { navItemClass } from "@/lib/nav-ui"
 import { useAuth } from "@/context/AuthContext"
+import { usePlanFeatures } from "@/context/PlanFeatureContext"
 import { gestaoNavItemsForHeader, canAccessGestaoItem, isGestaoPath } from "@/lib/gestao-nav"
 
 const itemIcons: Record<string, LucideIcon> = {
@@ -22,9 +24,10 @@ const itemIcons: Record<string, LucideIcon> = {
   Pesquisa: Smile,
 }
 
-export function GestaoNavDropdown() {
+export function GestaoNavDropdown({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const { hasFeature } = usePlanFeatures()
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -32,15 +35,8 @@ export function GestaoNavDropdown() {
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
 
   const items = gestaoNavItemsForHeader().filter((item) =>
-    canAccessGestaoItem(hasPermission, {
-      to: item.to,
-      label: item.label,
-      description: "",
-      anyPermission: item.anyPermission,
-    })
+    canAccessGestaoItem(hasPermission, item, hasFeature)
   )
-
-  if (items.length === 0) return null
 
   const active = isGestaoPath(location.pathname)
 
@@ -65,6 +61,8 @@ export function GestaoNavDropdown() {
     }
   }, [open])
 
+  if (items.length === 0) return null
+
   const toggle = () => {
     if (!open && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
@@ -84,15 +82,11 @@ export function GestaoNavDropdown() {
         ref={buttonRef}
         type="button"
         onClick={toggle}
-        className={cn(
-          "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
-          active || open
-            ? "bg-primary-light text-primary"
-            : "text-text-secondary hover:text-text hover:bg-surface-alt"
-        )}
+        className={navItemClass(active || open, compact)}
+        title="Gestão"
       >
         Gestão
-        <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 transition-transform", open && "rotate-180")} />
       </button>
 
       {open &&
@@ -105,7 +99,7 @@ export function GestaoNavDropdown() {
               style={{ top: menuPos.top, left: menuPos.left }}
             >
               {items.map((item) => {
-                const Icon = itemIcons[item.label] ?? Wallet
+                const Icon = itemIcons[item.label] ?? BarChart3
                 const isActive =
                   location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
                 return (

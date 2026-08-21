@@ -7,10 +7,11 @@ interface ModalProps {
   title: string
   children: ReactNode
   footer?: ReactNode
-  size?: "md" | "lg"
+  size?: "md" | "lg" | "xl"
+  zIndexClass?: string
 }
 
-export function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = "md", zIndexClass = "z-50" }: ModalProps) {
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden"
     return () => {
@@ -21,7 +22,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className={`fixed inset-0 ${zIndexClass} flex items-center justify-center p-4`}>
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
@@ -29,12 +30,12 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
         onClick={onClose}
       />
       <div
-        className={`relative w-full bg-surface rounded-2xl shadow-xl border border-border ${
-          size === "lg" ? "max-w-2xl" : "max-w-lg"
+        className={`relative w-full bg-white rounded-[10px] shadow-xl border border-[#E8EDF2] ${
+          size === "xl" ? "max-w-4xl" : size === "lg" ? "max-w-2xl" : "max-w-lg"
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-text">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8EDF2]">
+          <h2 className="text-lg font-bold text-[#1E3A4C]">{title}</h2>
           <button
             type="button"
             onClick={onClose}

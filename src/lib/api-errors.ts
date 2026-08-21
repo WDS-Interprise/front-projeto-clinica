@@ -9,7 +9,7 @@ export function messageFromApiError(err: unknown, fallback: string): string {
 /** Mensagem pronta para toast (erros de API + campos duplicados). */
 export function toastMessageFromApiError(err: unknown, fallback: string): string {
   const fields = fieldsFromApiError(err)
-  const extra = Object.values(fields).filter(Boolean).join(" — ")
+  const extra = Object.values(fields).filter(Boolean).join(". ")
   return extra || messageFromApiError(err, fallback)
 }
 

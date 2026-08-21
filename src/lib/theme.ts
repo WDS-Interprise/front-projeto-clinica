@@ -8,7 +8,7 @@ export function getStoredTheme(): Theme | null {
 }
 
 export function resolveTheme(): Theme {
-  return getStoredTheme() ?? "light"
+  return "light"
 }
 
 export function applyThemeToDocument(theme: Theme) {
@@ -17,17 +17,16 @@ export function applyThemeToDocument(theme: Theme) {
   root.style.colorScheme = theme
 }
 
-export function applyTheme(theme: Theme) {
-  applyThemeToDocument(theme)
-  localStorage.setItem(THEME_STORAGE_KEY, theme)
+export function applyTheme(_theme: Theme) {
+  applyThemeToDocument("light")
+  localStorage.setItem(THEME_STORAGE_KEY, "light")
 }
 
 export function initTheme() {
-  applyTheme(resolveTheme())
+  applyTheme("light")
 }
 
-export function toggleTheme(current: Theme): Theme {
-  const next: Theme = current === "light" ? "dark" : "light"
-  applyTheme(next)
-  return next
+export function toggleTheme(_current: Theme): Theme {
+  applyTheme("light")
+  return "light"
 }

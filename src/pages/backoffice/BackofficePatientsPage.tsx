@@ -40,7 +40,7 @@ export default function BackofficePatientsPage() {
       <div>
         <h1 className="text-2xl font-bold text-text">Pacientes</h1>
         <p className="text-sm text-text-secondary mt-1">
-          Visão global ({total} cadastros) — somente leitura
+          Visão global ({total} cadastros). Somente leitura
         </p>
       </div>
 
@@ -97,8 +97,8 @@ export default function BackofficePatientsPage() {
                 <tr key={p.id} className="border-t border-border text-text-secondary">
                   <td className="p-3 font-medium text-text">{p.name}</td>
                   <td className="p-3">{p.phone}</td>
-                  <td className="p-3">{p.insurancePlan ?? "—"}</td>
-                  <td className="p-3">{p.clinic?.name ?? "—"}</td>
+                  <td className="p-3">{p.insurancePlan ?? "-"}</td>
+                  <td className="p-3">{p.clinic?.name ?? "-"}</td>
                   <td className="p-3 text-xs">
                     {new Date(p.createdAt).toLocaleDateString("pt-BR")}
                   </td>

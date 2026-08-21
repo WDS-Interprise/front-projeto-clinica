@@ -118,7 +118,7 @@ function isHeadingLine(line: string, posologyMode = false) {
 }
 
 function isListLine(line: string) {
-  return /^(\d+[\.\)]\s|[-•*–—]\s)/.test(line.trim())
+  return /^(\d+[\.\)]\s|[-•*-: ]\s)/.test(line.trim())
 }
 
 function splitTableRow(line: string): string[] | null {
@@ -220,7 +220,7 @@ export function parseBulaContent(text: string, options?: { posology?: boolean })
     if (isListLine(line)) {
       const items: string[] = []
       while (i < lines.length && isListLine(lines[i])) {
-        items.push(lines[i].replace(/^(\d+[\.\)]\s|[-•*–—]\s)/, "").trim())
+        items.push(lines[i].replace(/^(\d+[\.\)]\s|[-•*-: ]\s)/, "").trim())
         i++
       }
       blocks.push({ type: "list", items })

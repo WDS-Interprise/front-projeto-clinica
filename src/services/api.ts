@@ -2,7 +2,7 @@ const BASE = import.meta.env.VITE_API_BASE ?? "/api"
 
 function apiNetworkErrorMessage(): string {
   if (import.meta.env.PROD) {
-    return `Não foi possível conectar à API (${BASE}). O serviço em api.clinmax.com.br pode estar fora do ar — isso não depende do backend no seu PC.`
+    return `Não foi possível conectar à API (${BASE}). O serviço em api.clinmax.com.br pode estar fora do ar. Isso não depende do backend no seu PC.`
   }
   return "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3001)."
 }
@@ -66,8 +66,26 @@ export type WhatsappSettings = {
   autoRemindersEnabled: boolean
   aiAssistantEnabled: boolean
   aiAutoReplyEnabled: boolean
+  aiMode?: "MANUAL" | "SUGGEST" | "AUTO_REPLY" | "AUTO_ACTIONS"
+  aiPermissions?: Record<string, boolean>
   openRouterConfigured?: boolean
   connections: { id: string; name: string; status: string; phoneNumber: string | null }[]
+}
+
+export type ClinicRole = {
+  id: string
+  clinicId: string
+  slug: string
+  name: string
+  isSystem: boolean
+  permissions: string[]
+  sortOrder: number
+  memberCount?: number
+}
+
+export type PermissionGroup = {
+  title: string
+  items: Array<{ permission: string; label: string }>
 }
 
 export type WhatsappConnection = {
@@ -131,6 +149,36 @@ export type FinanceLookup = {
   paymentMethods: Array<{ id: string; name: string; active: boolean }>
 }
 
+export type ClinmaxPaySettings = {
+  enabled: boolean
+  pixKeyMasked: string | null
+  pixKeyType: "CPF" | "CNPJ" | "EMAIL" | "PHONE" | "EVP" | null
+  recipientName: string | null
+  recipientDocumentMasked: string | null
+  verifiedAt: string | null
+  status: string
+  platformFeePercent: number
+  outstandingDebit: number
+  asaasConfigured: boolean
+}
+
+export type ClinmaxPayCharge = {
+  id: string
+  status: string
+  amountGross: number
+  gatewayFee: number
+  netAmount: number
+  platformFee: number
+  clinicPayout: number
+  compensationApplied: number
+  pixPayload: string | null
+  pixEncodedImage: string | null
+  pixExpirationDate: string | null
+  payoutStatus: string | null
+  payoutAmount: number | null
+  payoutFailReason: string | null
+}
+
 export type AttendanceReport = {
   period: { from: string; to: string }
   total: number
@@ -153,11 +201,26 @@ export type AttendanceReport = {
 
 export class ApiError extends Error {
   fields?: ApiFieldErrors
+  existing?: {
+    id: string
+    name: string
+    phone: string
+    email: string | null
+    cpf: string | null
+    insurancePlan: string | null
+  }
+  code?: string
 
-  constructor(message: string, fields?: ApiFieldErrors) {
+  constructor(
+    message: string,
+    fields?: ApiFieldErrors,
+    extra?: { existing?: ApiError["existing"]; code?: string }
+  ) {
     super(message)
     this.name = "ApiError"
     this.fields = fields
+    this.existing = extra?.existing
+    this.code = extra?.code
   }
 }
 
@@ -202,7 +265,16 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     if (res.status === 502 || res.status === 503 || res.status === 504) {
       throw new ApiError(apiUnavailableMessage())
     }
-    throw new ApiError(data.error || "Erro na requisicao", data.fields)
+    const body = data as {
+      error?: string
+      fields?: ApiFieldErrors
+      existing?: ApiError["existing"]
+      code?: string
+    }
+    throw new ApiError(body.error || "Erro na requisicao", body.fields, {
+      existing: body.existing,
+      code: body.code,
+    })
   }
 
   return data as T
@@ -237,13 +309,31 @@ export const api = {
         redirectPath?: string
       }>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
     completeOnboarding: (data: {
-      roleLabel: string
-      teamSize: string
+      path?: "create" | "join"
+      roleLabel?: string
+      alsoTreats?: boolean
+      profession?: string
+      councilNumber?: string
+      councilUf?: string
+      specialty?: string
+      teamSize?: string
       clinicName?: string
+      spaceType?: string
+      billingModel?: string
+      careMode?: string
+      operatingDays?: string
+      agendaStartTime?: string
+      agendaEndTime?: string
+      slotIntervalMinutes?: number
       inviteCode?: string
       crm?: string
-      specialty?: string
       phone?: string
+      pendingInvites?: Array<{
+        email: string
+        role: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE"
+        name?: string
+        profession?: string
+      }>
     }) =>
       request<{
         token: string
@@ -252,6 +342,8 @@ export const api = {
         clinicName?: string
         permissions: string[]
         redirectPath: string
+        pendingApproval?: boolean
+        clinicName?: string
       }>("/auth/complete-onboarding", {
         method: "POST",
         body: JSON.stringify(data),
@@ -266,6 +358,7 @@ export const api = {
         gender?: "M" | "F" | "O"
         clinicId: string
         clinicName?: string
+        clinics?: { id: string; name: string }[]
         permissions: string[]
         linkedDoctorIds?: string[]
         doctorId?: string
@@ -273,7 +366,23 @@ export const api = {
         redirectPath?: string
         needsOnboarding?: boolean
         provisionedByClinic?: boolean
+        pendingApproval?: boolean
+        pendingClinicName?: string
+        joinRequestStatus?: "PENDING" | "APPROVED" | "REJECTED" | null
+        token?: string
       }>("/auth/me"),
+    switchClinic: (clinicId: string) =>
+      request<{
+        token: string
+        clinicId: string
+        clinicName?: string
+        clinics: { id: string; name: string }[]
+        permissions: string[]
+        linkedDoctorIds?: string[]
+      }>("/auth/switch-clinic", {
+        method: "POST",
+        body: JSON.stringify({ clinicId }),
+      }),
     meAvatar: () => request<{ imageUrl: string | null }>("/auth/me/avatar"),
     uploadAvatar: (file: File) => {
       const body = new FormData()
@@ -333,6 +442,13 @@ export const api = {
   },
 
   invites: {
+    previewClinicCode: (code: string) =>
+      request<{
+        clinicId: string
+        clinicName: string
+        role: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE" | null
+        roleLabel: string | null
+      }>(`/invites/clinic-code/${encodeURIComponent(code)}`),
     preview: (token: string) =>
       request<{
         clinicName: string
@@ -381,6 +497,8 @@ export const api = {
     list: (clinicId: string) =>
       request<{
         inviteCode: string
+        inviteCodeRole: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE" | null
+        inviteCodeRoleLabel: string | null
         invites: Array<{
           id: string
           email: string
@@ -390,13 +508,25 @@ export const api = {
           expiresAt: string
           createdAt: string
         }>
+        joinRequests: Array<{
+          id: string
+          requestedRole: string | null
+          roleLabel: string
+          status: string
+          profession: string | null
+          crm: string | null
+          createdAt: string
+          user: { id: string; name: string; email: string }
+        }>
       }>(`/clinics/${clinicId}/invites`),
-    create: (clinicId: string, data: { email: string; role: "ADMIN" | "DOCTOR" | "RECEPTION" }) =>
+    create: (clinicId: string, data: { email: string; role: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE" }) =>
       request<{
         invite: { id: string; email: string; role: string; roleLabel: string; status: string }
         inviteUrl: string
         inviteCode: string
         emailDelivered: boolean
+        emailError?: string
+        emailPreview?: { subject: string; text: string }
       }>(`/clinics/${clinicId}/invites`, {
         method: "POST",
         body: JSON.stringify(data),
@@ -406,7 +536,34 @@ export const api = {
         method: "DELETE",
       }),
     regenerateCode: (clinicId: string) =>
-      request<{ inviteCode: string }>(`/clinics/${clinicId}/invites/regenerate-code`, {
+      request<{ inviteCode: string; inviteCodeRole: string | null }>(
+        `/clinics/${clinicId}/invites/regenerate-code`,
+        {
+          method: "POST",
+        }
+      ),
+    setInviteCodeRole: (
+      clinicId: string,
+      role: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE" | null
+    ) =>
+      request<{ inviteCode: string; inviteCodeRole: string | null }>(
+        `/clinics/${clinicId}/invites/code-role`,
+        {
+          method: "POST",
+          body: JSON.stringify({ role }),
+        }
+      ),
+    approveJoinRequest: (
+      clinicId: string,
+      requestId: string,
+      data?: { role?: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE" }
+    ) =>
+      request<{ ok: boolean }>(`/clinics/${clinicId}/join-requests/${requestId}/approve`, {
+        method: "POST",
+        body: JSON.stringify(data ?? {}),
+      }),
+    rejectJoinRequest: (clinicId: string, requestId: string) =>
+      request<{ ok: boolean }>(`/clinics/${clinicId}/join-requests/${requestId}/reject`, {
         method: "POST",
       }),
   },
@@ -444,12 +601,29 @@ export const api = {
     getById: (id: string) => request<any>(`/patients/${id}`),
     getHistory: (id: string) =>
       request<import("@/types/patient-history").PatientHistoryResponse>(`/patients/${id}/history`),
+    lookup: (params: { cpf?: string; email?: string; phone?: string }) => {
+      const q = new URLSearchParams()
+      if (params.cpf) q.set("cpf", params.cpf)
+      if (params.email) q.set("email", params.email)
+      if (params.phone) q.set("phone", params.phone)
+      return request<{
+        match: {
+          id: string
+          name: string
+          phone: string
+          email: string | null
+          cpf: string | null
+          insurancePlan: string | null
+        } | null
+        field: "cpf" | "email" | "phone" | null
+      }>(`/patients/lookup?${q}`)
+    },
     create: (data: any) =>
       request<any>("/patients", { method: "POST", body: JSON.stringify(data) }),
     update: (id: string, data: any) =>
       request<any>(`/patients/${id}`, { method: "PUT", body: JSON.stringify(data) }),
-    remove: (id: string) =>
-      request<void>(`/patients/${id}`, { method: "DELETE" }),
+    archive: (id: string) =>
+      request<any>(`/patients/${id}/archive`, { method: "PATCH" }),
   },
 
   doctors: {
@@ -503,16 +677,97 @@ export const api = {
     remove: (id: string) =>
       request<void>(`/appointments/${id}`, { method: "DELETE" }),
     charge: (id: string, amount?: number) =>
-      request(`/appointments/${id}/charge`, {
+      request<{
+        mode: "local" | "pix"
+        billingStatus: string
+        amount: number
+        pay: ClinmaxPayCharge | null
+      }>(`/appointments/${id}/charge`, {
         method: "POST",
         body: JSON.stringify({ amount }),
       }),
+    getPay: (id: string) =>
+      request<{ pay: ClinmaxPayCharge | null }>(`/appointments/${id}/pay`),
     receipt: (id: string) =>
       request(`/appointments/${id}/receipt`, { method: "POST" }),
-    reminder: (id: string, data?: { templateId?: string; body?: string }) =>
+    reminder: (
+      id: string,
+      data?: { templateId?: string; body?: string; purpose?: "reminder" | "reschedule" }
+    ) =>
       request<import("@/types").Appointment>(`/appointments/${id}/reminder`, {
         method: "POST",
         body: JSON.stringify(data ?? {}),
+      }),
+    aiDraft: (id: string) =>
+      request<{
+        mainComplaint: string
+        currentIllnessHistory: string
+        physicalExam: string
+        historyAndAntecedents: string
+        conduct: string
+        prescriptionSummary: string
+        notes: string
+        cidHint: string
+      }>(`/appointments/${id}/ai-draft`, { method: "POST" }),
+  },
+
+  encounters: {
+    getById: (id: string) => request<import("@/types/encounter").Encounter>(`/encounters/${id}`),
+    resolve: (id: string) =>
+      request<{
+        kind: "encounter" | "appointment"
+        encounter: import("@/types/encounter").Encounter
+        resumed?: boolean
+      }>(`/encounters/resolve/${id}`),
+    startFromAppointment: (appointmentId: string) =>
+      request<{
+        encounter: import("@/types/encounter").Encounter
+        resumed: boolean
+        alreadyCompleted?: boolean
+      }>(`/encounters/from-appointment/${appointmentId}/start`, { method: "POST" }),
+    update: (
+      id: string,
+      data: Partial<{
+        mainComplaint: string | null
+        physicalExam: string | null
+        currentIllnessHistory: string | null
+        historyAndAntecedents: string | null
+        conduct: string | null
+        prescriptionSummary: string | null
+        notes: string | null
+        cidCode: string | null
+        cidDescription: string | null
+        cidVersion: string | null
+      }>
+    ) =>
+      request<import("@/types/encounter").Encounter>(`/encounters/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    complete: (id: string) =>
+      request<import("@/types/encounter").Encounter>(`/encounters/${id}/complete`, {
+        method: "POST",
+      }),
+    addAddendum: (id: string, data: { body: string; reason?: string }) =>
+      request<import("@/types/encounter").Encounter>(`/encounters/${id}/addendums`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    recentByPatient: (patientId: string) =>
+      request<{
+        data: Array<{
+          id: string
+          startedAt: string | null
+          endedAt: string | null
+          mainComplaint: string | null
+          cidCode: string | null
+          cidDescription: string | null
+          doctor: { name: string } | null
+        }>
+      }>(`/encounters/patient/${patientId}/recent`),
+    aiDraft: (id: string) =>
+      request<import("@/types/encounter").AttendanceAiDraft>(`/encounters/${id}/ai-draft`, {
+        method: "POST",
       }),
   },
 
@@ -670,11 +925,31 @@ export const api = {
       autoRemindersEnabled?: boolean
       aiAssistantEnabled?: boolean
       aiAutoReplyEnabled?: boolean
+      aiMode?: "MANUAL" | "SUGGEST" | "AUTO_REPLY" | "AUTO_ACTIONS"
+      aiPermissions?: Record<string, boolean>
     }) =>
       request<WhatsappSettings>("/whatsapp/settings", {
         method: "PUT",
         body: JSON.stringify(data),
       }),
+  },
+
+  clinicRoles: {
+    list: () =>
+      request<{ roles: ClinicRole[]; groups: PermissionGroup[] }>("/clinic-roles/roles"),
+    getById: (id: string) => request<ClinicRole>(`/clinic-roles/roles/${id}`),
+    create: (data: { name: string; permissions: string[] }) =>
+      request<ClinicRole>("/clinic-roles/roles", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: { name?: string; permissions?: string[] }) =>
+      request<ClinicRole>(`/clinic-roles/roles/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<void>(`/clinic-roles/roles/${id}`, { method: "DELETE" }),
   },
 
   records: {
@@ -1121,6 +1396,18 @@ export const api = {
       request("/finance/cost-centers", { method: "POST", body: JSON.stringify(data) }),
     createPaymentMethod: (data: { name: string }) =>
       request("/finance/payment-methods", { method: "POST", body: JSON.stringify(data) }),
+    getPaySettings: () =>
+      request<ClinmaxPaySettings>("/finance/pay/settings"),
+    savePaySettings: (data: {
+      pixKey: string
+      pixKeyType?: "CPF" | "CNPJ" | "EMAIL" | "PHONE" | "EVP"
+      recipientName: string
+      recipientDocument: string
+      enabled?: boolean
+      confirmed: boolean
+    }) => request<ClinmaxPaySettings>("/finance/pay/settings", { method: "PUT", body: JSON.stringify(data) }),
+    setPayEnabled: (enabled: boolean) =>
+      request<ClinmaxPaySettings>("/finance/pay/enabled", { method: "PATCH", body: JSON.stringify({ enabled }) }),
   },
 
   inventory: {
@@ -1209,5 +1496,19 @@ export const api = {
       if (params?.dateTo) q.set("dateTo", params.dateTo)
       return request<{ rows: Array<{ id: string; name: string; total: number; count: number }> }>(`/reports/repasse?${q}`)
     },
+  },
+
+  subscription: {
+    current: () => request<import("@/lib/plan-features").ClinicSubscriptionView>("/subscription/current"),
+    usage: () =>
+      request<{ usage: import("@/lib/plan-features").PlanUsageItem[]; features: import("@/lib/plan-features").PlanFeature[]; subscription: import("@/lib/plan-features").ClinicSubscriptionView | null }>(
+        "/subscription/usage"
+      ),
+    plans: () => request<import("@/lib/plan-features").PublicPlan[]>("/subscription/plans"),
+    invoices: () => request<import("@/lib/plan-features").SubscriptionInvoiceView[]>("/subscription/invoices"),
+    changePlan: (data: { planId: string; billingCycle?: "MONTHLY" | "ANNUAL" }) =>
+      request("/subscription/change-plan", { method: "POST", body: JSON.stringify(data) }),
+    refreshInvoicePix: (id: string) =>
+      request(`/subscription/invoices/${id}/refresh-pix`, { method: "POST", body: "{}" }),
   },
 }

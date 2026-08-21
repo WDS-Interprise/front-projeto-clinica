@@ -103,10 +103,10 @@ export default function PesquisaSatisfacaoPage() {
             {!surveys.length && <tr><td colSpan={5} className="p-8 text-center text-text-secondary">Nenhuma pesquisa.</td></tr>}
             {surveys.map((s) => (
               <tr key={s.id} className="border-t border-border">
-                <td className="p-3">{s.patient?.name ?? "—"}</td>
+                <td className="p-3">{s.patient?.name ?? "-"}</td>
                 <td className="p-3">{statusLabels[s.sendStatus] ?? s.sendStatus}</td>
-                <td className="p-3">{s.rating ? `${s.rating}★` : "—"}</td>
-                <td className="p-3 text-text-secondary">{s.comment ?? "—"}</td>
+                <td className="p-3">{s.rating ? `${s.rating}★` : "-"}</td>
+                <td className="p-3 text-text-secondary">{s.comment ?? "-"}</td>
                 <td className="p-3 text-right space-x-1">
                   {canManage && s.sendStatus === "PENDING" && (
                     <Button type="button" size="sm" variant="outline" onClick={() => send(s.id)}>Enviar</Button>

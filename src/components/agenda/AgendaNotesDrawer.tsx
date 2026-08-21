@@ -112,7 +112,7 @@ export default function AgendaNotesDrawer({ open, onClose, noteDate, onCountChan
     <Drawer
       open={open}
       onClose={onClose}
-      title={`Observações — ${format(new Date(noteDate + "T12:00:00"), "dd/MM/yyyy")}`}
+      title={`Observações. ${format(new Date(noteDate + "T12:00:00"), "dd/MM/yyyy")}`}
       width="lg"
       footer={
         <Button className="w-full gap-2" onClick={() => setShowForm((v) => !v)}>
@@ -122,7 +122,7 @@ export default function AgendaNotesDrawer({ open, onClose, noteDate, onCountChan
       }
     >
       <p className="text-xs text-text-secondary mb-4">
-        Observações administrativas da agenda — não substituem o prontuário clínico.
+        Observações administrativas da agenda. Não substituem o prontuário clínico.
       </p>
 
       {showForm && (

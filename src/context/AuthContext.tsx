@@ -24,16 +24,19 @@ type AuthState = {
   user: AuthUser | null
   clinicId: string | null
   clinicName: string | null
+  clinics: { id: string; name: string }[]
   permissions: string[]
   linkedDoctorIds?: string[]
   loading: boolean
   refresh: () => Promise<void>
+  switchClinic: (clinicId: string) => Promise<void>
   setSession: (data: {
     token: string
     user: AuthUser
     clinicId?: string
     permissions: string[]
     clinicName?: string
+    clinics?: { id: string; name: string }[]
   }) => void
   logout: () => void
   hasPermission: (perm: Permission) => boolean
@@ -60,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [clinicName, setClinicName] = useState<string | null>(
     () => localStorage.getItem("clinicName")
   )
+  const [clinics, setClinics] = useState<{ id: string; name: string }[]>(() =>
+    readJsonStorage<{ id: string; name: string }[]>("clinics", [])
+  )
   const [permissions, setPermissions] = useState<string[]>(() => readJsonStorage<string[]>("permissions", []))
   const [linkedDoctorIds, setLinkedDoctorIds] = useState<string[] | undefined>()
   const [loading, setLoading] = useState(!!localStorage.getItem("token"))
@@ -71,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       const me = await api.auth.me()
+      if (me.token) localStorage.setItem("token", me.token)
       setUser({
         id: me.id,
         name: me.name,
@@ -81,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       setClinicId(me.clinicId)
       setClinicName(me.clinicName ?? null)
+      setClinics(me.clinics ?? [])
       setPermissions(me.permissions ?? [])
       setLinkedDoctorIds(me.linkedDoctorIds)
       localStorage.setItem(
@@ -95,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       )
       if (me.clinicId) localStorage.setItem("clinicId", me.clinicId)
       if (me.clinicName) localStorage.setItem("clinicName", me.clinicName)
+      localStorage.setItem("clinics", JSON.stringify(me.clinics ?? []))
       localStorage.setItem("permissions", JSON.stringify(me.permissions ?? []))
       applyAuthRedirectFlags({
         redirectPath: me.redirectPath,
@@ -110,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("user")
       localStorage.removeItem("clinicId")
       localStorage.removeItem("clinicName")
+      localStorage.removeItem("clinics")
       localStorage.removeItem("permissions")
       setUser(null)
       setClinicId(null)
@@ -118,6 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  const switchClinic = useCallback(async (nextClinicId: string) => {
+    const result = await api.auth.switchClinic(nextClinicId)
+    localStorage.setItem("token", result.token)
+    setClinicId(result.clinicId)
+    setClinicName(result.clinicName ?? null)
+    setClinics(result.clinics ?? [])
+    setPermissions(result.permissions ?? [])
+    setLinkedDoctorIds(result.linkedDoctorIds)
+    localStorage.setItem("clinicId", result.clinicId)
+    if (result.clinicName) localStorage.setItem("clinicName", result.clinicName)
+    localStorage.setItem("clinics", JSON.stringify(result.clinics ?? []))
+    localStorage.setItem("permissions", JSON.stringify(result.permissions ?? []))
   }, [])
 
   useEffect(() => {
@@ -131,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clinicId?: string
       permissions: string[]
       clinicName?: string
+      clinics?: { id: string; name: string }[]
     }) => {
       localStorage.setItem("token", data.token)
       localStorage.setItem("user", JSON.stringify(data.user))
@@ -149,6 +174,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("clinicName")
         setClinicName(null)
       }
+      if (data.clinics?.length) {
+        localStorage.setItem("clinics", JSON.stringify(data.clinics))
+        setClinics(data.clinics)
+      }
       setUser(data.user)
       setPermissions(data.permissions)
       setLoading(false)
@@ -161,11 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user")
     localStorage.removeItem("clinicId")
     localStorage.removeItem("clinicName")
+    localStorage.removeItem("clinics")
     localStorage.removeItem("permissions")
     clearOnboardingFlags()
     setUser(null)
     setClinicId(null)
     setClinicName(null)
+    setClinics([])
     setPermissions([])
     setLinkedDoctorIds(undefined)
   }, [])
@@ -175,15 +206,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       clinicId,
       clinicName,
+      clinics,
       permissions,
       linkedDoctorIds,
       loading,
       refresh,
+      switchClinic,
       setSession,
       logout,
       hasPermission: (perm: Permission) => can(permissions, perm),
     }),
-    [user, clinicId, clinicName, permissions, linkedDoctorIds, loading, refresh, setSession, logout]
+    [user, clinicId, clinicName, clinics, permissions, linkedDoctorIds, loading, refresh, switchClinic, setSession, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,31 +1,26 @@
 import { Link } from "react-router-dom"
 import { useEffect } from "react"
-import {
-  CalendarClock,
-  FileText,
-  HeartPulse,
-  MessageCircle,
-  Pill,
-  Stethoscope,
-} from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import AppLogo from "@/components/brand/AppLogo"
 import { cn } from "@/lib/utils"
 
 export const authInputClass =
-  "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+  "flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#00A86B] focus:outline-none focus:ring-2 focus:ring-[#00A86B]/20"
 
 export const authInputCompactClass =
-  "flex h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+  "flex h-8 w-full rounded-lg border border-slate-200 bg-white px-3 text-[13px] text-slate-900 placeholder:text-slate-400 transition-colors focus:border-[#00A86B] focus:outline-none focus:ring-2 focus:ring-[#00A86B]/20"
 
 export const authInputWithIconClass = `${authInputClass} pr-11`
 
+export const authInputWithLeadingIconClass = `${authInputClass} pl-11`
+
+export const authInputWithBothIconsClass = `${authInputClass} pl-11 pr-11`
+
 export const authInputCompactWithIconClass = `${authInputCompactClass} pr-10`
 
-export const authLabelClass = "block text-sm font-medium text-slate-900"
+export const authLabelClass = "block text-[13px] font-semibold text-slate-900"
 
 export const authSubmitClass =
-  "flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#256993] text-sm font-semibold text-white transition-colors hover:bg-[#1a4f6e] disabled:cursor-not-allowed disabled:opacity-60"
+  "flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#00A86B] text-[13px] font-semibold text-white shadow-sm shadow-[#00A86B]/25 transition-colors hover:bg-[#00915c] disabled:cursor-not-allowed disabled:opacity-60"
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -50,13 +45,10 @@ function GoogleIcon({ className }: { className?: string }) {
   )
 }
 
-function MicrosoftIcon({ className }: { className?: string }) {
+function AppleIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#F25022" d="M1 1h10v10H1z" />
-      <path fill="#7FBA00" d="M13 1h10v10H13z" />
-      <path fill="#00A4EF" d="M1 13h10v10H1z" />
-      <path fill="#FFB900" d="M13 13h10v10H13z" />
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.7 12.55c.03-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.63-1.71-3.2-1.73-1.36-.14-2.66.8-3.35.8-.69 0-1.76-.78-2.9-.76-1.49.02-2.87.87-3.64 2.2-1.55 2.69-.4 6.67 1.12 8.85.74 1.07 1.62 2.26 2.78 2.22 1.12-.05 1.54-.72 2.89-.72 1.35 0 1.73.72 2.91.7 1.2-.02 1.97-1.09 2.7-2.16.85-1.24 1.2-2.44 1.22-2.5-.03-.01-2.33-.89-2.36-3.59ZM14.9 6.4c.62-.75 1.03-1.79.92-2.83-.89.04-1.97.59-2.61 1.34-.57.66-1.07 1.72-.94 2.73 1 .08 2.02-.51 2.63-1.24Z" />
     </svg>
   )
 }
@@ -79,133 +71,30 @@ function SocialButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[13px] font-medium text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
       aria-label={ariaLabel}
     >
       {icon}
-      <span className="truncate">{label}</span>
+      <span>{label}</span>
     </button>
   )
 }
 
-const features = [
-  { icon: CalendarClock, label: "Agenda inteligente", desc: "Horários, confirmações e fila do dia" },
-  { icon: FileText, label: "Prontuário digital", desc: "Histórico clínico sempre à mão" },
-  { icon: Pill, label: "Prescrições", desc: "Medicamentos, exames e vacinas" },
-  { icon: MessageCircle, label: "WhatsApp", desc: "Lembretes automáticos para pacientes" },
-]
-
-function AuthMeshBackground() {
+function AuthHeroPair({
+  children,
+  footer,
+  wide = false,
+}: {
+  children: React.ReactNode
+  footer?: React.ReactNode
+  wide?: boolean
+}) {
   return (
-    <>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.35]"
-        aria-hidden
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(148,163,184,.25) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.25) 1px, transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-      <div className="pointer-events-none absolute -left-20 top-20 h-80 w-80 rounded-full bg-[#256993]/12 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#3d8fc4]/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 top-1/4 h-96 w-96 rounded-full bg-sky-200/50 blur-3xl" />
-    </>
-  )
-}
-
-const floatingShowcaseIcons: {
-  Icon: LucideIcon
-  left: string
-  bottom: string
-  delay: string
-  duration: string
-  size: "sm" | "md" | "lg"
-  tint: string
-}[] = [
-  { Icon: Stethoscope, left: "6%", bottom: "32%", delay: "0s", duration: "5.5s", size: "lg", tint: "from-[#256993]/15 to-white" },
-  { Icon: Pill, left: "78%", bottom: "40%", delay: "1.4s", duration: "6s", size: "md", tint: "from-sky-100 to-white" },
-  { Icon: CalendarClock, left: "58%", bottom: "26%", delay: "2.8s", duration: "5.2s", size: "sm", tint: "from-[#256993]/10 to-white" },
-  { Icon: HeartPulse, left: "28%", bottom: "38%", delay: "0.9s", duration: "6.2s", size: "md", tint: "from-teal-50 to-white" },
-  { Icon: MessageCircle, left: "88%", bottom: "55%", delay: "3.6s", duration: "5.8s", size: "sm", tint: "from-[#3d8fc4]/15 to-white" },
-  { Icon: FileText, left: "12%", bottom: "58%", delay: "2.1s", duration: "5.4s", size: "sm", tint: "from-slate-50 to-white" },
-]
-
-const floatSizeClass = {
-  sm: "h-11 w-11 [&_svg]:h-4 [&_svg]:w-4",
-  md: "h-14 w-14 [&_svg]:h-5 [&_svg]:w-5",
-  lg: "h-[4.25rem] w-[4.25rem] [&_svg]:h-6 [&_svg]:w-6",
-} as const
-
-function AuthFloatingIcons() {
-  return (
-    <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden>
-      {floatingShowcaseIcons.map(({ Icon, left, bottom, delay, duration, size, tint }, i) => (
-        <div
-          key={i}
-          className="auth-float-icon absolute"
-          style={{
-            left,
-            bottom,
-            animationDelay: delay,
-            animationDuration: duration,
-          }}
-        >
-          <div
-            className={cn(
-              "auth-float-icon-3d flex items-center justify-center rounded-2xl bg-gradient-to-br text-[#256993]",
-              floatSizeClass[size],
-              tint
-            )}
-          >
-            <Icon strokeWidth={1.75} />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function AuthClinicShowcase() {
-  return (
-    <div className="relative flex min-h-[280px] flex-1 flex-col justify-between overflow-hidden lg:min-h-screen lg:border-r lg:border-slate-200/80">
-      <AuthFloatingIcons />
-      <div className="relative z-10 flex flex-1 flex-col justify-start px-6 py-8 sm:px-10 lg:px-12 lg:pt-14 lg:pb-10 xl:px-16 xl:pt-16">
-        <div className="mb-8">
-          <AppLogo size="xl" />
-        </div>
-
-        <div className="max-w-lg">
-          <h2 className="text-2xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
-            Gestão completa para clínica geral
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-            Agenda, prontuário, prescrições e comunicação com pacientes — um fluxo
-            organizado para médicos, enfermagem e recepção.
-          </p>
-
-          <ul className="mt-8 space-y-2.5">
-            {features.map(({ icon: Icon, label, desc }) => (
-              <li
-                key={label}
-                className="flex items-start gap-3 rounded-xl border border-slate-200/90 bg-white/70 px-3.5 py-3 shadow-sm shadow-slate-200/40 backdrop-blur-sm"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#256993]/10 text-[#256993] ring-1 ring-[#256993]/15">
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 pt-0.5">
-                  <p className="text-sm font-medium text-slate-900">{label}</p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{desc}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <div className="flex h-full w-full items-center justify-center px-4">
+      <div className={cn("w-full max-w-[20.5rem]")}>
+        {children}
+        {footer}
       </div>
-
-      <p className="relative z-10 hidden px-10 pb-8 text-[11px] text-slate-400 lg:block lg:px-12 xl:px-16">
-        Desenvolvido para clínicas gerais, consultórios e equipes multiprofissionais no Brasil.
-      </p>
     </div>
   )
 }
@@ -222,7 +111,7 @@ export function AuthPageShell({
   useEffect(() => {
     document.documentElement.classList.add("auth-ui-scale")
     const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = "auto"
+    document.body.style.overflow = "hidden"
     return () => {
       document.documentElement.classList.remove("auth-ui-scale")
       document.body.style.overflow = prevOverflow || "hidden"
@@ -230,17 +119,10 @@ export function AuthPageShell({
   }, [])
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-white via-[#f5fafd] to-[#e9f3f9] lg:flex-row">
-      <AuthMeshBackground />
-
-      <AuthClinicShowcase />
-
-      <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8 sm:px-6 lg:min-h-screen">
-        <div className={cn("w-full", wide ? "max-w-[28.75rem]" : "max-w-[26.25rem]")}>
-          {children}
-          {footer}
-        </div>
-      </div>
+    <div className="relative h-dvh overflow-x-hidden overflow-y-hidden bg-[#f4f6f8]">
+      <AuthHeroPair footer={footer} wide={wide}>
+        {children}
+      </AuthHeroPair>
     </div>
   )
 }
@@ -255,7 +137,7 @@ export function AuthCard({
   return (
     <div
       className={cn(
-        "rounded-3xl bg-white px-7 py-9 shadow-xl shadow-slate-200/60 ring-1 ring-slate-200/80 sm:px-9 sm:py-10",
+        "flex min-h-[min(36.5rem,86vh)] w-full flex-col overflow-visible rounded-2xl bg-white px-5 pb-6 pt-4 shadow-[0_10px_28px_rgba(15,23,42,0.08)] sm:px-6 sm:pb-6 sm:pt-4",
         className
       )}
     >
@@ -266,10 +148,22 @@ export function AuthCard({
 
 export function AuthLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <AppLogo
-      size={compact ? "sm" : "md"}
-      className={cn("mx-auto object-center", compact ? "mb-3" : "mb-5")}
-    />
+    <Link
+      to="/"
+      aria-label="Ir para a página inicial do ClinMax"
+      className={cn(
+        "mx-auto mb-3 flex w-full max-w-[12.5rem] shrink-0 items-center justify-center overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A86B] focus-visible:ring-offset-2",
+        compact ? "h-12" : "h-[4.25rem]"
+      )}
+    >
+      <AppLogo
+        size={compact ? "md" : "lg"}
+        className={cn(
+          "origin-center object-contain object-center",
+          compact ? "scale-110" : "scale-[1.45]"
+        )}
+      />
+    </Link>
   )
 }
 
@@ -281,18 +175,18 @@ export function AuthSocialButtons({
   googleLoading?: boolean
 } = {}) {
   return (
-    <div className="mb-6 grid min-w-0 grid-cols-2 gap-2.5">
+    <div className="space-y-2">
       <SocialButton
         icon={<GoogleIcon className="h-4 w-4 shrink-0" />}
-        label={googleLoading ? "Redirecionando..." : "Google"}
+        label={googleLoading ? "Redirecionando..." : "Continuar com Google"}
         ariaLabel="Iniciar sessão com o Google"
         onClick={onGoogleClick}
         disabled={googleLoading}
       />
       <SocialButton
-        icon={<MicrosoftIcon className="h-4 w-4 shrink-0" />}
-        label="Microsoft"
-        ariaLabel="Iniciar sessão com a Microsoft"
+        icon={<AppleIcon className="h-4 w-4 shrink-0" />}
+        label="Continuar com Apple"
+        ariaLabel="Iniciar sessão com a Apple"
       />
     </div>
   )
@@ -300,7 +194,7 @@ export function AuthSocialButtons({
 
 export function AuthDivider({ text }: { text: string }) {
   return (
-    <div className="mb-6 flex items-center gap-3">
+    <div className="my-3 flex items-center gap-3">
       <div className="h-px flex-1 bg-slate-200" />
       <span className="shrink-0 text-xs text-slate-400">{text}</span>
       <div className="h-px flex-1 bg-slate-200" />
@@ -318,7 +212,7 @@ export function AuthError({ message }: { message: string }) {
 
 export function AuthBackofficeLink() {
   return (
-    <p className="mt-6 text-center text-xs text-slate-500">
+    <p className="mt-4 text-center text-[11px] text-slate-500">
       <Link to="/backoffice/login" className="transition-colors hover:text-slate-700">
         Acesso dono da plataforma (backoffice)
       </Link>

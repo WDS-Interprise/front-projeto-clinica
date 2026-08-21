@@ -1,6 +1,5 @@
 import { Palette } from "lucide-react"
 import SettingsLayout, { SettingsPageHeader } from "@/components/layout/SettingsLayout"
-import ThemeAppearanceCard from "@/components/settings/ThemeAppearanceCard"
 
 export default function AparenciaPage() {
   return (
@@ -8,10 +7,11 @@ export default function AparenciaPage() {
       <SettingsPageHeader
         icon={<Palette className="w-7 h-7 text-primary" />}
         title="Aparência"
-        description="Personalize o tema da interface. A preferência é salva neste navegador."
+        description="A interface do ClinMax usa o tema claro."
       />
-
-      <ThemeAppearanceCard hideHeader />
+      <div className="rounded-xl border border-border bg-surface p-6 text-sm text-text-secondary">
+        O modo escuro foi desativado. Toda a plataforma permanece no tema claro.
+      </div>
     </SettingsLayout>
   )
 }

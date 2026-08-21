@@ -17,11 +17,12 @@ export function HistoryTimeline({ patientId, days }: Props) {
   const { toast } = useToast()
 
   const handleAttendanceInsert = (record: Extract<PatientHistoryRecord, { type: "ATTENDANCE" }>) => {
-    if (record.locked) {
-      toast("Atendimento finalizado. Não é possível alterar o registro.", "error")
+    const targetId = record.encounterId ?? record.appointmentId
+    if (!targetId) {
+      toast("Atendimento sem referência válida.", "error")
       return
     }
-    navigate(`/atendimento/${record.appointmentId}`)
+    navigate(`/atendimento/${targetId}`)
   }
 
   const handlePrescriptionInsert = () => {

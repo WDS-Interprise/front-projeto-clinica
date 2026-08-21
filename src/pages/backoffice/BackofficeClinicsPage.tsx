@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { Plus, Building2 } from "lucide-react"
 import { backofficeApi, type BackofficeClinic } from "@/services/backoffice-api"
 import { Button } from "@/components/ui/button"
+import { PlanBadge, SubscriptionStatusBadge } from "@/components/billing/PlanBadges"
 
 export default function BackofficeClinicsPage() {
   const [clinics, setClinics] = useState<BackofficeClinic[]>([])
@@ -100,6 +102,7 @@ export default function BackofficeClinicsPage() {
           <thead className="bg-surface-alt/80 text-text-secondary">
             <tr>
               <th className="text-left p-3">Clínica</th>
+              <th className="text-left p-3">Plano</th>
               <th className="text-left p-3">Usuários</th>
               <th className="text-left p-3">Pacientes</th>
               <th className="text-left p-3">Consultas</th>
@@ -110,7 +113,7 @@ export default function BackofficeClinicsPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-text-secondary">
+                <td colSpan={7} className="p-8 text-center text-text-secondary">
                   Carregando...
                 </td>
               </tr>
@@ -122,13 +125,26 @@ export default function BackofficeClinicsPage() {
                       <Building2 className="w-4 h-4 text-amber-400 shrink-0" />
                       <span className="font-medium text-text">{c.name}</span>
                     </div>
-                    <p className="text-xs text-text-secondary mt-0.5">{c.email || "—"}</p>
+                    <p className="text-xs text-text-secondary mt-0.5">{c.email || "-"}</p>
+                  </td>
+                  <td className="p-3">
+                    {c.subscription ? (
+                      <div className="flex flex-col gap-1">
+                        <PlanBadge name={c.subscription.planName} />
+                        <SubscriptionStatusBadge status={c.subscription.status} />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-text-secondary">Sem plano</span>
+                    )}
                   </td>
                   <td className="p-3">{c._count.users}</td>
                   <td className="p-3">{c._count.patients}</td>
                   <td className="p-3">{c._count.appointments}</td>
                   <td className="p-3">{c.active ? "Ativa" : "Inativa"}</td>
-                  <td className="p-3 text-right">
+                  <td className="p-3 text-right space-x-2">
+                    <Link to={`/backoffice/clinicas/${c.id}`} className="text-xs text-[#006B4D] hover:underline">
+                      Detalhes
+                    </Link>
                     <button
                       type="button"
                       className="text-xs text-amber-400 hover:underline"

@@ -151,7 +151,7 @@ export default function AgendaPrintPreview({
               <header className="border-b border-gray-300 pb-4 mb-6">
                 <h1 className="text-xl font-bold">{clinicName ?? "Clínica"}</h1>
                 <p className="text-sm text-gray-600 mt-1">
-                  Agenda — {format(new Date(startDate + "T12:00:00"), "dd/MM", { locale: ptBR })}{" "}
+                  Agenda. {format(new Date(startDate + "T12:00:00"), "dd/MM", { locale: ptBR })}{" "}
                   a {format(new Date(endDate + "T12:00:00"), "dd/MM/yyyy", { locale: ptBR })}
                 </p>
                 <p className="text-sm text-gray-600">Profissional: {doctorName}</p>
@@ -179,10 +179,10 @@ export default function AgendaPrintPreview({
                       </td>
                       <td className="py-2 pr-2">{a.startTime ?? a.time}</td>
                       <td className="py-2 pr-2">
-                        {a.type === "BLOCK" ? "— Bloqueado —" : a.patient?.name ?? "—"}
+                        {a.type === "BLOCK" ? ":  Bloqueado : " : a.patient?.name ?? "-"}
                       </td>
-                      <td className="py-2 pr-2">{a.patient?.phone ?? "—"}</td>
-                      <td className="py-2 pr-2">{a.insurancePlan ?? a.patient?.insurancePlan ?? "—"}</td>
+                      <td className="py-2 pr-2">{a.patient?.phone ?? "-"}</td>
+                      <td className="py-2 pr-2">{a.insurancePlan ?? a.patient?.insurancePlan ?? "-"}</td>
                       <td className="py-2">
                         {a.type === "BLOCK"
                           ? "Bloqueio"

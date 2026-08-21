@@ -15,7 +15,7 @@ alwaysApply: true
 
 - Usar **`useToast()`** de `@/context/ToastContext` para sucesso, erro e avisos.
 - Erros de API: usar `toastMessageFromApiError()` de `@/lib/api-errors` (mensagem + campos duplicados).
-- Promises de carregamento (`api.*`, `backofficeApi.*`): sempre `.catch()` com toast — nunca deixar rejeição sem tratamento (evita "Uncaught (in promise)").
+- Promises de carregamento (`api.*`, `backofficeApi.*`): sempre `.catch()` com toast. Nunca deixar rejeição sem tratamento (evita "Uncaught (in promise)").
 
 ## Padrão
 
@@ -33,7 +33,7 @@ try {
 ## Backoffice
 
 - Mesmo `ToastProvider` do app principal (já envolve rotas `/backoffice`).
-- Cliente HTTP: `backoffice-api.ts` — erros lançam `ApiError` com mensagens claras (incl. 502 quando o backend não responde).
+- Cliente HTTP: `backoffice-api.ts`. Erros lançam `ApiError` com mensagens claras (incl. 502 quando o backend não responde).
 
 ## Tema (light / dark)
 

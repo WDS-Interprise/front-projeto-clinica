@@ -109,7 +109,7 @@ export default function RelatoriosPage() {
           headers={["Data", "Paciente", "Profissional"]}
           rows={noShows.rows.map((r) => [
             `${format(new Date(r.date), "dd/MM/yyyy")} ${r.startTime}`,
-            r.patient?.name ?? "—",
+            r.patient?.name ?? "-",
             r.doctor.name,
           ])}
         />
@@ -120,7 +120,7 @@ export default function RelatoriosPage() {
           <ul className="space-y-2">
             {cidData.byCid.map((c) => (
               <li key={c.code} className="flex justify-between text-sm border-b border-border py-2">
-                <span>{c.code} — {c.description}</span>
+                <span>{c.code}. {c.description}</span>
                 <span className="font-medium">{c.count}</span>
               </li>
             ))}

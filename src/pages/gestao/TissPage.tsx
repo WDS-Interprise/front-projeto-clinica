@@ -82,11 +82,11 @@ export default function TissPage() {
             {!guides.length && <tr><td colSpan={7} className="p-8 text-center text-text-secondary">Nenhuma guia cadastrada.</td></tr>}
             {guides.map((g) => (
               <tr key={g.id} className="border-t border-border">
-                <td className="p-3 font-mono">{g.guideNumber ?? "—"}</td>
-                <td className="p-3">{g.patient?.name ?? "—"}</td>
-                <td className="p-3">{g.doctor?.name ?? "—"}</td>
+                <td className="p-3 font-mono">{g.guideNumber ?? "-"}</td>
+                <td className="p-3">{g.patient?.name ?? "-"}</td>
+                <td className="p-3">{g.doctor?.name ?? "-"}</td>
                 <td className="p-3">{g.insurancePlan}</td>
-                <td className="p-3">{g.procedureName ?? "—"}</td>
+                <td className="p-3">{g.procedureName ?? "-"}</td>
                 <td className="p-3">{statusLabels[g.status] ?? g.status}</td>
                 <td className="p-3 text-right">
                   {canManage && g.status === "DRAFT" && (

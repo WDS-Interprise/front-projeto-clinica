@@ -138,7 +138,7 @@ export default function RelatoriosAtendimentoPage({ embedded = false }: { embedd
                 <td className="p-3 whitespace-nowrap">
                   {format(new Date(row.date), "dd/MM/yyyy")} {row.startTime}
                 </td>
-                <td className="p-3">{row.patient?.name ?? "—"}</td>
+                <td className="p-3">{row.patient?.name ?? "-"}</td>
                 <td className="p-3">{row.doctor.name}</td>
                 <td className="p-3">{row.insurancePlan || "Particular"}</td>
                 <td className="p-3">{statusLabels[row.status] ?? row.status}</td>

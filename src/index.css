@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* shadcn / 21st.dev tokens — bridged to ClinicHub theme */
+/* shadcn / 21st.dev tokens, bridged to ClinicHub theme */
 :root {
   --radius: 0.5rem;
   --background: oklch(0.985 0.002 247.8);
@@ -154,12 +154,86 @@ html,
 body,
 #root {
   height: 100%;
+  cursor: default;
 }
 
 body {
   overflow: hidden;
   font-family: "Inter", system-ui, sans-serif;
   @apply bg-surface-alt text-text antialiased transition-colors duration-200;
+}
+
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="color"]):not([type="range"]),
+textarea,
+[contenteditable="true"] {
+  cursor: text;
+}
+
+a[href],
+button,
+summary,
+select,
+label,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="option"],
+[role="switch"],
+[role="checkbox"],
+[role="combobox"],
+[role="link"] {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Evita caret de texto ao clicar em cards, linhas e outros controles clicáveis */
+.cursor-pointer {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Conteúdo que deve permitir copiar/selecionar texto */
+.select-text,
+.select-text *,
+[data-selectable="true"],
+[data-selectable="true"] * {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+:disabled,
+[aria-disabled="true"],
+[disabled] {
+  cursor: not-allowed;
+}
+
+/* Inputs numéricos: remove setas nativas (spinners) em todo o site */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Select nativo: seta dentro do campo (evita botão solto ao lado no Windows) */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.25rem;
+}
+
+html.dark select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 
 * {
@@ -226,6 +300,157 @@ html.dark * {
   animation: landingFadeUp 0.55s ease-out both;
 }
 
+.landing-reveal {
+  opacity: 0;
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.landing-reveal-delay {
+  transition-delay: var(--landing-reveal-delay, 0ms);
+}
+
+.landing-reveal-fade-up {
+  transform: translateY(28px);
+}
+
+.landing-reveal-fade-in {
+  transform: none;
+}
+
+.landing-reveal-fade-left {
+  transform: translateX(-32px);
+}
+
+.landing-reveal-fade-right {
+  transform: translateX(32px);
+}
+
+.landing-reveal-scale-in {
+  transform: scale(0.94);
+}
+
+.landing-reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.landing-header-enter {
+  animation: landingHeaderSlide 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes landingHeaderSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingHeroFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.landing-hero-float {
+  animation: landingHeroFloat 5.5s ease-in-out infinite;
+}
+
+.landing-card-hover {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease;
+}
+
+.landing-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.11);
+}
+
+.landing-plan-highlight {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-plan-highlight:hover {
+  transform: translateY(-6px) scale(1.015);
+}
+
+.landing-btn-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.landing-btn-lift:hover {
+  transform: translateY(-2px);
+}
+
+.landing-btn-lift:active {
+  transform: translateY(0);
+}
+
+@keyframes landingStepArrow {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+}
+
+.landing-step-arrow {
+  animation: landingStepArrow 2.4s ease-in-out infinite;
+}
+
+@keyframes landingCtaGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.08);
+  }
+}
+
+.landing-cta-glow {
+  animation: landingCtaGlow 3s ease-in-out infinite;
+}
+
+@keyframes landingMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.landing-marquee-track {
+  animation: landingMarquee 42s linear infinite;
+  will-change: transform;
+}
+
+.landing-marquee-track-reverse {
+  animation-direction: reverse;
+  animation-duration: 48s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-fade-up {
     animation: none;
@@ -233,6 +458,38 @@ html.dark * {
 
   .auth-float-icon {
     animation: none;
+  }
+
+  .landing-logo-track {
+    animation: none;
+  }
+
+  .landing-marquee-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .landing-marquee-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .landing-header-enter,
+  .landing-hero-float,
+  .landing-step-arrow,
+  .landing-cta-glow {
+    animation: none;
+  }
+
+  .landing-card-hover:hover,
+  .landing-plan-highlight:hover,
+  .landing-btn-lift:hover {
+    transform: none;
   }
 }
 
@@ -249,6 +506,61 @@ html.dark * {
   font-family: var(--font-landing-body);
 }
 
+.landing-logo-loop {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.landing-logo-track {
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  width: max-content;
+  margin: 0;
+  padding: 8px 22px;
+  list-style: none;
+  animation: landingLogoScroll 26s linear infinite;
+}
+
+.landing-logo-loop:hover .landing-logo-track {
+  animation-play-state: paused;
+}
+
+@keyframes landingLogoScroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.landing-logo-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+  color: #8b96a5;
+  cursor: default;
+  transition: transform 0.24s cubic-bezier(0.3, 0.9, 0.4, 1), color 0.24s ease;
+}
+
+.landing-logo-item:hover {
+  transform: scale(1.08);
+  color: #00914a;
+}
+
+.landing-logo-item svg {
+  width: 21px;
+  height: 21px;
+}
+
+.landing-logo-item span {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
 @keyframes onboardingFadeIn {
   from {
     opacity: 0;
@@ -258,4 +570,19 @@ html.dark * {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes onboardingStepReveal {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.onboarding-step-reveal {
+  animation: onboardingStepReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
 }

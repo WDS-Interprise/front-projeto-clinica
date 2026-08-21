@@ -4,7 +4,7 @@ export interface Patient {
   email: string | null
   phone: string
   phoneHome?: string | null
-  cpf: string
+  cpf: string | null
   birthDate: string
   gender: "M" | "F" | "O"
   address: string | null
@@ -78,6 +78,8 @@ export interface Appointment {
   reminderSentAt?: string | null
   startedAt?: string | null
   endedAt?: string | null
+  encounterId?: string | null
+  encounterStatus?: string | null
   cidCode?: string | null
   cidDescription?: string | null
   cidVersion?: string | null
@@ -90,6 +92,7 @@ export interface Appointment {
   totalAmount?: number
   chargedAmount?: number
   billingStatus?: string
+  occupancyOnly?: boolean
   createdAt: string
   updatedAt: string
   patient?: {
@@ -102,6 +105,8 @@ export interface Appointment {
     insurancePlan?: string
     birthDate?: string
     gender?: string
+    allergies?: string
+    medications?: string
   } | null
   doctor: { id: string; name: string; specialty: string; email?: string }
   procedures?: AppointmentProcedureLine[]
@@ -118,13 +123,36 @@ export interface PanelMetrics {
   confirmed: number
   completed: number
   noShow: number
-  newVsReturning: { new: number; returning: number }
+  vsYesterday: {
+    scheduled: number
+    confirmed: number
+    completed: number
+    noShow: number
+  }
+  newVsReturning: {
+    new: number
+    returning: number
+    newChange: number
+    returningChange: number
+  }
   byInsurance: Array<{ label: string; count: number }>
   procedures: Array<{ label: string; count: number }>
   appointmentsInPeriod: number
   avgDurationMinutes: number | null
   birthdaysToday?: Array<{ id: string; name: string; phone: string; age: number }>
   ageDistribution?: Array<{ label: string; count: number }>
+  periodSummary: {
+    total: number
+    confirmationRate: number
+    noShow: number
+    revenue: number
+    vsPrevious: {
+      total: number
+      confirmationRatePp: number
+      noShow: number
+      revenue: number
+    }
+  }
 }
 
 export interface TodayPatientSlot {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Search, ChevronLeft, ChevronRight } from "lucide-react"
-import { OutrosPageShell } from "@/components/outros/OutrosPageShell"
+import { ClinicalToolsPageShell } from "@/components/clinical/ClinicalToolsPageShell"
 import { CidDetailCard } from "@/components/cid/CidDetailCard"
 import { api } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
@@ -86,7 +86,7 @@ export default function Cid11Page() {
   }, [query, capitulo, bloco, tipo, page, toast])
 
   return (
-    <OutrosPageShell title="CID 11" description="Classificação Internacional de Doenças — 11ª revisão.">
+    <ClinicalToolsPageShell title="CID-11" description="Classificação Internacional de Doenças. 11ª revisão.">
       <div className="rounded-xl border border-border bg-surface-alt/50 px-4 py-3 text-sm text-text-secondary">
         A seleção de CID deve ser realizada por profissional habilitado.
       </div>
@@ -116,7 +116,7 @@ export default function Cid11Page() {
                 <option value="">Todos</option>
                 {capitulos.map((c) => (
                   <option key={c.codigo} value={c.codigo}>
-                    {c.codigo} — {c.descricao}
+                    {c.codigo}. {c.descricao}
                   </option>
                 ))}
               </select>
@@ -233,6 +233,6 @@ export default function Cid11Page() {
           </div>
         </div>
       </div>
-    </OutrosPageShell>
+    </ClinicalToolsPageShell>
   )
 }

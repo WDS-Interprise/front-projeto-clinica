@@ -1,7 +1,8 @@
 export type HistoryAttendanceRecord = {
   id: string
   type: "ATTENDANCE"
-  appointmentId: string
+  appointmentId: string | null
+  encounterId?: string | null
   status: string
   professionalName: string
   time: string
@@ -19,6 +20,13 @@ export type HistoryAttendanceRecord = {
     prescriptionSummary?: string | null
     notes?: string | null
   }
+  addendums?: Array<{
+    id: string
+    body: string
+    reason?: string | null
+    createdAt: string
+    authorName: string
+  }>
 }
 
 export type HistoryPrescriptionRecord = {
@@ -26,6 +34,7 @@ export type HistoryPrescriptionRecord = {
   type: "PRESCRIPTION"
   prescriptionId: string
   appointmentId?: string | null
+  encounterId?: string | null
   status: string
   professionalName: string
   time: string

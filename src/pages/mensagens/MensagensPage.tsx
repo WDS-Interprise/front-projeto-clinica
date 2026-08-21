@@ -20,6 +20,7 @@ import { toastMessageFromApiError } from "@/lib/api-errors"
 import { cn } from "@/lib/utils"
 import { renderMessageTemplate } from "@/lib/render-template"
 import { whatsappChatDisplayName } from "@/lib/whatsapp-display"
+import { setWhatsappUnreadCount, visibleUnreadCount } from "@/lib/whatsapp-unread"
 import NewWhatsappChatModal from "@/components/whatsapp/NewWhatsappChatModal"
 import WhatsappChatAvatar from "@/components/whatsapp/WhatsappChatAvatar"
 import WhatsappChatListItem from "@/components/whatsapp/WhatsappChatListItem"
@@ -60,6 +61,7 @@ export default function MensagensPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const composingPingRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const staffComposingRef = useRef(false)
+  const selectedIdRef = useRef<string | null>(null)
 
   const selected = chats.find((c) => c.id === selectedId)
   const aiComposing = selected?.aiComposing && !selected?.aiPaused
@@ -67,16 +69,29 @@ export default function MensagensPage() {
   const clinicComposing = Boolean(aiComposing || staffTyping)
   const anyComposing = contactComposing || clinicComposing
 
+  const markChatRead = useCallback((chatId: string) => {
+    setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, unreadCount: 0 } : c)))
+  }, [])
+
+  const selectChat = useCallback(
+    (chatId: string) => {
+      selectedIdRef.current = chatId
+      setSelectedId(chatId)
+      markChatRead(chatId)
+    },
+    [markChatRead]
+  )
+
   const loadChats = useCallback(() => {
     if (!connectionId) return Promise.resolve()
     return api.whatsapp
       .listChats(patientFilter ? { patientId: patientFilter } : undefined)
       .then((list) => {
-        setChats(list)
-        setSelectedId((prev) => {
-          if (prev && list.some((c) => c.id === prev)) return prev
-          return list.length > 0 ? list[0].id : null
-        })
+        const current = selectedIdRef.current
+        const nextId = current && list.some((c) => c.id === current) ? current : (list[0]?.id ?? null)
+        selectedIdRef.current = nextId
+        setChats(list.map((c) => (c.id === nextId ? { ...c, unreadCount: 0 } : c)))
+        setSelectedId(nextId)
       })
       .catch((e: unknown) =>
         toast(toastMessageFromApiError(e, "Erro ao carregar conversas"), "error")
@@ -89,11 +104,16 @@ export default function MensagensPage() {
         setConnectionId(resolveConnectedId(s.connections, s.defaultConnectionId))
       }),
       api.whatsapp.listTemplates().then(setTemplates),
-    ]).finally(() => setLoading(false))
-  }, [])
+    ])
+      .catch((e: unknown) =>
+        toast(toastMessageFromApiError(e, "Erro ao carregar configurações do WhatsApp"), "error")
+      )
+      .finally(() => setLoading(false))
+  }, [toast])
 
   useEffect(() => {
     if (!connectionId) {
+      selectedIdRef.current = null
       setChats([])
       setSelectedId(null)
       return
@@ -123,6 +143,7 @@ export default function MensagensPage() {
               c.id === r.chat.id
                 ? {
                     ...c,
+                    unreadCount: 0,
                     aiPaused: r.chat.aiPaused,
                     aiComposing: r.chat.aiComposing ?? false,
                     contactComposing: r.chat.contactComposing ?? false,
@@ -233,11 +254,16 @@ export default function MensagensPage() {
   const handleChatCreated = (chat: WhatsappChat) => {
     setChats((prev) => {
       const exists = prev.some((c) => c.id === chat.id)
-      if (exists) return prev.map((c) => (c.id === chat.id ? { ...c, ...chat } : c))
-      return [chat, ...prev]
+      const next = exists ? prev.map((c) => (c.id === chat.id ? { ...c, ...chat } : c)) : [chat, ...prev]
+      return next.map((c) => (c.id === chat.id ? { ...c, unreadCount: 0 } : c))
     })
+    selectedIdRef.current = chat.id
     setSelectedId(chat.id)
   }
+
+  useEffect(() => {
+    setWhatsappUnreadCount(visibleUnreadCount(chats))
+  }, [chats])
 
   const filteredChats = chats.filter((c) => {
     if (!search.trim()) return true
@@ -322,7 +348,7 @@ export default function MensagensPage() {
                       key={c.id}
                       chat={c}
                       selected={selectedId === c.id}
-                      onSelect={() => setSelectedId(c.id)}
+                      onSelect={() => selectChat(c.id)}
                     />
                   ))
                 )}
@@ -346,7 +372,10 @@ export default function MensagensPage() {
                     <button
                       type="button"
                       className="md:hidden rounded-full p-2 text-[#54656f] hover:bg-[#e9edef]"
-                      onClick={() => setSelectedId(null)}
+                      onClick={() => {
+                        selectedIdRef.current = null
+                        setSelectedId(null)
+                      }}
                       aria-label="Voltar para conversas"
                     >
                       <ArrowLeft className="h-5 w-5" />

@@ -8,6 +8,8 @@ import {
   shouldShowOnboarding,
 } from "@/lib/onboarding"
 
+import { PlanFeatureProvider } from "@/context/PlanFeatureContext"
+
 export default function AppShell() {
   const [onboardingDismissed, setOnboardingDismissed] = useState(false)
   const showOnboarding = !onboardingDismissed && shouldShowOnboarding()
@@ -17,7 +19,8 @@ export default function AppShell() {
   }, [])
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-surface-alt">
+    <PlanFeatureProvider>
+      <div className="flex h-screen flex-col bg-surface-alt">
       <AppHeader />
       <main className="min-h-0 flex-1 overflow-hidden pt-16">
         <Outlet />
@@ -26,6 +29,7 @@ export default function AppShell() {
         <OnboardingPage onComplete={() => setOnboardingDismissed(true)} />
       )}
     </div>
+    </PlanFeatureProvider>
   )
 }
 

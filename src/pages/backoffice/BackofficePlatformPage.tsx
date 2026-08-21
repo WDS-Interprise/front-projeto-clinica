@@ -1,68 +1,112 @@
-import { CreditCard, FileDown, ArrowLeftRight, MessageSquare, Smartphone, Video } from "lucide-react"
-
-const sections = [
-  {
-    icon: CreditCard,
-    title: "Assinatura",
-    desc: "Planos, faturamento e renovação da plataforma (em breve).",
-  },
-  {
-    icon: CreditCard,
-    title: "Cobrança",
-    desc: "Gateways, boletos e histórico de pagamentos das clínicas (em breve).",
-  },
-  {
-    icon: MessageSquare,
-    title: "Permissões de envio",
-    desc: "E-mail e WhatsApp em nível de plataforma (em breve).",
-  },
-  {
-    icon: Smartphone,
-    title: "SMS enviados",
-    desc: "Relatório consolidado de SMS (em breve).",
-  },
-  {
-    icon: Video,
-    title: "Teleconsultas",
-    desc: "Uso de teleconsulta por clínica (em breve).",
-  },
-  {
-    icon: FileDown,
-    title: "Exportar dados",
-    desc: "Exportação em massa para compliance e backup (em breve).",
-  },
-  {
-    icon: ArrowLeftRight,
-    title: "Migrar",
-    desc: "Importação de bases legadas (em breve).",
-  },
-]
+import { useEffect, useState } from "react"
+import { backofficeApi } from "@/services/backoffice-api"
+import { useToast } from "@/context/ToastContext"
+import { toastMessageFromApiError } from "@/lib/api-errors"
+import { Button } from "@/components/ui/button"
 
 export default function BackofficePlatformPage() {
+  const { toast } = useToast()
+  const [settings, setSettings] = useState<any>(null)
+  const [plans, setPlans] = useState<any[]>([])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    Promise.all([backofficeApi.platformSettings.get(), backofficeApi.plans.list()])
+      .then(([s, p]) => {
+        setSettings(s)
+        setPlans(p.filter((x: any) => x.active))
+      })
+      .catch((err: unknown) => toast(toastMessageFromApiError(err, "Erro ao carregar configurações"), "error"))
+  }, [])
+
+  const save = async () => {
+    if (!settings) return
+    setSaving(true)
+    try {
+      const updated = await backofficeApi.platformSettings.update(settings)
+      setSettings(updated)
+      toast("Configurações salvas")
+    } catch (err: unknown) {
+      toast(toastMessageFromApiError(err, "Erro ao salvar"), "error")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!settings) {
+    return <p className="text-sm text-[#6B7C74]">Carregando configurações...</p>
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-text">Plataforma</h1>
-        <p className="text-sm text-text-secondary mt-1">
-          Configurações exclusivas dos donos — não disponíveis no CRM das clínicas
-        </p>
+        <h1 className="text-2xl font-bold text-[#12261E]">Configurações da plataforma</h1>
+        <p className="mt-1 text-sm text-[#6B7C74]">Billing SaaS, trial padrão e cadastros.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sections.map(({ icon: Icon, title, desc }) => (
-          <div
-            key={title}
-            className="bg-surface border border-border rounded-xl p-5 flex gap-4"
+      <div className="rounded-xl border border-[#E4EBE6] bg-white p-6 space-y-4">
+        <label className="block text-sm">
+          <span className="text-[#6B7C74]">Plano padrão para novas clínicas</span>
+          <select
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
+            value={settings.defaultPlanId ?? ""}
+            onChange={(e) => setSettings({ ...settings, defaultPlanId: e.target.value || null })}
           >
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-              <Icon className="w-5 h-5 text-amber-400" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-text">{title}</h2>
-              <p className="text-sm text-text-secondary mt-1">{desc}</p>
-            </div>
-          </div>
-        ))}
+            <option value="">Selecione...</option>
+            {plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-sm">
+          <span className="text-[#6B7C74]">Dias de trial padrão</span>
+          <input
+            type="number"
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
+            value={settings.defaultTrialDays}
+            onChange={(e) => setSettings({ ...settings, defaultTrialDays: Number(e.target.value) })}
+          />
+        </label>
+
+        <label className="block text-sm">
+          <span className="text-[#6B7C74]">Dias de tolerância após vencimento</span>
+          <input
+            type="number"
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
+            value={settings.gracePeriodDays}
+            onChange={(e) => setSettings({ ...settings, gracePeriodDays: Number(e.target.value) })}
+          />
+        </label>
+
+        <label className="block text-sm">
+          <span className="text-[#6B7C74]">E-mail financeiro</span>
+          <input
+            type="email"
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
+            value={settings.billingEmail ?? ""}
+            onChange={(e) => setSettings({ ...settings, billingEmail: e.target.value || null })}
+          />
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={settings.newSignupsEnabled}
+            onChange={(e) => setSettings({ ...settings, newSignupsEnabled: e.target.checked })}
+          />
+          Permitir novos cadastros de clínicas
+        </label>
+
+        <p className="text-xs text-[#8A9A90]">
+          Chaves da API Asaas permanecem no servidor (.env). Não são editáveis aqui.
+        </p>
+
+        <Button className="bg-[#006B4D] text-white" onClick={save} disabled={saving}>
+          {saving ? "Salvando..." : "Salvar configurações"}
+        </Button>
       </div>
     </div>
   )

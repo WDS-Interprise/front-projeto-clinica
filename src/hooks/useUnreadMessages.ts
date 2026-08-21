@@ -1,21 +1,41 @@
 import { useEffect, useState } from "react"
+import { useLocation } from "react-router-dom"
 import { api } from "@/services/api"
 import { useAuth } from "@/context/AuthContext"
+import {
+  getWhatsappUnreadCount,
+  setWhatsappUnreadCount,
+  subscribeWhatsappUnread,
+  visibleUnreadCount,
+} from "@/lib/whatsapp-unread"
 
 export function useUnreadMessages() {
   const { hasPermission } = useAuth()
-  const [count, setCount] = useState(0)
+  const location = useLocation()
+  const [count, setCount] = useState(getWhatsappUnreadCount)
+  const onMessagesPage = location.pathname === "/mensagens"
+
+  useEffect(() => subscribeWhatsappUnread(setCount), [])
 
   useEffect(() => {
     if (!hasPermission("whatsapp:send")) {
-      setCount(0)
+      setWhatsappUnreadCount(0)
       return
     }
-    api.whatsapp
-      .listChats()
-      .then((chats) => setCount(chats.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0)))
-      .catch(() => setCount(0))
-  }, [hasPermission])
+
+    const refresh = () => {
+      api.whatsapp
+        .listChats()
+        .then((chats) => setWhatsappUnreadCount(visibleUnreadCount(chats)))
+        .catch(() => undefined)
+    }
+
+    refresh()
+    if (onMessagesPage) return
+
+    const timer = window.setInterval(refresh, 12_000)
+    return () => window.clearInterval(timer)
+  }, [hasPermission, onMessagesPage])
 
   return count
 }

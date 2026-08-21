@@ -150,7 +150,7 @@ export default function MinhaContaPage() {
               onSelectFile={handleAvatarUpload}
             />
             <div className="text-center sm:text-left">
-              <p className="text-sm font-semibold text-text">{form.name || "—"}</p>
+              <p className="text-sm font-semibold text-text">{form.name || "-"}</p>
               <p className="text-xs text-text-secondary mt-0.5">{form.email || user?.email}</p>
               <p className="text-xs text-text-secondary mt-1">{roleLabel}</p>
             </div>

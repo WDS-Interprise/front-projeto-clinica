@@ -27,6 +27,7 @@ type Props = {
   onSubmit: (values: MedicationFormValues) => void
   initialProduct?: MedicamentoProduto | null
   initialSubstanceName?: string
+  initialValues?: MedicationFormValues | null
 }
 
 function productToForm(product: MedicamentoProduto): MedicationFormValues {
@@ -50,13 +51,16 @@ export function MedicationFormModal({
   onSubmit,
   initialProduct,
   initialSubstanceName,
+  initialValues,
 }: Props) {
   const { toast } = useToast()
   const [form, setForm] = useState<MedicationFormValues>(empty)
 
   useEffect(() => {
     if (!open) return
-    if (initialProduct) {
+    if (initialValues) {
+      setForm(initialValues)
+    } else if (initialProduct) {
       setForm(productToForm(initialProduct))
     } else if (initialSubstanceName) {
       setForm({
@@ -68,7 +72,7 @@ export function MedicationFormModal({
     } else {
       setForm(empty)
     }
-  }, [open, initialProduct, initialSubstanceName])
+  }, [open, initialProduct, initialSubstanceName, initialValues])
 
   const set = (key: keyof MedicationFormValues, value: string | boolean) => {
     setForm((f) => ({ ...f, [key]: value }))

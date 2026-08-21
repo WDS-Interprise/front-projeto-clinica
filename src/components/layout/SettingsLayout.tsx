@@ -9,11 +9,9 @@ type Props = {
 
 export default function SettingsLayout({ children, className }: Props) {
   return (
-    <div className="flex h-full min-h-0 gap-4 overflow-hidden p-4 lg:gap-6 lg:p-6">
+    <div className="flex h-full min-h-0 gap-5 overflow-hidden bg-[#F4F7F5] p-5">
       <SettingsSidebar />
-      <div className={cn("min-h-0 min-w-0 flex-1 space-y-6 overflow-y-auto", className)}>
-        {children}
-      </div>
+      <div className={cn("min-h-0 min-w-0 flex-1 overflow-auto", className)}>{children}</div>
     </div>
   )
 }
@@ -30,13 +28,13 @@ export function SettingsPageHeader({
   action?: ReactNode
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className="mb-5 flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-text flex items-center gap-2">
+        <h1 className="flex items-center gap-2 text-[28px] font-bold leading-tight text-[#12261E]">
           {icon}
           {title}
         </h1>
-        {description && <p className="text-sm text-text-secondary mt-1">{description}</p>}
+        {description && <p className="mt-1 max-w-2xl text-[14px] leading-relaxed text-[#6B7C74]">{description}</p>}
       </div>
       {action}
     </div>

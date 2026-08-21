@@ -93,8 +93,8 @@ export default function ContatosPage() {
                     {c.subtitle && <p className="text-xs text-text-secondary">{c.subtitle}</p>}
                   </td>
                   <td className="p-3 text-text-secondary">{typeLabels[c.type] ?? c.type}</td>
-                  <td className="p-3">{c.phone ?? "—"}</td>
-                  <td className="p-3">{c.email ?? "—"}</td>
+                  <td className="p-3">{c.phone ?? "-"}</td>
+                  <td className="p-3">{c.email ?? "-"}</td>
                   <td className="p-3">
                     <div className="flex justify-end gap-1">
                       {c.phone && (

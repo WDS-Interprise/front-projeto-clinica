@@ -14,6 +14,7 @@ export default function Patients() {
   const location = useLocation()
   const navigate = useNavigate()
   const { hasPermission } = useAuth()
+  const canReadClinical = hasPermission("records:view")
   const [search, setSearch] = useState("")
   const [patients, setPatients] = useState<Patient[]>([])
   const [formOpen, setFormOpen] = useState(false)
@@ -101,7 +102,9 @@ export default function Patients() {
                       <td className="py-3 px-4">
                         <button
                           type="button"
-                          onClick={() => navigate(`/prontuario/${patient.id}`)}
+                          onClick={() =>
+                            navigate(canReadClinical ? `/prontuario/${patient.id}` : `/pacientes/${patient.id}`)
+                          }
                           className="flex items-center gap-3 text-left w-full rounded-lg hover:opacity-90"
                         >
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shrink-0">
@@ -120,7 +123,7 @@ export default function Patients() {
                         </button>
                       </td>
                       <td className="py-3 px-4 text-text-secondary">
-                        {patient.cpf ? formatCPF(patient.cpf) : "—"}
+                        {patient.cpf ? formatCPF(patient.cpf) : "-"}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex flex-col gap-1">
@@ -149,13 +152,17 @@ export default function Patients() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <Link
-                          to={`/prontuario/${patient.id}`}
-                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary-light"
-                        >
-                          <FileText className="w-3.5 h-3.5" />
-                          Prontuário
-                        </Link>
+                        {canReadClinical ? (
+                          <Link
+                            to={`/prontuario/${patient.id}`}
+                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary-light"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            Prontuário
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-text-secondary">Cadastro</span>
+                        )}
                       </td>
                     </tr>
                   ))}

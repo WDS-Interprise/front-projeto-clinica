@@ -145,7 +145,7 @@ export default function ExtratoPage({
                   {tx.account?.name ??
                     (tx.transferFrom && tx.transferTo
                       ? `${tx.transferFrom.name} → ${tx.transferTo.name}`
-                      : "—")}
+                      : "-")}
                   {tx.category?.name ? ` · ${tx.category.name}` : ""}
                 </td>
                 <td className="p-3">
