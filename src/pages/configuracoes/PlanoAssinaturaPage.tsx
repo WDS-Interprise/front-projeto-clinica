@@ -93,6 +93,26 @@ export default function PlanoAssinaturaPage() {
     }
   }
 
+  const refreshPix = async (invoiceId: string) => {
+    try {
+      await api.subscription.refreshInvoicePix(invoiceId)
+      toast("Pix atualizado")
+      loadInvoices()
+    } catch (err: unknown) {
+      toast(toastMessageFromApiError(err, "Erro ao atualizar Pix"), "error")
+    }
+  }
+
+  const copyPix = async (pix: string | null) => {
+    if (!pix) return
+    try {
+      await navigator.clipboard.writeText(pix)
+      toast("Pix copiado")
+    } catch {
+      toast("Não foi possível copiar o Pix", "error")
+    }
+  }
+
   const pendingPlanSlug =
     plans.find((p) => p.id === subscription?.pendingUpgrade?.planId)?.slug ??
     plans.find((p) => p.name === subscription?.pendingUpgrade?.planName)?.slug
