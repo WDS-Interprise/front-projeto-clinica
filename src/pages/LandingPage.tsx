@@ -1,11 +1,16 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import {
   ArrowRight,
+  Briefcase,
   CalendarClock,
   Check,
   ChevronDown,
   ChevronRight,
+  Leaf,
+  Rocket,
+  Shield,
+  Star,
 } from "lucide-react"
 import AppLogo from "@/components/brand/AppLogo"
 import LandingMarquee from "@/components/landing/LandingMarquee"
@@ -27,10 +32,12 @@ import {
   LANDING_FOOTER_COLUMNS,
   LANDING_HERO_TRUST,
   LANDING_NAV,
-  LANDING_PLANS,
+  LANDING_PLAN_FALLBACK,
   LANDING_SPECIALIST_EMAIL,
   LANDING_STEPS,
 } from "@/lib/landing-content"
+import { api } from "@/services/api"
+import { rememberSelectedPlan, checkoutPath, type PublicCatalog, type PublicCatalogPlan } from "@/lib/plan-features"
 
 function LandingHeader() {
   return (
@@ -244,70 +251,204 @@ function HowItWorksSection() {
   )
 }
 
+function formatLandingPrice(value: number) {
+  return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(value)
+}
+
+const PLAN_ICONS = {
+  essencial: Leaf,
+  profissional: Briefcase,
+  premium: Rocket,
+} as const
+
 function PricingSection() {
+  const [cycle, setCycle] = useState<"MONTHLY" | "ANNUAL">("MONTHLY")
+  const [catalog, setCatalog] = useState<PublicCatalog>(LANDING_PLAN_FALLBACK)
+  const [compareOpen, setCompareOpen] = useState(false)
+
+  useEffect(() => {
+    api.public
+      .plans()
+      .then((data) => {
+        if (data?.plans?.length) setCatalog(data)
+      })
+      .catch(() => undefined)
+  }, [])
+
   return (
     <section id="planos" className="scroll-mt-20 bg-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <LandingReveal className="mx-auto max-w-2xl text-center">
           <h2 className="font-landing-heading text-2xl font-bold tracking-tight text-[#0A1F44] sm:text-3xl">
-            Planos que cabem no seu momento
+            Planos que cabem <span style={{ color: LANDING_GREEN }}>no seu momento</span>
           </h2>
           <p className="mt-3 text-base leading-relaxed text-[#5b6573]">
-            Escolha o plano ideal para sua clínica. Todos incluem os recursos essenciais.
+            Escolha o plano da sua clínica. O Essencial cobre o básico. Profissional e Premium liberam mais recursos depois do pagamento.
           </p>
         </LandingReveal>
 
+        <div className="mt-8 flex justify-center">
+          <div className="inline-flex rounded-full border border-[#e6eaf0] bg-[#f7f8fa] p-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setCycle("MONTHLY")}
+              className={`rounded-full px-4 py-1.5 font-medium ${cycle === "MONTHLY" ? "bg-white text-[#0A1F44] shadow-sm" : "text-[#5b6573]"}`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              onClick={() => setCycle("ANNUAL")}
+              className={`rounded-full px-4 py-1.5 font-medium ${cycle === "ANNUAL" ? "bg-white text-[#0A1F44] shadow-sm" : "text-[#5b6573]"}`}
+            >
+              Anual
+            </button>
+          </div>
+        </div>
+        {cycle === "ANNUAL" ? (
+          <p className="mt-3 text-center text-sm font-medium" style={{ color: LANDING_GREEN }}>
+            {catalog.annualSavingsLabel}
+          </p>
+        ) : null}
+
         <div className="mt-12 grid gap-6 lg:grid-cols-3 lg:items-stretch">
-          {LANDING_PLANS.map((plan, index) => (
-            <LandingReveal key={plan.name} delay={index * 120} variant="scale-in">
-              <article
-                className={`landing-card-hover relative flex h-full flex-col rounded-2xl bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.08)] ${
-                  plan.highlighted ? "landing-plan-highlight border-2" : "border border-[#e6eaf0]"
-                }`}
-                style={plan.highlighted ? { borderColor: LANDING_GREEN } : undefined}
-              >
-                {plan.badge ? (
-                  <span
-                    className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[11px] font-semibold text-white"
-                    style={{ backgroundColor: LANDING_GREEN }}
-                  >
-                    {plan.badge}
-                  </span>
-                ) : null}
-
-                <h3 className="font-landing-heading text-lg font-bold text-[#0A1F44]">{plan.name}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-[#5b6573]">{plan.description}</p>
-                <p className="mt-5 font-landing-heading text-3xl font-bold tracking-tight text-[#0A1F44]">
-                  R$ {plan.price}
-                  <span className="text-base font-medium text-[#5b6573]">{plan.period}</span>
-                </p>
-
-                <Link
-                  to="/register"
-                  className="landing-btn-lift mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-[#0A1F44]/20 bg-white text-sm font-semibold text-[#0A1F44] transition-colors duration-200 hover:bg-slate-50"
-                >
-                  Começar agora
-                </Link>
-
-                <ul className="mt-6 space-y-2.5">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-[#3d4654]">
-                      <Check
-                        className="mt-0.5 h-4 w-4 shrink-0"
-                        strokeWidth={2.5}
-                        style={{ color: LANDING_GREEN }}
-                        aria-hidden
-                      />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            </LandingReveal>
+          {catalog.plans.map((plan, index) => (
+            <PlanCard key={plan.slug} plan={plan} cycle={cycle} delay={index * 120} />
           ))}
         </div>
+
+        <div className="mt-8 rounded-2xl bg-[#f6f8fa] px-5 py-4 text-sm text-[#3d4654]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-10">
+            <p className="flex items-center gap-2">
+              <Shield className="h-4 w-4 shrink-0" style={{ color: LANDING_GREEN }} aria-hidden />
+              Sem fidelidade. Cancele quando quiser.
+            </p>
+            <p className="flex items-center gap-2">
+              <Shield className="h-4 w-4 shrink-0" style={{ color: LANDING_GREEN }} aria-hidden />
+              Ambiente seguro e 100% em nuvem.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-10 text-center">
+          <button
+            type="button"
+            onClick={() => setCompareOpen((open) => !open)}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[#0A1F44] hover:underline"
+          >
+            Comparar todos os recursos
+            <ChevronDown className={`h-4 w-4 transition ${compareOpen ? "rotate-180" : ""}`} aria-hidden />
+          </button>
+        </div>
+
+        {compareOpen && catalog.plans[0]?.comparison?.length ? (
+          <div className="mt-6 overflow-x-auto rounded-2xl border border-[#e6eaf0]">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-[#f7f8fa] text-[#0A1F44]">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Recurso</th>
+                  {catalog.plans.map((plan) => (
+                    <th key={plan.slug} className="px-4 py-3 font-semibold">
+                      {plan.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {catalog.plans[0].comparison.map((row, rowIndex) => (
+                  <tr key={row.key} className="border-t border-[#eef1f5]">
+                    <td className="px-4 py-2.5 text-[#3d4654]">{row.label}</td>
+                    {catalog.plans.map((plan) => {
+                      const cell = plan.comparison[rowIndex]
+                      return (
+                        <td key={plan.slug} className="px-4 py-2.5 text-[#0A1F44]">
+                          {cell?.included ? cell.value === "Sim" ? "Sim" : cell.value : "Não"}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </div>
     </section>
+  )
+}
+
+function PlanCard({
+  plan,
+  cycle,
+  delay,
+}: {
+  plan: PublicCatalogPlan
+  cycle: "MONTHLY" | "ANNUAL"
+  delay: number
+}) {
+  const Icon = PLAN_ICONS[plan.slug as keyof typeof PLAN_ICONS] ?? Briefcase
+  const monthly = cycle === "ANNUAL" ? plan.annualEquivalentMonthly : plan.monthlyPrice
+  const checkoutTo = checkoutPath(plan.slug, cycle)
+
+  return (
+    <LandingReveal delay={delay} variant="scale-in">
+      <article
+        className={`landing-card-hover relative flex h-full flex-col rounded-2xl bg-white p-6 pt-8 shadow-[0_12px_40px_rgba(15,23,42,0.08)] ${
+          plan.highlighted ? "landing-plan-highlight border-2" : "border border-[#e6eaf0]"
+        }`}
+        style={plan.highlighted ? { borderColor: LANDING_GREEN } : undefined}
+      >
+        {plan.badge ? (
+          <span
+            className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
+            style={{ backgroundColor: LANDING_GREEN }}
+          >
+            <Star className="h-3 w-3" fill="currentColor" aria-hidden />
+            {plan.badge}
+          </span>
+        ) : null}
+
+        <span
+          className="mb-3 flex h-10 w-10 items-center justify-center rounded-full"
+          style={{ backgroundColor: "rgba(0,145,74,0.12)", color: LANDING_GREEN }}
+        >
+          <Icon className="h-5 w-5" strokeWidth={1.85} aria-hidden />
+        </span>
+        <h3 className="font-landing-heading text-lg font-bold text-[#0A1F44]">{plan.name}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-[#5b6573]">{plan.description}</p>
+        <p className="mt-5 font-landing-heading text-3xl font-bold tracking-tight" style={{ color: LANDING_GREEN }}>
+          R$ {formatLandingPrice(monthly)}
+          <span className="text-base font-medium text-[#5b6573]"> /mês</span>
+        </p>
+        {cycle === "ANNUAL" ? (
+          <p className="mt-1 text-xs text-[#5b6573]">
+            R$ {formatLandingPrice(plan.annualPrice)} cobrados anualmente
+          </p>
+        ) : null}
+
+        <Link
+          to={checkoutTo}
+          onClick={() => rememberSelectedPlan(plan.slug)}
+          className={
+            plan.highlighted
+              ? "landing-btn-lift mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl text-sm font-semibold text-white"
+              : "landing-btn-lift mt-5 inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-[#0A1F44]/20 bg-white text-sm font-semibold text-[#0A1F44] transition-colors duration-200 hover:bg-slate-50"
+          }
+          style={plan.highlighted ? { backgroundColor: LANDING_GREEN } : undefined}
+        >
+          {plan.ctaLabel}
+        </Link>
+
+        <ul className="mt-6 space-y-2.5">
+          {plan.marketingFeatures.map((feature) => (
+            <li key={feature} className="flex items-start gap-2 text-sm text-[#3d4654]">
+              <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.5} style={{ color: LANDING_GREEN }} aria-hidden />
+              {feature}
+            </li>
+          ))}
+        </ul>
+      </article>
+    </LandingReveal>
   )
 }
 
@@ -338,7 +479,7 @@ function CtaSection() {
               to="/register"
               className="landing-btn-lift inline-flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white px-5 text-sm font-semibold text-[#0A1F44] transition-colors duration-200 hover:bg-white/95"
             >
-              Criar conta grátis
+              Criar conta
               <ChevronDown className="h-4 w-4" aria-hidden />
             </Link>
             <a

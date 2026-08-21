@@ -30,10 +30,22 @@ export default function UserAvatar({
   className,
 }: UserAvatarProps) {
   const [failed, setFailed] = useState(false)
-  const showImage = Boolean(imageUrl) && !failed
+  const [shownUrl, setShownUrl] = useState<string | null>(imageUrl ?? null)
+  const showImage = Boolean(shownUrl) && !failed
 
   useEffect(() => {
     setFailed(false)
+    if (!imageUrl) {
+      setShownUrl(null)
+      return
+    }
+    if (imageUrl === shownUrl) return
+    const preload = new Image()
+    preload.onload = () => setShownUrl(imageUrl)
+    preload.onerror = () => {
+      if (!shownUrl) setFailed(true)
+    }
+    preload.src = imageUrl
   }, [imageUrl])
 
   return (
@@ -47,11 +59,12 @@ export default function UserAvatar({
     >
       {showImage ? (
         <img
-          key={imageUrl}
-          src={imageUrl!}
+          src={shownUrl!}
           alt=""
           className="h-full w-full object-cover"
-          onError={() => setFailed(true)}
+          onError={() => {
+            if (shownUrl === imageUrl) setFailed(true)
+          }}
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center">

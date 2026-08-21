@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   Banknote,
   Building2,
-  ChevronRight,
   CreditCard,
   Landmark,
   Layers,
@@ -16,6 +15,7 @@ import {
   QrCode,
   SlidersHorizontal,
   Tags,
+  Trash2,
   Wallet,
   type LucideIcon,
 } from "lucide-react"
@@ -25,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Modal } from "@/components/ui/modal"
 import ClinmaxPaySettingsCard from "@/components/settings/ClinmaxPaySettingsCard"
 import { api, type FinanceLookup } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
@@ -34,7 +35,7 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { id: "recebimentos", label: "Recebimentos", icon: QrCode },
   { id: "padroes", label: "Padrões", icon: SlidersHorizontal },
-  { id: "contas", label: "Contas bancárias", icon: Landmark },
+  { id: "contas", label: "Caixas e contas", icon: Landmark },
   { id: "categorias", label: "Categorias", icon: Tags },
   { id: "centros", label: "Centros de custo", icon: Layers },
   { id: "formas", label: "Formas de pagamento", icon: CreditCard },
@@ -54,23 +55,6 @@ function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 }
 
-function nameById(items: Array<{ id: string; name: string }>, id: string) {
-  return items.find((item) => item.id === id)?.name ?? ""
-}
-
-function ValueChip({ children, empty }: { children: ReactNode; empty?: boolean }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex max-w-full truncate rounded-full px-3 py-1 text-[13px] font-medium",
-        empty ? "bg-[#F4F7F5] text-[#6B7C74]" : "bg-[#E8F6EE] text-[#006B4D]"
-      )}
-    >
-      {children}
-    </span>
-  )
-}
-
 export default function FinanceConfigPage() {
   const { toast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -84,7 +68,6 @@ export default function FinanceConfigPage() {
     defaultPaymentMethodId: "",
     autoGenerateOnAppointment: false,
   })
-  const [editingDefaults, setEditingDefaults] = useState(false)
   const [savingDefaults, setSavingDefaults] = useState(false)
   const [newAccount, setNewAccount] = useState("")
   const [newCategory, setNewCategory] = useState("")
@@ -94,6 +77,16 @@ export default function FinanceConfigPage() {
   const [adding, setAdding] = useState(false)
   const [showAllAccounts, setShowAllAccounts] = useState(false)
   const [showAddPaymentMethod, setShowAddPaymentMethod] = useState(false)
+  const [showAddCostCenter, setShowAddCostCenter] = useState(false)
+  const [removingItem, setRemovingItem] = useState<{
+    kind: "paymentMethod" | "costCenter"
+    id: string
+    name: string
+  } | null>(null)
+  const [removing, setRemoving] = useState(false)
+  const [renamingCenter, setRenamingCenter] = useState<{ id: string; name: string } | null>(null)
+  const [renameValue, setRenameValue] = useState("")
+  const [savingCenter, setSavingCenter] = useState(false)
 
   const load = () => {
     Promise.all([api.finance.lookup(), api.finance.getSettings()])
@@ -114,9 +107,9 @@ export default function FinanceConfigPage() {
   }, [])
 
   useEffect(() => {
-    setEditingDefaults(false)
     setShowAllAccounts(false)
     setShowAddPaymentMethod(false)
+    setShowAddCostCenter(false)
   }, [tab])
 
   const setTab = (id: TabId) => {
@@ -133,7 +126,6 @@ export default function FinanceConfigPage() {
         autoGenerateOnAppointment: settings.autoGenerateOnAppointment,
       })
       toast("Padrões financeiros salvos")
-      setEditingDefaults(false)
     } catch (e: unknown) {
       toast(toastMessageFromApiError(e, "Erro ao salvar padrões"), "error")
     } finally {
@@ -155,9 +147,55 @@ export default function FinanceConfigPage() {
     }
   }
 
-  const accountName = nameById(lookup?.accounts ?? [], settings.defaultAccountId)
-  const costCenterName = nameById(lookup?.costCenters ?? [], settings.defaultCostCenterId)
-  const paymentName = nameById(lookup?.paymentMethods ?? [], settings.defaultPaymentMethodId)
+  const confirmRemoveItem = async () => {
+    if (!removingItem) return
+    setRemoving(true)
+    try {
+      if (removingItem.kind === "paymentMethod") {
+        await api.finance.removePaymentMethod(removingItem.id)
+        toast("Forma de pagamento removida")
+      } else {
+        await api.finance.removeCostCenter(removingItem.id)
+        toast("Centro de custo removido")
+      }
+      setRemovingItem(null)
+      load()
+    } catch (e: unknown) {
+      toast(toastMessageFromApiError(e, "Não foi possível remover"), "error")
+    } finally {
+      setRemoving(false)
+    }
+  }
+
+  const saveRenamedCostCenter = async () => {
+    if (!renamingCenter || !renameValue.trim()) return
+    setSavingCenter(true)
+    try {
+      await api.finance.updateCostCenter(renamingCenter.id, { name: renameValue.trim() })
+      toast("Centro de custo atualizado")
+      setRenamingCenter(null)
+      load()
+    } catch (e: unknown) {
+      toast(toastMessageFromApiError(e, "Não foi possível atualizar o centro de custo"), "error")
+    } finally {
+      setSavingCenter(false)
+    }
+  }
+
+  const setDefaultCostCenter = async (id: string) => {
+    try {
+      await api.finance.updateSettings({
+        defaultAccountId: settings.defaultAccountId || null,
+        defaultCostCenterId: id,
+        defaultPaymentMethodId: settings.defaultPaymentMethodId || null,
+        autoGenerateOnAppointment: settings.autoGenerateOnAppointment,
+      })
+      setSettings((s) => ({ ...s, defaultCostCenterId: id }))
+      toast("Centro de custo padrão atualizado")
+    } catch (e: unknown) {
+      toast(toastMessageFromApiError(e, "Não foi possível definir o padrão"), "error")
+    }
+  }
 
   const expenseCategories = useMemo(
     () => (lookup?.categories ?? []).filter((c) => c.kind === "EXPENSE"),
@@ -172,7 +210,7 @@ export default function FinanceConfigPage() {
     <SettingsLayout className="flex w-full flex-col">
       <SettingsPageHeader
         title="Financeiro (cadastros)"
-        description="Contas, categorias, centros de custo, formas de pagamento e padrões usados no caixa da clínica."
+        description="Cadastros do livro-caixa da clínica: caixas, categorias, centros de custo, formas de pagamento e padrões. Pix de consulta fica em Recebimentos."
       />
 
       <div className="mb-5 flex flex-wrap gap-2" role="tablist" aria-label="Seções financeiras">
@@ -213,85 +251,59 @@ export default function FinanceConfigPage() {
 
       {tab === "padroes" && lookup && (
         <section className={card}>
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8F6EE] text-[#006B4D]">
-                <Wallet className="h-4 w-4" />
-              </span>
-              <h2 className="text-[16px] font-semibold text-[#12261E]">Padrões financeiros</h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => setEditingDefaults((v) => !v)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-[#006B4D] hover:bg-[#E8F6EE]"
-            >
-              <Pencil className="h-4 w-4" />
-              {editingDefaults ? "Cancelar" : "Editar padrões"}
-            </button>
+          <div className="mb-4 flex items-center gap-2.5">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8F6EE] text-[#006B4D]">
+              <Wallet className="h-4 w-4" />
+            </span>
+            <h2 className="text-[16px] font-semibold text-[#12261E]">Padrões financeiros</h2>
           </div>
+          <p className="mb-5 text-[13px] leading-relaxed text-[#6B7C74]">
+            Valores usados automaticamente em novos lançamentos do caixa. Se a clínica já tem conta, centro de custo e forma de pagamento, o sistema preenche aqui. Você pode trocar e salvar.
+          </p>
 
-          {editingDefaults ? (
-            <div className="space-y-4">
-              <Select
-                label="Conta padrão"
-                value={settings.defaultAccountId}
-                onChange={(defaultAccountId) => setSettings((s) => ({ ...s, defaultAccountId }))}
-                placeholder="Selecione..."
-                options={[
-                  { value: "", label: "Selecione..." },
-                  ...lookup.accounts.map((a) => ({ value: a.id, label: a.name })),
-                ]}
+          <div className="space-y-4">
+            <Select
+              label="Conta padrão"
+              value={settings.defaultAccountId}
+              onChange={(defaultAccountId) => setSettings((s) => ({ ...s, defaultAccountId }))}
+              placeholder={lookup.accounts.length ? "Selecione a conta" : "Cadastre uma conta primeiro"}
+              disabled={lookup.accounts.length === 0}
+              options={lookup.accounts.map((a) => ({ value: a.id, label: a.name }))}
+            />
+            <Select
+              label="Centro de custo padrão"
+              value={settings.defaultCostCenterId}
+              onChange={(defaultCostCenterId) => setSettings((s) => ({ ...s, defaultCostCenterId }))}
+              placeholder={lookup.costCenters.length ? "Selecione o centro" : "Cadastre um centro primeiro"}
+              disabled={lookup.costCenters.length === 0}
+              options={lookup.costCenters.map((c) => ({ value: c.id, label: c.name }))}
+            />
+            <Select
+              label="Forma de pagamento padrão"
+              value={settings.defaultPaymentMethodId}
+              onChange={(defaultPaymentMethodId) => setSettings((s) => ({ ...s, defaultPaymentMethodId }))}
+              placeholder={lookup.paymentMethods.length ? "Selecione a forma" : "Cadastre uma forma primeiro"}
+              disabled={lookup.paymentMethods.length === 0}
+              options={lookup.paymentMethods.map((p) => ({ value: p.id, label: p.name }))}
+            />
+            <div className="flex items-center gap-2 text-sm text-[#12261E]">
+              <Checkbox
+                id="auto-generate-income"
+                checked={settings.autoGenerateOnAppointment}
+                onCheckedChange={(checked) =>
+                  setSettings((s) => ({ ...s, autoGenerateOnAppointment: checked }))
+                }
               />
-              <Select
-                label="Centro de custo padrão"
-                value={settings.defaultCostCenterId}
-                onChange={(defaultCostCenterId) => setSettings((s) => ({ ...s, defaultCostCenterId }))}
-                placeholder="Selecione..."
-                options={[
-                  { value: "", label: "Selecione..." },
-                  ...lookup.costCenters.map((c) => ({ value: c.id, label: c.name })),
-                ]}
-              />
-              <Select
-                label="Forma de pagamento padrão"
-                value={settings.defaultPaymentMethodId}
-                onChange={(defaultPaymentMethodId) => setSettings((s) => ({ ...s, defaultPaymentMethodId }))}
-                placeholder="Selecione..."
-                options={[
-                  { value: "", label: "Selecione..." },
-                  ...lookup.paymentMethods.map((p) => ({ value: p.id, label: p.name })),
-                ]}
-              />
-              <div className="flex items-center gap-2 text-sm text-[#12261E]">
-                <Checkbox
-                  id="auto-generate-income"
-                  checked={settings.autoGenerateOnAppointment}
-                  onCheckedChange={(checked) =>
-                    setSettings((s) => ({ ...s, autoGenerateOnAppointment: checked }))
-                  }
-                />
-                <label htmlFor="auto-generate-income" className="cursor-pointer">
-                  Gerar receita automaticamente ao concluir atendimento
-                </label>
-              </div>
-              <div className="flex justify-end">
-                <Button type="button" onClick={() => void saveSettings()} disabled={savingDefaults}>
-                  {savingDefaults ? "Salvando..." : "Salvar padrões"}
-                </Button>
-              </div>
+              <label htmlFor="auto-generate-income" className="cursor-pointer">
+                Gerar receita automaticamente ao concluir atendimento
+              </label>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
-              <DefaultField label="Conta padrão" value={accountName} />
-              <DefaultField label="Centro de custo padrão" value={costCenterName} />
-              <DefaultField label="Forma de pagamento padrão" value={paymentName} />
-              <DefaultField
-                label="Receita automática"
-                value={settings.autoGenerateOnAppointment ? "Ativa" : "Inativa"}
-                empty={!settings.autoGenerateOnAppointment}
-              />
+            <div className="flex justify-end">
+              <Button type="button" onClick={() => void saveSettings()} disabled={savingDefaults}>
+                {savingDefaults ? "Salvando..." : "Salvar padrões"}
+              </Button>
             </div>
-          )}
+          </div>
         </section>
       )}
 
@@ -302,7 +314,7 @@ export default function FinanceConfigPage() {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8F6EE] text-[#006B4D]">
                 <Landmark className="h-4 w-4" />
               </span>
-              <h2 className="text-[16px] font-semibold text-[#12261E]">Contas bancárias</h2>
+              <h2 className="text-[16px] font-semibold text-[#12261E]">Caixas e contas</h2>
             </div>
             {lookup.accounts.length > 0 && (
               <button
@@ -317,9 +329,13 @@ export default function FinanceConfigPage() {
             )}
           </div>
 
+          <p className="mb-4 text-[13px] leading-relaxed text-[#6B7C74]">
+            Isso não conecta com banco de verdade. Serve para separar o dinheiro no livro-caixa, por exemplo caixa da recepção, conta corrente ou maquininha. Cada lançamento em Finanças aponta para uma dessas origens.
+          </p>
+
           {lookup.accounts.length === 0 ? (
             <p className="rounded-xl border border-dashed border-[#E4EBE6] px-4 py-6 text-sm text-[#6B7C74]">
-              Nenhuma conta cadastrada. Adicione a primeira para lançar no caixa.
+              Nenhuma origem cadastrada. A clínica precisa de pelo menos uma para lançar receitas e despesas.
             </p>
           ) : (
             <AccountsSummary
@@ -345,7 +361,7 @@ export default function FinanceConfigPage() {
                 <Input
                   value={newAccount}
                   onChange={(e) => setNewAccount(e.target.value)}
-                  placeholder="Nome da nova conta"
+                  placeholder="Ex.: Caixa da recepção"
                   aria-label="Nome da nova conta"
                 />
               </div>
@@ -419,14 +435,15 @@ export default function FinanceConfigPage() {
 
       {tab === "centros" && lookup && (
         <section className={cn(card, "w-full")}>
-          <div className="mb-5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8F6EE] text-[#006B4D]">
-                <Layers className="h-4 w-4" />
-              </span>
-              <h2 className="text-[16px] font-semibold text-[#12261E]">Centros de custo</h2>
-            </div>
+          <div className="mb-4 flex items-center gap-2.5">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8F6EE] text-[#006B4D]">
+              <Layers className="h-4 w-4" />
+            </span>
+            <h2 className="text-[16px] font-semibold text-[#12261E]">Centros de custo</h2>
           </div>
+          <p className="mb-4 text-[13px] leading-relaxed text-[#6B7C74]">
+            Agrupa lançamentos por área da clínica, por exemplo Consultórios, Administrativo ou Estoque. Não é um departamento do banco. Serve para ver de onde sai e para onde vai o dinheiro no caixa.
+          </p>
 
           {lookup.costCenters.length === 0 ? (
             <p className="rounded-xl border border-dashed border-[#E4EBE6] px-4 py-6 text-sm text-[#6B7C74]">
@@ -455,13 +472,37 @@ export default function FinanceConfigPage() {
                     <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[#12261E]">
                       {center.name}
                     </p>
-                    <div className="flex shrink-0 items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-1">
                       {isDefault ? (
-                        <span className="text-[13px] font-medium text-[#006B4D]">Principal</span>
-                      ) : !center.active ? (
-                        <span className="text-[13px] text-[#6B7C74]">Inativo</span>
-                      ) : null}
-                      <ChevronRight className="h-4 w-4 text-[#C5D0CA]" aria-hidden />
+                        <span className="mr-1 text-[13px] font-medium text-[#006B4D]">Principal</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void setDefaultCostCenter(center.id)}
+                          className="mr-1 rounded-lg px-2 py-1 text-[12px] font-medium text-[#6B7C74] hover:bg-[#E8F6EE] hover:text-[#006B4D]"
+                        >
+                          Definir padrão
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRenamingCenter({ id: center.id, name: center.name })
+                          setRenameValue(center.name)
+                        }}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#8A9A90] hover:bg-[#F4F7F5] hover:text-[#006B4D]"
+                        aria-label={`Renomear ${center.name}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRemovingItem({ kind: "costCenter", id: center.id, name: center.name })}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#8A9A90] hover:bg-red-50 hover:text-red-600"
+                        aria-label={`Remover ${center.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </li>
                 )
@@ -469,26 +510,41 @@ export default function FinanceConfigPage() {
             </ul>
           )}
 
-          <AddRow
-            onSubmit={() =>
-              addItem(
-                () => api.finance.createCostCenter({ name: newCostCenter.trim() }),
-                () => setNewCostCenter(""),
-                "Centro de custo adicionado"
-              )
-            }
-            disabled={adding || !newCostCenter.trim()}
-            adding={adding}
-          >
-            <div className="min-w-0 flex-1">
-              <Input
-                value={newCostCenter}
-                onChange={(e) => setNewCostCenter(e.target.value)}
-                placeholder="Nome do novo centro de custo"
-                aria-label="Nome do novo centro de custo"
-              />
-            </div>
-          </AddRow>
+          {showAddCostCenter || lookup.costCenters.length === 0 ? (
+            <AddRow
+              onSubmit={() =>
+                addItem(
+                  () => api.finance.createCostCenter({ name: newCostCenter.trim() }),
+                  () => {
+                    setNewCostCenter("")
+                    setShowAddCostCenter(false)
+                  },
+                  "Centro de custo adicionado"
+                )
+              }
+              disabled={adding || !newCostCenter.trim()}
+              adding={adding}
+              label="Adicionar centro de custo"
+            >
+              <div className="min-w-0 flex-1">
+                <Input
+                  value={newCostCenter}
+                  onChange={(e) => setNewCostCenter(e.target.value)}
+                  placeholder="Ex.: Consultórios"
+                  aria-label="Nome do novo centro de custo"
+                />
+              </div>
+            </AddRow>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAddCostCenter(true)}
+              className="mt-4 inline-flex h-10 items-center gap-1.5 text-[13px] font-semibold text-[#006B4D] hover:underline"
+            >
+              <Plus className="h-4 w-4" />
+              Adicionar centro de custo
+            </button>
+          )}
         </section>
       )}
 
@@ -525,14 +581,14 @@ export default function FinanceConfigPage() {
                     <p className="min-w-0 flex-1 truncate text-[14px] font-semibold text-[#12261E]">
                       {method.name}
                     </p>
-                    <span
-                      className={cn(
-                        "shrink-0 text-[13px] font-medium",
-                        method.active ? "text-[#006B4D]" : "text-[#6B7C74]"
-                      )}
+                    <button
+                      type="button"
+                      onClick={() => setRemovingItem({ kind: "paymentMethod", id: method.id, name: method.name })}
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[#8A9A90] hover:bg-red-50 hover:text-red-600"
+                      aria-label={`Remover ${method.name}`}
                     >
-                      {method.active ? "Ativa" : "Inativa"}
-                    </span>
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </li>
                 )
               })}
@@ -576,6 +632,55 @@ export default function FinanceConfigPage() {
           )}
         </section>
       )}
+
+      <Modal
+        open={Boolean(removingItem)}
+        onClose={() => {
+          if (!removing) setRemovingItem(null)
+        }}
+        title={removingItem?.kind === "costCenter" ? "Remover centro de custo" : "Remover forma de pagamento"}
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setRemovingItem(null)} disabled={removing}>
+              Cancelar
+            </Button>
+            <Button type="button" variant="danger" onClick={() => void confirmRemoveItem()} disabled={removing}>
+              {removing ? "Removendo..." : "Remover"}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-sm text-[#6B7C74]">
+          {removingItem
+            ? `Remover ${removingItem.name} da lista? Lançamentos antigos continuam no extrato.`
+            : ""}
+        </p>
+      </Modal>
+
+      <Modal
+        open={Boolean(renamingCenter)}
+        onClose={() => {
+          if (!savingCenter) setRenamingCenter(null)
+        }}
+        title="Renomear centro de custo"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setRenamingCenter(null)} disabled={savingCenter}>
+              Cancelar
+            </Button>
+            <Button type="button" onClick={() => void saveRenamedCostCenter()} disabled={savingCenter || !renameValue.trim()}>
+              {savingCenter ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        }
+      >
+        <Input
+          value={renameValue}
+          onChange={(e) => setRenameValue(e.target.value)}
+          placeholder="Nome do centro de custo"
+          aria-label="Nome do centro de custo"
+        />
+      </Modal>
     </SettingsLayout>
   )
 }
@@ -695,26 +800,6 @@ const COST_CENTER_ICON_STYLES = [
   "bg-[#E8F1F8] text-[#3D6A8A]",
   "bg-[#E8F6EE] text-[#006B4D]",
 ]
-
-function DefaultField({
-  label,
-  value,
-  empty,
-}: {
-  label: string
-  value: string
-  empty?: boolean
-}) {
-  const isEmpty = empty || !value
-  return (
-    <div className="min-w-0">
-      <p className="text-[13px] font-semibold text-[#12261E]">{label}</p>
-      <div className="mt-2">
-        <ValueChip empty={isEmpty}>{isEmpty ? "Não definido" : value}</ValueChip>
-      </div>
-    </div>
-  )
-}
 
 function CategoryColumn({
   title,

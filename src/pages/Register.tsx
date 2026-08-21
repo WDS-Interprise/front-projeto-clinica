@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useState, useMemo, useEffect } from "react"
+import { useNavigate, Link, useSearchParams } from "react-router-dom"
 import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react"
 import {
   AuthCard,
@@ -15,6 +15,7 @@ import { api } from "@/services/api"
 import type { ApiFieldErrors } from "@/services/api"
 import { fieldsFromApiError, messageFromApiError } from "@/lib/api-errors"
 import { markSelfRegisteredUser } from "@/lib/onboarding"
+import { rememberSelectedPlan } from "@/lib/plan-features"
 import { useAuth } from "@/context/AuthContext"
 import { useTheme } from "@/context/ThemeContext"
 import { cn } from "@/lib/utils"
@@ -95,8 +96,14 @@ function PasswordField({
 
 export default function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { setSession } = useAuth()
   const { setTheme } = useTheme()
+
+  useEffect(() => {
+    const plan = searchParams.get("plan")
+    if (plan) rememberSelectedPlan(plan)
+  }, [searchParams])
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")

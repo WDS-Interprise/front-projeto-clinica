@@ -12,7 +12,7 @@ export default function PlanFeatureRoute({
   feature: PlanFeature
   children: React.ReactNode
 }) {
-  const { hasFeature, loading } = usePlanFeatures()
+  const { hasFeature, loading, isActive } = usePlanFeatures()
 
   if (loading) {
     return (
@@ -30,15 +30,19 @@ export default function PlanFeatureRoute({
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary">
               <Lock className="h-7 w-7" />
             </div>
-            <h1 className="text-xl font-bold text-text">Recurso não incluído no plano</h1>
+            <h1 className="text-xl font-bold text-text">
+              {isActive ? "Recurso não incluído no plano" : "Pagamento necessário"}
+            </h1>
             <p className="text-sm text-text-secondary">
-              {PLAN_FEATURE_LABELS[feature]} não faz parte do plano atual da sua clínica.
+              {isActive
+                ? `${PLAN_FEATURE_LABELS[feature]} não faz parte do plano atual da sua clínica.`
+                : "Pague o plano da clínica para liberar agenda, pacientes e os demais recursos."}
             </p>
             <Link
               to="/configuracoes/plano"
               className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary-dark"
             >
-              Ver planos
+              {isActive ? "Ver planos" : "Pagar agora"}
             </Link>
           </CardContent>
         </Card>

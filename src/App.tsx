@@ -63,7 +63,7 @@ import { UserAvatarProvider } from "@/context/UserAvatarContext"
 import PlanFeatureRoute from "@/components/routing/PlanFeatureRoute"
 import PermissionRoute from "@/components/PermissionRoute"
 import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
-import LandingPage from "@/pages/LandingPage"
+import CheckoutPage from "@/pages/checkout/CheckoutPage"
 import { defaultHomePath } from "@/lib/permissions"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
@@ -119,6 +119,7 @@ export default function App() {
           <Route path="/" element={<RootRoute />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/convite/:token" element={<AcceptInvitePage />} />
           <Route

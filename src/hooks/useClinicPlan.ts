@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { api } from "@/services/api"
-import type { ClinicSubscriptionView, PlanFeature, PlanUsageItem, PublicPlan } from "@/lib/plan-features"
+import type { ClinicSubscriptionView, PlanFeature, PlanLimitKey, PlanUsageItem, PublicPlan } from "@/lib/plan-features"
 
 type ClinicPlanState = {
   subscription: ClinicSubscriptionView | null
@@ -23,7 +23,18 @@ export function useClinicPlan(): ClinicPlanState {
     Promise.all([api.subscription.current(), api.subscription.usage()])
       .then(([sub, usageRes]) => {
         setSubscription(sub)
-        setUsage(usageRes.usage)
+        setUsage(
+          usageRes.usage.map((item) => {
+            const raw = String(item.key)
+            const key: PlanLimitKey =
+              raw === "maxAiMessagesPerMonth"
+                ? "maxAiAssistantMessagesPerMonth"
+                : raw === "maxAiActionsPerMonth"
+                  ? "maxAiAutomationActionsPerMonth"
+                  : (raw as PlanLimitKey)
+            return { ...item, key }
+          })
+        )
         setFeatures(usageRes.features)
         setError(null)
       })

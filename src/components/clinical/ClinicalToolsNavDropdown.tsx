@@ -81,8 +81,8 @@ export function ClinicalToolsNavDropdown({ compact = false }: { compact?: boolea
       >
         {compact ? (
           <>
-            <Pill className="h-[18px] w-[18px] shrink-0 xl:hidden" strokeWidth={1.75} />
-            <span className="hidden xl:inline">Ferramentas clínicas</span>
+            <Pill className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
+            <span>Clínica</span>
           </>
         ) : (
           "Ferramentas clínicas"

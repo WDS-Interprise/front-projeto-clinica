@@ -9,6 +9,7 @@ import { OnboardingOptionCard } from "@/components/onboarding/OnboardingOptionCa
 import { OnboardingAvatar } from "@/components/onboarding/OnboardingAvatar"
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell"
 import { markSelfRegisteredOnboardingDone, shouldShowOnboarding } from "@/lib/onboarding"
+import { readSelectedPlan } from "@/lib/plan-features"
 import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/context/ToastContext"
 import { useForceLightTheme } from "@/hooks/useForceLightTheme"
@@ -170,6 +171,7 @@ export default function OnboardingPage({ onComplete }: Props) {
         inviteCode: path === "join" ? inviteCode.trim() : undefined,
         crm: clinical ? councilNumber.trim() : undefined,
         pendingInvites: path === "create" ? pendingInvites : undefined,
+        planSlug: path === "create" ? readSelectedPlan() ?? undefined : undefined,
       })
       setSession({
         token: result.token,
