@@ -8,7 +8,11 @@ import {
   type ReactNode,
 } from "react"
 import { useAuth } from "@/context/AuthContext"
-import { withAvatarCacheBuster } from "@/lib/avatar-events"
+import {
+  readCachedAvatarUrl,
+  withAvatarCacheBuster,
+  writeCachedAvatarUrl,
+} from "@/lib/avatar-events"
 import { fetchUserAvatarUrl } from "@/services/avatar-service"
 
 type UserAvatarContextValue = {
@@ -23,12 +27,17 @@ const UserAvatarContext = createContext<UserAvatarContextValue | null>(null)
 
 export function UserAvatarProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [imageUrl, setImageUrl] = useState<string | null>(() => readCachedAvatarUrl(user?.id))
+  const [loading, setLoading] = useState(!readCachedAvatarUrl(user?.id))
 
-  const applyUrl = useCallback((url: string | null) => {
-    setImageUrl(withAvatarCacheBuster(url))
-  }, [])
+  const applyUrl = useCallback(
+    (url: string | null) => {
+      const next = withAvatarCacheBuster(url)
+      setImageUrl(next)
+      writeCachedAvatarUrl(user?.id, next)
+    },
+    [user?.id]
+  )
 
   const setPreviewUrl = useCallback((url: string | null) => {
     setImageUrl(url)
@@ -56,14 +65,20 @@ export function UserAvatarProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
+    const cached = readCachedAvatarUrl(user.id)
+    if (cached) {
+      setImageUrl(cached)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
     let cancelled = false
-    setLoading(true)
     fetchUserAvatarUrl()
       .then((url) => {
         if (!cancelled) applyUrl(url)
       })
       .catch(() => {
-        if (!cancelled) applyUrl(null)
+        if (!cancelled && !cached) applyUrl(null)
       })
       .finally(() => {
         if (!cancelled) setLoading(false)

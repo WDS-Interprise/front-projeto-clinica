@@ -111,58 +111,81 @@ export const LANDING_NAV = [
   { id: "planos", label: "Planos" },
 ] as const
 
-export type LandingPlan = {
-  name: string
-  description: string
-  price: string
-  period: string
-  highlighted: boolean
-  badge?: string
-  features: string[]
+export const LANDING_PLAN_FALLBACK: import("@/lib/plan-features").PublicCatalog = {
+  currency: "BRL",
+  annualSavingsLabel: "Economize 2 meses",
+  comparisonRows: [],
+  plans: [
+    {
+      slug: "essencial",
+      name: "Essencial",
+      description: "Operação clínica básica para profissional individual ou consultório pequeno.",
+      monthlyPrice: 99,
+      annualPrice: 990,
+      annualEquivalentMonthly: 82.5,
+      trialDays: 0,
+      highlighted: false,
+      badge: null,
+      ctaLabel: "Assinar Essencial",
+      marketingFeatures: [
+        "Agenda online",
+        "Prontuário eletrônico",
+        "Pacientes",
+        "Prescrições",
+        "Bulas e CID",
+        "1 profissional",
+      ],
+      limits: {},
+      comparison: [],
+    },
+    {
+      slug: "profissional",
+      name: "Profissional",
+      description: "Gestão completa para clínicas pequenas e médias em crescimento.",
+      monthlyPrice: 199,
+      annualPrice: 1990,
+      annualEquivalentMonthly: 165.83,
+      trialDays: 0,
+      highlighted: true,
+      badge: "Mais escolhido",
+      ctaLabel: "Assinar Profissional",
+      marketingFeatures: [
+        "Tudo do Essencial",
+        "Financeiro",
+        "WhatsApp integrado",
+        "Relatórios",
+        "Pesquisa de satisfação",
+        "Até 3 profissionais",
+        "Assistente com IA",
+      ],
+      limits: {},
+      comparison: [],
+    },
+    {
+      slug: "premium",
+      name: "Premium",
+      description: "Automação, inteligência artificial e escala.",
+      monthlyPrice: 349,
+      annualPrice: 3490,
+      annualEquivalentMonthly: 290.83,
+      trialDays: 0,
+      highlighted: false,
+      badge: null,
+      ctaLabel: "Assinar Premium",
+      marketingFeatures: [
+        "Tudo do Profissional",
+        "WhatsApp com IA",
+        "Automações avançadas",
+        "Indicadores avançados",
+        "Até 3 WhatsApps",
+        "Maior capacidade de IA",
+        "Suporte prioritário",
+      ],
+      limits: {},
+      comparison: [],
+    },
+  ],
 }
-
-export const LANDING_PLANS: LandingPlan[] = [
-  {
-    name: "Básico",
-    description: "Ideal para profissionais que estão começando.",
-    price: "79",
-    period: "/mês",
-    highlighted: false,
-    features: [
-      "Agendamento online",
-      "Prontuário eletrônico",
-      "WhatsApp integrado",
-      "Relatórios básicos",
-    ],
-  },
-  {
-    name: "Profissional",
-    description: "Para clínicas que querem mais controle e eficiência.",
-    price: "149",
-    period: "/mês",
-    highlighted: true,
-    badge: "Mais escolhido",
-    features: [
-      "Tudo do plano Básico",
-      "Financeiro integrado",
-      "Receitas e exames",
-      "Relatórios avançados",
-    ],
-  },
-  {
-    name: "Avançado",
-    description: "Para clínicas que buscam o máximo de desempenho.",
-    price: "249",
-    period: "/mês",
-    highlighted: false,
-    features: [
-      "Tudo do plano Profissional",
-      "Indicadores personalizados",
-      "Suporte prioritário",
-      "Treinamento de equipe",
-    ],
-  },
-]
 
 export const LANDING_SPECIALIST_EMAIL = "contato@clinmax.com.br"
 

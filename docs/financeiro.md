@@ -444,13 +444,13 @@ Quem opera na plataforma: dono do backoffice.
 | Slug | Nome | Mensal | Anual | Público | Papel |
 |------|------|--------|-------|---------|-------|
 | `essencial` | Essencial | R$ 99 | R$ 990 | Sim | Agenda, pacientes, prontuário, prescrições, CID/bulas. 3 usuários, 1 profissional |
-| `profissional` | Profissional | R$ 199 | R$ 1.990 | Sim (destaque) | + WhatsApp, financeiro, relatórios, NPS, multi-profissional. 8 usuários, 3 profissionais, 1 WhatsApp |
-| `premium` | Premium | R$ 349 | R$ 3.490 | Sim | + IA, ClinMax Pay, estoque, TISS, relatórios avançados. Limites frouxos |
+| `profissional` | Profissional | R$ 199 | R$ 1.990 | Sim (destaque) | + WhatsApp, financeiro, ClinMax Pay, relatórios, NPS, IA assistiva. 10 usuários, 3 profissionais, 1 WhatsApp |
+| `premium` | Premium | R$ 349 | R$ 3.490 | Sim | + WhatsApp com IA, automações, estoque, TISS. Limites finitos (30 usuários, 5 profissionais, 3 WhatsApps) |
 | `legacy` | Legacy | R$ 0 | R$ 0 | Não | Plano interno: todos os recursos, limites ilimitados |
 
 Trial padrão: **14 dias**. Grace period de inadimplência: **3 dias**. Plano padrão de signup: **Profissional**.
 
-A landing ainda mostra Básico R$ 79 / Profissional R$ 149 / Avançado R$ 249. Isso é **copy de marketing**, não lê o banco.
+A landing lê `GET /api/public/plans` (Essencial R$ 99, Profissional R$ 199, Premium R$ 349). Detalhes em `docs/planos.md`.
 
 ### 9.2 Como a clínica ganha uma assinatura
 
@@ -458,7 +458,7 @@ A landing ainda mostra Básico R$ 79 / Profissional R$ 149 / Avançado R$ 249. I
 2. **Clínica criada no backoffice:** igual.
 3. **Clínica antiga sem assinatura:** no boot, `migrateExistingClinicsToLegacy()` coloca no plano Legacy `ACTIVE` (não cobra).
 
-Não há checkout, cartão nem escolha de plano na landing.
+Não há checkout de cartão. A landing envia `?plan=` e o onboarding grava o trial nesse plano. Sem escolha, usa Profissional.
 
 ### 9.3 Tela da clínica: Plano e assinatura
 

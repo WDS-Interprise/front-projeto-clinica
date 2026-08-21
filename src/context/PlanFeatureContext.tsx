@@ -15,6 +15,7 @@ type PlanFeatureState = {
   features: PlanFeature[]
   usage: PlanUsageItem[]
   loading: boolean
+  isActive: boolean
   hasFeature: (feature: PlanFeature) => boolean
   getLimit: (key: PlanLimitKey) => PlanUsageItem
   refresh: () => void
@@ -26,12 +27,14 @@ export function PlanFeatureProvider({ children }: { children: ReactNode }) {
   const { clinicId, loading: authLoading } = useAuth()
   const [features, setFeatures] = useState<PlanFeature[]>([])
   const [usage, setUsage] = useState<PlanUsageItem[]>([])
+  const [isActive, setIsActive] = useState(true)
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(() => {
     if (!localStorage.getItem("token") || !clinicId) {
       setFeatures([])
       setUsage([])
+      setIsActive(true)
       setLoading(false)
       return
     }
@@ -41,6 +44,7 @@ export function PlanFeatureProvider({ children }: { children: ReactNode }) {
       .then((res) => {
         setFeatures(res.features)
         setUsage(res.usage)
+        setIsActive(res.isActive !== false)
       })
       .catch(() => {
         setFeatures([])
@@ -65,8 +69,8 @@ export function PlanFeatureProvider({ children }: { children: ReactNode }) {
   )
 
   const value = useMemo(
-    () => ({ features, usage, loading, hasFeature, getLimit, refresh }),
-    [features, usage, loading, hasFeature, getLimit, refresh]
+    () => ({ features, usage, loading, isActive, hasFeature, getLimit, refresh }),
+    [features, usage, loading, isActive, hasFeature, getLimit, refresh]
   )
 
   return <PlanFeatureContext.Provider value={value}>{children}</PlanFeatureContext.Provider>

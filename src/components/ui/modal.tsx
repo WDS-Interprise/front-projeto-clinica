@@ -7,7 +7,7 @@ interface ModalProps {
   title: string
   children: ReactNode
   footer?: ReactNode
-  size?: "md" | "lg" | "xl"
+  size?: "md" | "lg" | "xl" | "2xl"
   zIndexClass?: string
 }
 
@@ -31,7 +31,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md", zIn
       />
       <div
         className={`relative w-full bg-white rounded-[10px] shadow-xl border border-[#E8EDF2] ${
-          size === "xl" ? "max-w-4xl" : size === "lg" ? "max-w-2xl" : "max-w-lg"
+          size === "2xl" ? "max-w-5xl" : size === "xl" ? "max-w-4xl" : size === "lg" ? "max-w-2xl" : "max-w-lg"
         }`}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8EDF2]">

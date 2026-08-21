@@ -4,290 +4,199 @@ Documentação dos planos comerciais da plataforma ClinMax, seus benefícios, li
 
 **Última revisão:** 21/08/2026
 
+Esta página separa o que já está no código (`IMPLEMENTADO`) do que ainda é intenção de produto (`PLANEJADO`).
+
 ## 1. Resumo
 
-Os planos são assinaturas SaaS pagas pela clínica para usar o ClinMax. O pagamento da clínica é separado:
+Os planos são assinaturas SaaS pagas pela clínica para usar o ClinMax. Esse pagamento é separado:
 
 - do livro-caixa da clínica;
 - do ClinMax Pay, usado para o paciente pagar uma consulta;
 - das permissões internas dos usuários da clínica.
 
-O catálogo comercial real é criado no boot do backend. A landing page ainda exibe nomes e preços antigos.
+O catálogo comercial default vive em `back-projeto-clinica/src/lib/plan-catalog.ts`. O banco (`Plan`) é a autoridade em runtime. A landing consome `GET /api/public/plans`. O seed reaplica o pacote oficial quando `PlatformSettings.settingsJson.catalogVersion` está abaixo de `PLAN_CATALOG_VERSION`.
 
-## 2. Planos comerciais
+## 2. Planos comerciais (IMPLEMENTADO)
 
-| Plano | Mensal | Anual | Indicado para |
-|---|---:|---:|---|
-| Essencial | R$ 99 | R$ 990 | Consultórios pequenos e profissionais em início de operação |
-| Profissional | R$ 199 | R$ 1.990 | Clínicas em crescimento que precisam de WhatsApp, financeiro e relatórios |
-| Premium | R$ 349 | R$ 3.490 | Clínicas que precisam de IA, pagamentos e módulos avançados |
+| Plano | Mensal | Anual | Equivalente mensal no anual | Indicado para |
+|---|---:|---:|---:|---|
+| Essencial | R$ 99 | R$ 990 | R$ 82,50/mês (cobrado anualmente) | Profissional individual ou consultório pequeno |
+| Profissional | R$ 199 | R$ 1.990 | R$ 165,83/mês (cobrado anualmente) | Clínicas em crescimento. Plano padrão e mais escolhido |
+| Premium | R$ 349 | R$ 3.490 | R$ 290,83/mês (cobrado anualmente) | Automação, IA operacional e escala |
 
-Os valores anuais correspondem a dez mensalidades, representando dois meses de economia.
+O anual equivale a dez mensalidades (dois meses de economia). **Não há trial gratuito.** Cadastro cria cobrança Pix. Sem pagamento, os recursos do plano ficam bloqueados. Cadastro sem plano escolhido usa Profissional (ainda assim cobrado).
 
-Todos os planos públicos têm trial padrão de 14 dias. O plano Profissional é o plano padrão para novos cadastros.
-
-## 3. Benefícios por plano
+## 3. Benefícios e limites (IMPLEMENTADO)
 
 ### Essencial
 
-Recursos incluídos:
+Objetivo: operação clínica básica.
 
-- Painel;
-- agenda;
-- pacientes;
-- prontuário eletrônico;
-- prescrições;
-- medicamentos, bulas e CID.
+Inclui: painel, agenda, pacientes, prontuário, prescrições, medicamentos, bulas e CID.
 
-Limites:
+Não inclui: WhatsApp, financeiro, ClinMax Pay, IA, TISS, estoque, automações.
 
 | Recurso | Limite |
 |---|---:|
 | Usuários | 3 |
 | Profissionais | 1 |
-| WhatsApps conectados | 0 |
-| Mensagens de IA por mês | 0 |
-| Ações de IA por mês | 0 |
-| Armazenamento | 1.024 MB |
+| WhatsApps | 0 |
+| IA assistiva / mês | 0 |
+| Ações automáticas IA / mês | 0 |
+| Armazenamento | 2 GB |
 
 ### Profissional
 
-Inclui todos os recursos do Essencial, mais:
-
-- WhatsApp;
-- financeiro;
-- relatórios;
-- pesquisa de satisfação;
-- operação multi-profissional.
-
-Limites:
+Inclui o Essencial, mais financeiro, ClinMax Pay, WhatsApp, relatórios, pesquisa de satisfação, multi-profissional e IA assistiva (feature `AI_ASSISTANT`). Não inclui WhatsApp com IA.
 
 | Recurso | Limite |
 |---|---:|
-| Usuários | 8 |
+| Usuários | 10 |
 | Profissionais | 3 |
-| WhatsApps conectados | 1 |
-| Mensagens de IA por mês | 200 |
-| Ações de IA por mês | 100 |
-| Armazenamento | 5.120 MB |
+| WhatsApps | 1 |
+| IA assistiva / mês | 300 |
+| Ações automáticas IA / mês | 0 |
+| Armazenamento | 10 GB |
 
 ### Premium
 
-Inclui todos os recursos do Profissional, mais:
-
-- WhatsApp com IA;
-- automações;
-- ClinMax Pay;
-- estoque;
-- TISS;
-- relatórios avançados.
-
-Limites:
+Inclui o Profissional, mais WhatsApp com IA, automações, estoque, TISS, relatórios avançados e maior capacidade.
 
 | Recurso | Limite |
 |---|---:|
-| Usuários | Ilimitado |
-| Profissionais | Ilimitado |
-| WhatsApps conectados | 3 |
-| Mensagens de IA por mês | Ilimitado |
-| Ações de IA por mês | Ilimitado |
-| Armazenamento | Ilimitado |
+| Usuários | 30 |
+| Profissionais | 5 |
+| WhatsApps | 3 |
+| IA assistiva / mês | 5.000 |
+| Ações automáticas IA / mês | 2.000 |
+| Armazenamento | 50 GB |
 
-## 4. Comparação de recursos
+Premium não é ilimitado. Legacy continua ilimitado.
 
-| Recurso | Essencial | Profissional | Premium |
-|---|:---:|:---:|:---:|
-| Painel | Sim | Sim | Sim |
-| Agenda | Sim | Sim | Sim |
-| Pacientes | Sim | Sim | Sim |
-| Prontuário | Sim | Sim | Sim |
-| Prescrições | Sim | Sim | Sim |
-| Medicamentos, bulas e CID | Sim | Sim | Sim |
-| WhatsApp | Não | Sim | Sim |
-| Financeiro | Não | Sim | Sim |
-| Relatórios | Não | Sim | Sim |
-| Pesquisa de satisfação | Não | Sim | Sim |
-| Multi-profissional | Não | Sim | Sim |
-| WhatsApp com IA | Não | Não | Sim |
-| Automações | Não | Não | Sim |
-| ClinMax Pay | Não | Não | Sim |
-| Estoque | Não | Não | Sim |
-| TISS | Não | Não | Sim |
-| Relatórios avançados | Não | Não | Sim |
+`Suporte prioritário` aparece na landing como texto comercial. Não existe fila de suporte no backend (`PLANEJADO`).
 
-## 5. Trial e criação da assinatura
+## 4. IA assistiva vs operacional (IMPLEMENTADO conceitualmente)
 
-Quando uma nova clínica é criada:
+| Tipo | Feature | Limite | Onde existe hoje |
+|---|---|---|---|
+| IA assistiva | `AI_ASSISTANT` | `maxAiAssistantMessagesPerMonth` | Profissional e Premium. Ainda não há produto interno de resumo/sugestão ligado a esse consumo |
+| IA operacional | `WHATSAPP_AI` + `AUTOMATIONS` | `maxAiAutomationActionsPerMonth` + mensagens | WhatsApp com IA no Premium |
 
-1. o backend cria uma assinatura para a clínica;
-2. associa o plano Profissional padrão;
-3. define o status como `TRIAL`;
-4. define o término do trial para 14 dias depois;
-5. libera os recursos do plano durante o período.
+Colunas antigas no JSON (`maxAiMessagesPerMonth`, `maxAiActionsPerMonth`) e no banco (`aiMessagesCount`, `aiActionsCount`) foram mantidas. Não houve rename destrutivo.
 
-Clínicas antigas que ainda não tinham assinatura são associadas ao plano interno `Legacy`.
+## 5. ClinMax Pay e TISS
 
-## 6. Plano Legacy
+**IMPLEMENTADO:** ClinMax Pay (`CLINMAX_PAY`) está no Profissional e no Premium. O módulo operacional de Pix do paciente não mudou. A diferença de taxa entre planos é `PLANEJADO`.
 
-O plano `Legacy` não é público e não é vendido. Ele existe para manter o acesso das clínicas cadastradas antes da implantação do billing SaaS.
+**IMPLEMENTADO (temporário):** TISS continua só no Premium, porque o módulo já está gated por essa feature.
 
-Características:
+**PLANEJADO:** TISS como add-on, independente do tamanho do plano.
 
-- preço mensal: R$ 0;
-- preço anual: R$ 0;
-- todos os recursos liberados;
-- todos os limites ilimitados;
-- status ativo;
-- nenhuma cobrança de assinatura.
+## 6. Trial (IMPLEMENTADO)
 
-## 7. Status e acesso
+Nova clínica:
 
-| Status | Regra de acesso |
+1. cria assinatura;
+2. usa o slug escolhido na landing (`?plan=` + `complete-onboarding.planSlug`) ou Profissional;
+3. status `TRIAL`, 14 dias.
+
+**PLANEJADO:** ao terminar o trial, gerar cobrança automaticamente, ir para `PAST_DUE` se não pagar, depois `SUSPENDED`. Hoje o lifecycle no boot marca trial vencido como `EXPIRED` e não emite fatura.
+
+## 7. Legacy (IMPLEMENTADO)
+
+Interno, não público, R$ 0, todos os recursos, limites ilimitados. Clínicas antigas sem assinatura continuam Legacy. Não há migração automática para plano pago.
+
+## 8. Status e acesso (IMPLEMENTADO)
+
+| Status | Regra |
 |---|---|
-| `TRIAL` | Acesso até o término do trial |
+| `TRIAL` | Acesso até o fim do trial |
 | `ACTIVE` | Acesso normal |
-| `PAST_DUE` | Acesso durante o período de tolerância |
-| `SUSPENDED` | Recursos do plano bloqueados |
-| `CANCELLED` | Recursos do plano bloqueados |
-| `EXPIRED` | Recursos do plano bloqueados |
+| `PAST_DUE` | Acesso no grace de 3 dias |
+| `SUSPENDED` / `CANCELLED` / `EXPIRED` | Features gated bloqueadas |
 
-O período de tolerância padrão para inadimplência é de 3 dias após o vencimento da fatura.
+Cortesia (`courtesyUntil`) prevalece. Login nunca é bloqueado. `/configuracoes/plano` não usa `PlanFeatureRoute`. Agenda, pacientes e prontuário não são gated por plano (só módulos como WhatsApp, financeiro, TISS, etc.).
 
-Uma cortesia válida em `courtesyUntil` mantém o acesso liberado, mesmo quando o status normal da assinatura não permitiria acesso.
+## 9. Cobrança (IMPLEMENTADO)
 
-O bloqueio ocorre por recurso. O login da clínica não é bloqueado por inadimplência.
+A clínica não gera a própria fatura. O backoffice gera Pix via Asaas ou cobrança `MANUAL`. Webhook confirma pagamento e ativa a assinatura.
 
-## 8. Onde o usuário vê o plano
+A fatura grava `amount` no momento da emissão. Preço atual do plano não reescreve faturas antigas. Snapshot de nome/ciclo/período na fatura é `PLANEJADO`.
 
-### Clínica
-
-Rota: `/configuracoes/plano`
-
-Permissão: `clinics:manage`.
-
-O administrador ou consultor pode ver:
-
-- plano atual;
-- ciclo mensal ou anual;
-- preço;
-- status;
-- término do trial;
-- próxima cobrança;
-- uso atual e limites;
-- recursos incluídos;
-- histórico de cobranças;
-- Pix copia e cola, quando disponível.
-
-Também pode solicitar a troca de plano e ciclo.
-
-### Backoffice
-
-Rotas principais:
-
-| Rota | Finalidade |
-|---|---|
-| `/backoffice/planos` | Criar e editar planos, preços, recursos e limites |
-| `/backoffice/assinaturas` | Administrar trials, planos, cortesias e status |
-| `/backoffice/cobrancas` | Acompanhar MRR, faturas, valores pendentes e atrasos |
-
-Somente o dono da plataforma pode acessar essas telas.
-
-## 9. Como funciona a cobrança
-
-O backoffice gera uma cobrança para a assinatura da clínica. Com o Asaas configurado, o sistema:
-
-1. cria ou reutiliza o customer da clínica;
-2. cria uma cobrança Pix;
-3. grava uma `SubscriptionInvoice` com status `PENDING`;
-4. salva o QR Code e o código copia e cola quando disponíveis;
-5. mostra a cobrança em Configurações → Plano e assinatura;
-6. recebe a confirmação por webhook;
-7. altera a fatura para `PAID`;
-8. altera a assinatura para `ACTIVE`;
-9. atualiza o período da assinatura.
-
-Se o Asaas não estiver configurado, a fatura é criada como `MANUAL`, sem QR Code Pix.
-
-A clínica não gera a própria fatura. Ela apenas paga uma cobrança gerada pelo backoffice.
+`syncAsaasSubscription` com `updatePendingPayments` permanece como estava. Recorrência automática após o trial é `PLANEJADO`.
 
 ## 10. Troca de plano
 
-A troca pode ser solicitada na tela da clínica ou executada pelo backoffice.
+**ESTADO ATUAL:** a clínica ou o backoffice altera plano e ciclo na hora, sem cobrança proporcional.
 
-O sistema permite alterar:
+**DESEJADO (PLANEJADO):** upgrade com diferença ou nova cobrança; downgrade só no fim do ciclo; excesso de profissionais gera aviso, sem exclusão.
 
-- plano;
-- ciclo mensal;
-- ciclo anual.
+## 11. Add-ons (PLANEJADO)
 
-A troca de plano não gera automaticamente uma nova cobrança. A cobrança precisa ser gerada pelo backoffice.
+Modelo conceitual já previsto no código via `mergeEntitlementLimits(plano, addons, overrides)`:
 
-## 11. Diferença entre catálogo real e landing
+```
+entitlement base + add-ons + cortesias = entitlement efetivo
+```
 
-O catálogo usado pelo backend é:
+Exemplos futuros: profissional adicional (+R$ 49/mês), WhatsApp extra, pacote de IA, armazenamento, TISS, módulos. Não há tabelas de add-on nem cobrança de extra nesta entrega.
 
-| Backend | Landing atual |
-|---|---|
-| Essencial: R$ 99 | Básico: R$ 79 |
-| Profissional: R$ 199 | Profissional: R$ 149 |
-| Premium: R$ 349 | Avançado: R$ 249 |
+## 12. Landing (IMPLEMENTADO)
 
-A landing é apenas marketing e não está sincronizada com os planos cadastrados no banco. Essa diferença precisa ser corrigida antes de divulgar os preços publicamente.
+Cards no visual original da landing, com catálogo oficial:
 
-## 12. O que já funciona
+- Essencial R$ 99/mês
+- Profissional R$ 199/mês (Mais escolhido)
+- Premium R$ 349/mês
 
-- criação automática da assinatura;
-- trial de 14 dias;
-- catálogo de planos;
-- plano mensal e anual;
-- limites por usuários, profissionais, WhatsApp, IA e armazenamento;
-- bloqueio de recursos que não pertencem ao plano;
-- tela de plano da clínica;
-- histórico de faturas;
-- cobrança Pix via Asaas;
-- webhook de confirmação, vencimento e estorno;
-- gestão de planos e assinaturas no backoffice;
-- métricas de MRR, valores a receber e valores em atraso.
+Toggle mensal/anual, equivalente mensal só como referência quando anual, tabela "Comparar todos os recursos" derivada dos entitlements reais.
 
-## 13. Pendências
+## 13. Lifecycle (IMPLEMENTADO hoje / PLANEJADO depois)
 
-- sincronizar os preços da landing com o catálogo real;
-- criar checkout para novos clientes;
-- gerar a primeira cobrança automaticamente ao fim do trial;
-- iniciar a recorrência Asaas após o primeiro pagamento;
-- executar o lifecycle em job periódico, não apenas no boot da API;
-- permitir que a clínica solicite uma cobrança diretamente;
-- preencher e disponibilizar o link de fatura quando existir;
-- melhorar as mensagens de cobrança e inadimplência;
-- criar testes completos para trial, pagamento, estorno e suspensão.
+Hoje `runSubscriptionLifecycle()` roda no boot da API (trials expirados e grace → suspensão).
 
-## 14. Arquivos relacionados
+**PLANEJADO:** job periódico (trials, vencimentos, grace, suspensão, renovações), fora do request HTTP e preferencialmente fora só do boot.
+
+## 14. O que já funciona
+
+- catálogo único no backend;
+- API pública de planos;
+- landing alinhada a preços e benefícios oficiais;
+- cobrança no cadastro (Pix Asaas quando configurado);
+- recursos bloqueados até o primeiro pagamento;
+- limites finitos no Premium;
+- ClinMax Pay no Profissional;
+- tela da clínica com uso em linguagem clara;
+- backoffice de planos, assinaturas e cobranças;
+- Legacy preservado.
+
+## 15. Pendências (PLANEJADO)
+
+- recorrência Asaas após o primeiro pagamento;
+- job de lifecycle;
+- upgrade/downgrade com proration e troca no fim do ciclo;
+- marketplace de add-ons e profissional adicional cobrado;
+- TISS como módulo avulso;
+- produto de IA assistiva interno consumindo o limite do Profissional;
+- snapshot completo na fatura;
+- testes de webhook, grace e criação de clínica com banco.
+
+## 16. Arquivos relacionados
 
 ### Frontend
 
-- `src/pages/configuracoes/PlanoAssinaturaPage.tsx`
-- `src/pages/backoffice/BackofficePlanosPage.tsx`
-- `src/pages/backoffice/BackofficeAssinaturasPage.tsx`
-- `src/pages/backoffice/BackofficeCobrancasPage.tsx`
-- `src/components/billing/PlanBadges.tsx`
-- `src/components/billing/PlanUsage.tsx`
-- `src/components/routing/PlanFeatureRoute.tsx`
-- `src/context/PlanFeatureContext.tsx`
-- `src/hooks/useClinicPlan.ts`
-- `src/lib/plan-features.ts`
+- `src/pages/LandingPage.tsx`
 - `src/lib/landing-content.ts`
+- `src/pages/configuracoes/PlanoAssinaturaPage.tsx`
+- `src/lib/plan-features.ts`
+- `src/hooks/useClinicPlan.ts`
 
 ### Backend
 
+- `src/lib/plan-catalog.ts`
 - `src/lib/saas-billing-seed.ts`
 - `src/lib/plan-features.ts`
 - `src/lib/plan-entitlements.ts`
 - `src/services/plan.service.ts`
-- `src/services/subscription.service.ts`
-- `src/services/subscription-billing.service.ts`
-- `src/services/subscription-lifecycle.service.ts`
-- `src/services/asaas-webhook.service.ts`
-- `src/controllers/saas-billing.controller.ts`
-- `src/routes/subscription.routes.ts`
-- `src/routes/backoffice-saas.routes.ts`
+- `src/routes/public-plans.routes.ts`
 - `prisma/schema.prisma`

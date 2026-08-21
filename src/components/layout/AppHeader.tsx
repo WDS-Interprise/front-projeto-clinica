@@ -88,12 +88,12 @@ export default function AppHeader() {
       <div className="flex h-full min-w-0 items-center gap-2 px-2 sm:gap-3 sm:px-3">
         <NavLink
           to={mainNav[0]?.to ?? "/agenda"}
-          className="relative z-10 block h-10 w-[108px] shrink-0 overflow-hidden sm:w-[118px] xl:w-[136px]"
+          className="relative z-10 block h-12 w-[132px] shrink-0 overflow-hidden sm:w-[150px] xl:w-[172px]"
         >
           <AppLogo
-            size="md"
+            size="lg"
             rounded={false}
-            className="absolute top-1/2 left-0 h-12 max-w-none origin-left -translate-y-1/2 scale-[1.15] sm:scale-[1.25] xl:h-14 xl:scale-[1.4]"
+            className="absolute top-1/2 left-0 h-14 max-w-none origin-left -translate-y-1/2 scale-[1.32] sm:scale-[1.42] xl:h-16 xl:scale-[1.55]"
           />
         </NavLink>
 
@@ -111,7 +111,7 @@ export default function AppHeader() {
                 className={navItemClass(isActive, true)}
               >
                 <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
-                <span className="hidden xl:inline">{label}</span>
+                <span>{label}</span>
               </NavLink>
             )
           })}

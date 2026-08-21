@@ -11,7 +11,7 @@ export default function SettingsLayout({ children, className }: Props) {
   return (
     <div className="flex h-full min-h-0 gap-5 overflow-hidden bg-[#F4F7F5] p-5">
       <SettingsSidebar />
-      <div className={cn("min-h-0 min-w-0 flex-1 overflow-auto", className)}>{children}</div>
+      <div className={cn("min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden pb-12", className)}>{children}</div>
     </div>
   )
 }

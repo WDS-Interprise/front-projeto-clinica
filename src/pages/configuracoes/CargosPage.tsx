@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useState } from "react"
-import { Plus, Shield, Trash2 } from "lucide-react"
+import { Plus, RotateCcw, Shield, Trash2 } from "lucide-react"
 import SettingsLayout, { SettingsPageHeader } from "@/components/layout/SettingsLayout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Modal } from "@/components/ui/modal"
 import { api, type ClinicRole, type PermissionGroup } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
+import { useAuth } from "@/context/AuthContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
 import type { Permission } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
 
 export default function CargosPage() {
   const { toast } = useToast()
+  const { refresh } = useAuth()
   const [roles, setRoles] = useState<ClinicRole[]>([])
   const [groups, setGroups] = useState<PermissionGroup[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -20,6 +22,7 @@ export default function CargosPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [resetOpen, setResetOpen] = useState(false)
   const [newName, setNewName] = useState("")
 
   const load = useCallback(() => {
@@ -63,6 +66,7 @@ export default function CargosPage() {
         permissions: editPerms,
       })
       setRoles((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+      await refresh()
       toast("Cargo atualizado")
     } catch (e: unknown) {
       toast(toastMessageFromApiError(e, "Erro ao salvar cargo"), "error")
@@ -87,6 +91,24 @@ export default function CargosPage() {
       toast("Cargo criado")
     } catch (e: unknown) {
       toast(toastMessageFromApiError(e, "Erro ao criar cargo"), "error")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleReset = async () => {
+    if (!selectedId) return
+    setSaving(true)
+    try {
+      const updated = await api.clinicRoles.reset(selectedId)
+      setRoles((prev) => prev.map((r) => (r.id === updated.id ? updated : r)))
+      setEditPerms(updated.permissions as Permission[])
+      if (updated.name) setEditName(updated.name)
+      await refresh()
+      setResetOpen(false)
+      toast("Permissões restauradas para o padrão do sistema")
+    } catch (e: unknown) {
+      toast(toastMessageFromApiError(e, "Erro ao resetar cargo"), "error")
     } finally {
       setSaving(false)
     }
@@ -200,9 +222,20 @@ export default function CargosPage() {
                 </div>
               ))}
 
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Salvando..." : "Salvar cargo"}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={handleSave} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar cargo"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={saving}
+                  onClick={() => setResetOpen(true)}
+                >
+                  <RotateCcw className="mr-1 h-4 w-4" />
+                  Restaurar padrão
+                </Button>
+              </div>
             </div>
           ) : (
             <p className="text-sm text-text-secondary">Selecione um cargo.</p>
@@ -224,6 +257,22 @@ export default function CargosPage() {
             </Button>
             <Button onClick={handleCreate} disabled={saving}>
               Criar
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={resetOpen} onClose={() => setResetOpen(false)} title="Restaurar padrão">
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary">
+            As permissões de {selected?.name ?? "este cargo"} voltam ao padrão do ClinMax. As alterações manuais deste cargo serão desfeitas.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setResetOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => void handleReset()} disabled={saving}>
+              {saving ? "Restaurando..." : "Restaurar"}
             </Button>
           </div>
         </div>

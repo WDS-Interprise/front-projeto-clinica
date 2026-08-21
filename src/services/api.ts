@@ -328,6 +328,7 @@ export const api = {
       inviteCode?: string
       crm?: string
       phone?: string
+      planSlug?: string
       pendingInvites?: Array<{
         email: string
         role: "ADMIN" | "DOCTOR" | "RECEPTION" | "CONSULTANT" | "FINANCE"
@@ -947,6 +948,8 @@ export const api = {
         method: "PUT",
         body: JSON.stringify(data),
       }),
+    reset: (id: string) =>
+      request<ClinicRole>(`/clinic-roles/roles/${id}/reset`, { method: "POST", body: "{}" }),
     remove: (id: string) =>
       request<void>(`/clinic-roles/roles/${id}`, { method: "DELETE" }),
   },
@@ -1393,8 +1396,14 @@ export const api = {
       request("/finance/categories", { method: "POST", body: JSON.stringify(data) }),
     createCostCenter: (data: { name: string }) =>
       request("/finance/cost-centers", { method: "POST", body: JSON.stringify(data) }),
+    updateCostCenter: (id: string, data: { name?: string; active?: boolean }) =>
+      request(`/finance/cost-centers/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+    removeCostCenter: (id: string) =>
+      request(`/finance/cost-centers/${id}`, { method: "DELETE" }),
     createPaymentMethod: (data: { name: string }) =>
       request("/finance/payment-methods", { method: "POST", body: JSON.stringify(data) }),
+    removePaymentMethod: (id: string) =>
+      request(`/finance/payment-methods/${id}`, { method: "DELETE" }),
     getPaySettings: () =>
       request<ClinmaxPaySettings>("/finance/pay/settings"),
     savePaySettings: (data: {
@@ -1500,14 +1509,38 @@ export const api = {
   subscription: {
     current: () => request<import("@/lib/plan-features").ClinicSubscriptionView>("/subscription/current"),
     usage: () =>
-      request<{ usage: import("@/lib/plan-features").PlanUsageItem[]; features: import("@/lib/plan-features").PlanFeature[]; subscription: import("@/lib/plan-features").ClinicSubscriptionView | null }>(
+      request<{ usage: import("@/lib/plan-features").PlanUsageItem[]; features: import("@/lib/plan-features").PlanFeature[]; subscription: import("@/lib/plan-features").ClinicSubscriptionView | null; isActive?: boolean }>(
         "/subscription/usage"
       ),
     plans: () => request<import("@/lib/plan-features").PublicPlan[]>("/subscription/plans"),
     invoices: () => request<import("@/lib/plan-features").SubscriptionInvoiceView[]>("/subscription/invoices"),
-    changePlan: (data: { planId: string; billingCycle?: "MONTHLY" | "ANNUAL" }) =>
-      request("/subscription/change-plan", { method: "POST", body: JSON.stringify(data) }),
+    changePlan: (data: {
+      planId: string
+      billingCycle?: "MONTHLY" | "ANNUAL"
+      paymentMethod?: "PIX" | "CREDIT_CARD"
+      creditCard?: {
+        holderName: string
+        number: string
+        expiryMonth: string
+        expiryYear: string
+        ccv: string
+      }
+      creditCardHolderInfo?: {
+        name: string
+        email: string
+        cpfCnpj: string
+        postalCode: string
+        addressNumber: string
+        phone: string
+      }
+    }) => request("/subscription/change-plan", { method: "POST", body: JSON.stringify(data) }),
+    cancelUpgrade: () => request("/subscription/cancel-upgrade", { method: "POST", body: "{}" }),
     refreshInvoicePix: (id: string) =>
       request(`/subscription/invoices/${id}/refresh-pix`, { method: "POST", body: "{}" }),
   },
+
+  public: {
+    plans: () => request<import("@/lib/plan-features").PublicCatalog>("/public/plans"),
+  },
 }
+
