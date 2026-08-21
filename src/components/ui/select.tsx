@@ -1,7 +1,7 @@
 import { useCallback, useId, useMemo, useState } from "react"
 import { Check, ChevronDown } from "lucide-react"
 import { useClickOutside } from "@/hooks/useClickOutside"
-import { fieldInputClass, fieldLabelClass, fieldTriggerClass } from "@/lib/form-classes"
+import { fieldLabelClass, fieldTriggerClass } from "@/lib/form-classes"
 import { cn } from "@/lib/utils"
 
 export type SelectOption = {

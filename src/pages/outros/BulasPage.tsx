@@ -235,9 +235,9 @@ export default function BulasPage() {
     setMedModalOpen(true)
   }
 
-  const handlePrescriptionSubmit = (values: MedicationFormValues) => {
+  const handlePrescriptionSubmit = () => {
     if (fromPrescription) {
-      navigate(-1, { state: { pendingMedication: values } })
+      navigate(-1)
       return
     }
     toast("Medicamento configurado. Adicione durante um atendimento em prescrição.", "success")

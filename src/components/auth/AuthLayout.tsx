@@ -83,11 +83,9 @@ function SocialButton({
 function AuthHeroPair({
   children,
   footer,
-  wide = false,
 }: {
   children: React.ReactNode
   footer?: React.ReactNode
-  wide?: boolean
 }) {
   return (
     <div className="flex h-full w-full items-center justify-center px-4">
@@ -102,7 +100,6 @@ function AuthHeroPair({
 export function AuthPageShell({
   children,
   footer,
-  wide = false,
 }: {
   children: React.ReactNode
   footer?: React.ReactNode
@@ -120,7 +117,7 @@ export function AuthPageShell({
 
   return (
     <div className="relative h-dvh overflow-x-hidden overflow-y-hidden bg-[#f4f6f8]">
-      <AuthHeroPair footer={footer} wide={wide}>
+      <AuthHeroPair footer={footer}>
         {children}
       </AuthHeroPair>
     </div>

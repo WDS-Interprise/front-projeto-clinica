@@ -343,7 +343,6 @@ export const api = {
         permissions: string[]
         redirectPath: string
         pendingApproval?: boolean
-        clinicName?: string
       }>("/auth/complete-onboarding", {
         method: "POST",
         body: JSON.stringify(data),

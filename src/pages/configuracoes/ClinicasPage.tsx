@@ -54,7 +54,7 @@ function splitCityState(city?: string | null, state?: string | null) {
 function parseCityState(value: string) {
   const parts = value.split("-").map((p) => p.trim())
   if (parts.length >= 2) {
-    return { addressCity: parts.slice(0, -1).join(" - "), addressState: parts.at(-1) ?? "" }
+    return { addressCity: parts.slice(0, -1).join(" - "), addressState: parts[parts.length - 1] ?? "" }
   }
   return { addressCity: value.trim(), addressState: "" }
 }
