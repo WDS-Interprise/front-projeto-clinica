@@ -69,10 +69,6 @@ import { defaultHomePath } from "@/lib/permissions"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
 
-function isAuthenticated() {
-  return !!localStorage.getItem("token")
-}
-
 function DashboardRoute({ children }: { children: React.ReactNode }) {
   const { loading, hasPermission, user } = useAuth()
 
@@ -84,21 +80,44 @@ function DashboardRoute({ children }: { children: React.ReactNode }) {
     )
   }
 
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
   if (hasPermission("dashboard:view")) return <>{children}</>
-  return <Navigate to={defaultHomePath(user?.role)} replace />
+  return <Navigate to={defaultHomePath(user.role)} replace />
 }
 
 function RootRoute() {
-  if (isAuthenticated()) {
+  const { user, loading } = useAuth()
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh] text-text-secondary">
+        Carregando...
+      </div>
+    )
+  }
+  if (user) {
     return <Navigate to={getAuthHome()} replace />
   }
   return <LandingPage />
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  if (!isAuthenticated()) {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh] text-text-secondary">
+        Carregando...
+      </div>
+    )
+  }
+
+  if (!user) {
     return <Navigate to="/login" replace />
   }
+
   return <>{children}</>
 }
 

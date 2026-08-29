@@ -199,6 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setClinics([])
     setPermissions([])
     setLinkedDoctorIds(undefined)
+    setLoading(false)
   }, [])
 
   const value = useMemo(
