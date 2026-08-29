@@ -22,6 +22,10 @@ export default function PermissionRoute({
     )
   }
 
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
   if (!hasPermission(permission)) {
     return <Navigate to={home} replace />
   }

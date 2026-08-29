@@ -62,7 +62,7 @@ export default function UserMenu() {
     setLogoutOpen(false)
     close()
     logout()
-    navigate("/login")
+    navigate("/login", { replace: true })
   }
 
   if (!user) return null
