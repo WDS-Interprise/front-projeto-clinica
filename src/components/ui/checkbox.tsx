@@ -25,7 +25,7 @@ export function Checkbox({
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border shadow-sm transition-colors",
+          "inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center overflow-hidden rounded-[4px] border shadow-sm transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#256993]/40 focus-visible:ring-offset-2",
         "disabled:cursor-not-allowed disabled:opacity-50",
         checked
@@ -35,8 +35,8 @@ export function Checkbox({
       )}
     >
       <Check
-        className={cn("h-3.5 w-3.5 stroke-[3]", !checked && "scale-0 opacity-0")}
-        strokeWidth={3}
+        className={cn("h-3 w-3 stroke-[2.5]", !checked && "scale-0 opacity-0")}
+        strokeWidth={2.5}
       />
     </button>
   )

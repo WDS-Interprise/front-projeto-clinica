@@ -116,7 +116,7 @@ export function AuthPageShell({
   }, [])
 
   return (
-    <div className="relative h-dvh overflow-x-hidden overflow-y-hidden bg-[#f4f6f8]">
+    <div className="auth-page relative min-h-dvh h-dvh w-full overflow-x-hidden overflow-y-hidden bg-[#f4f6f8]">
       <AuthHeroPair footer={footer}>
         {children}
       </AuthHeroPair>

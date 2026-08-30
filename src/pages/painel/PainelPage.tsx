@@ -479,7 +479,7 @@ export default function PainelPage() {
                     />
                   </div>
                   <div>
-                    <p className="text-[12px] text-[#6B7C73]">Receita (prevista)</p>
+                    <p className="text-[12px] text-[#6B7C73]">Receita recebida</p>
                     <p className="mt-1 text-[22px] font-bold leading-none text-[#1B2E26]">
                       {formatMoney(metrics.periodSummary?.revenue ?? 0)}
                     </p>

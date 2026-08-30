@@ -37,7 +37,7 @@ const empty: PlanForm = {
   public: true,
   monthlyPrice: 0,
   annualPrice: 0,
-  trialDays: 14,
+  trialDays: 0,
   highlighted: false,
   displayOrder: 0,
   features: ["DASHBOARD", "AGENDA", "PATIENTS"],

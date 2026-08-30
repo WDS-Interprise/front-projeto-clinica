@@ -2,7 +2,7 @@
 
 Documentação dos planos comerciais da plataforma ClinMax, seus benefícios, limites, regras de acesso e cobrança.
 
-**Última revisão:** 21/08/2026
+**Última revisão:** 30/08/2026
 
 Esta página separa o que já está no código (`IMPLEMENTADO`) do que ainda é intenção de produto (`PLANEJADO`).
 
@@ -21,10 +21,10 @@ O catálogo comercial default vive em `back-projeto-clinica/src/lib/plan-catalog
 | Plano | Mensal | Anual | Equivalente mensal no anual | Indicado para |
 |---|---:|---:|---:|---|
 | Essencial | R$ 99 | R$ 990 | R$ 82,50/mês (cobrado anualmente) | Profissional individual ou consultório pequeno |
-| Profissional | R$ 199 | R$ 1.990 | R$ 165,83/mês (cobrado anualmente) | Clínicas em crescimento. Plano padrão e mais escolhido |
+| Profissional | R$ 199 | R$ 1.990 | R$ 165,83/mês (cobrado anualmente) | Clínicas em crescimento. Primeiro upgrade pago |
 | Premium | R$ 349 | R$ 3.490 | R$ 290,83/mês (cobrado anualmente) | Automação, IA operacional e escala |
 
-O anual equivale a dez mensalidades (dois meses de economia). **Não há trial gratuito.** Cadastro cria cobrança Pix. Sem pagamento, os recursos do plano ficam bloqueados. Cadastro sem plano escolhido usa Profissional (ainda assim cobrado).
+O anual equivale a dez mensalidades (dois meses de economia). **Não há trial gratuito.** Cadastro novo entra no **Essencial**, status `ACTIVE`, com primeira fatura PENDING e ciclo mensal. O slug da landing vira intenção (`requestedPlanSlug`) e segue para o checkout. Para subir, só vale o próximo plano, e só depois do pagamento (Essencial → Profissional → Premium).
 
 ## 3. Benefícios e limites (IMPLEMENTADO)
 
@@ -92,15 +92,17 @@ Colunas antigas no JSON (`maxAiMessagesPerMonth`, `maxAiActionsPerMonth`) e no b
 
 **PLANEJADO:** TISS como add-on, independente do tamanho do plano.
 
-## 6. Trial (IMPLEMENTADO)
+## 6. Cadastro e trial
 
 Nova clínica:
 
-1. cria assinatura;
-2. usa o slug escolhido na landing (`?plan=` + `complete-onboarding.planSlug`) ou Profissional;
-3. status `TRIAL`, 14 dias.
+1. cria assinatura no **Essencial**;
+2. guarda `requestedPlanSlug` da landing (não ativa esse plano);
+3. status `ACTIVE`, `trialDays: 0`, primeira fatura PENDING, `currentPeriodEnd` em 1 mês.
 
-**PLANEJADO:** ao terminar o trial, gerar cobrança automaticamente, ir para `PAST_DUE` se não pagar, depois `SUSPENDED`. Hoje o lifecycle no boot marca trial vencido como `EXPIRED` e não emite fatura.
+Trial de 14 dias **não** está ativo nos planos comerciais. O status `TRIAL` ainda existe no modelo para cortesia/legado.
+
+**IMPLEMENTADO:** se a fatura vencer, `PAST_DUE`, grace de 3 dias, depois `SUSPENDED` comercial. Recorrência Asaas no primeiro pagamento. Job a cada 15 minutos.
 
 ## 7. Legacy (IMPLEMENTADO)
 
@@ -119,17 +121,19 @@ Cortesia (`courtesyUntil`) prevalece. Login nunca é bloqueado. `/configuracoes/
 
 ## 9. Cobrança (IMPLEMENTADO)
 
-A clínica não gera a própria fatura. O backoffice gera Pix via Asaas ou cobrança `MANUAL`. Webhook confirma pagamento e ativa a assinatura.
+Upgrade self-serve gera Pix ou cartão no checkout (`/checkout`). O plano novo só entra no webhook pago. O backoffice ainda pode gerar Pix via Asaas ou cobrança `MANUAL`.
 
 A fatura grava `amount` no momento da emissão. Preço atual do plano não reescreve faturas antigas. Snapshot de nome/ciclo/período na fatura é `PLANEJADO`.
 
-`syncAsaasSubscription` com `updatePendingPayments` permanece como estava. Recorrência automática após o trial é `PLANEJADO`.
+`syncAsaasSubscription` é chamado no primeiro pagamento PAID. Recorrência Asaas passa a existir depois disso.
+
+Estado ponta a ponta do Asaas: `docs/asaas-estado-atual.md`.
 
 ## 10. Troca de plano
 
-**ESTADO ATUAL:** a clínica ou o backoffice altera plano e ciclo na hora, sem cobrança proporcional.
+**ESTADO ATUAL:** self-serve só sobe um degrau por vez, com pagamento. Downgrade aplica na hora, sem reembolso. Backoffice pode pular a escada.
 
-**DESEJADO (PLANEJADO):** upgrade com diferença ou nova cobrança; downgrade só no fim do ciclo; excesso de profissionais gera aviso, sem exclusão.
+**DESEJADO (PLANEJADO):** proration; downgrade só no fim do ciclo; excesso de profissionais gera aviso, sem exclusão.
 
 ## 11. Add-ons (PLANEJADO)
 
@@ -151,19 +155,18 @@ Cards no visual original da landing, com catálogo oficial:
 
 Toggle mensal/anual, equivalente mensal só como referência quando anual, tabela "Comparar todos os recursos" derivada dos entitlements reais.
 
-## 13. Lifecycle (IMPLEMENTADO hoje / PLANEJADO depois)
+## 13. Lifecycle (IMPLEMENTADO)
 
-Hoje `runSubscriptionLifecycle()` roda no boot da API (trials expirados e grace → suspensão).
-
-**PLANEJADO:** job periódico (trials, vencimentos, grace, suspensão, renovações), fora do request HTTP e preferencialmente fora só do boot.
+`runSubscriptionLifecycle()` roda no boot da API e no scheduler a cada 15 minutos (trials, vencimentos, grace, suspensão, renovação local se não houver assinatura Asaas).
 
 ## 14. O que já funciona
 
 - catálogo único no backend;
 - API pública de planos;
 - landing alinhada a preços e benefícios oficiais;
-- cobrança no cadastro (Pix Asaas quando configurado);
-- recursos bloqueados até o primeiro pagamento;
+- cadastro no Essencial, com primeira fatura;
+- upgrade self-serve só para o próximo plano, com Pix ou cartão;
+- checkout em `/checkout`;
 - limites finitos no Premium;
 - ClinMax Pay no Profissional;
 - tela da clínica com uso em linguagem clara;
@@ -172,20 +175,18 @@ Hoje `runSubscriptionLifecycle()` roda no boot da API (trials expirados e grace 
 
 ## 15. Pendências (PLANEJADO)
 
-- recorrência Asaas após o primeiro pagamento;
-- job de lifecycle;
-- upgrade/downgrade com proration e troca no fim do ciclo;
+- proration e downgrade só no fim do ciclo;
 - marketplace de add-ons e profissional adicional cobrado;
 - TISS como módulo avulso;
 - produto de IA assistiva interno consumindo o limite do Profissional;
-- snapshot completo na fatura;
-- testes de webhook, grace e criação de clínica com banco.
+- snapshot completo na fatura.
 
 ## 16. Arquivos relacionados
 
 ### Frontend
 
 - `src/pages/LandingPage.tsx`
+- `src/pages/checkout/CheckoutPage.tsx`
 - `src/lib/landing-content.ts`
 - `src/pages/configuracoes/PlanoAssinaturaPage.tsx`
 - `src/lib/plan-features.ts`

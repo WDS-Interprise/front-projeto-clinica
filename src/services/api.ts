@@ -1362,6 +1362,13 @@ export const api = {
         method: "POST",
         body: JSON.stringify(data),
       }),
+    updateTransactionStatus: (id: string, status: "PENDING" | "PAID" | "CANCELLED") =>
+      request<FinanceTransaction>(`/finance/transactions/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+    cancelTransaction: (id: string) =>
+      request(`/finance/transactions/${id}`, { method: "DELETE" }),
     lookup: async (): Promise<FinanceLookup> => {
       const [accounts, categories, costCenters, paymentMethods] = await Promise.all([
         request<FinanceLookup["accounts"]>("/finance/accounts"),

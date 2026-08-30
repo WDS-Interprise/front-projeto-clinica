@@ -25,6 +25,10 @@ import { toastMessageFromApiError } from "@/lib/api-errors"
 import { LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL } from "@/lib/landing-content"
 import {
   checkoutPath,
+  commercialPlanLabel,
+  isCommercialRankUpgrade,
+  isNextCommercialUpgrade,
+  nextCommercialPlanSlug,
   rememberSelectedPlan,
   type ClinicSubscriptionView,
   type PublicCatalogPlan,
@@ -126,6 +130,14 @@ export default function CheckoutPage() {
   const isDowngrade = Boolean(
     loggedIn && currentPlan && plan && plan.monthlyPrice < currentPlan.monthlyPrice
   )
+  const assumedFromSlug = loggedIn ? currentSub?.planSlug : "essencial"
+  const nextAllowedSlug = nextCommercialPlanSlug(assumedFromSlug)
+  const skipBlocked = Boolean(
+    plan &&
+      (!loggedIn || currentSub) &&
+      isCommercialRankUpgrade(assumedFromSlug ?? "legacy", plan.slug) &&
+      !isNextCommercialUpgrade(assumedFromSlug, plan.slug)
+  )
 
   const confirm = async () => {
     const emailOk = validateEmail(email)
@@ -136,6 +148,15 @@ export default function CheckoutPage() {
     const docOk = validateCpfOrCnpj(document)
     if (!docOk.ok) {
       toast(docOk.msg, "error")
+      return
+    }
+    if (skipBlocked) {
+      toast(
+        nextAllowedSlug
+          ? `Só é possível subir um plano por vez. Assine o ${commercialPlanLabel(nextAllowedSlug)} primeiro.`
+          : "Só é possível subir um plano por vez.",
+        "error"
+      )
       return
     }
     if (!terms) {
@@ -285,8 +306,8 @@ export default function CheckoutPage() {
   if (!plan) return null
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#F6F8F7] text-[#12261E]">
-      <header className="shrink-0 border-b border-[#E4EBE6] bg-white">
+    <div className="flex min-h-dvh flex-col bg-[#F6F8F7] text-[#12261E]">
+      <header className="sticky top-0 z-20 shrink-0 border-b border-[#E4EBE6] bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             to="/"
@@ -315,8 +336,8 @@ export default function CheckoutPage() {
         </div>
       </header>
 
-      <main className="mx-auto grid min-h-0 w-full max-w-6xl flex-1 grid-cols-1 items-stretch gap-4 overflow-hidden px-4 py-3 sm:px-6 lg:grid-cols-2">
-        <section className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-[20px] bg-[#E8F5EE] p-4 sm:p-5">
+      <main className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 items-start gap-4 px-4 py-3 sm:px-6 lg:grid-cols-2 lg:items-stretch">
+        <section className="relative flex min-h-0 flex-col overflow-hidden rounded-[20px] bg-[#E8F5EE] p-4 sm:p-5 lg:min-h-[calc(100dvh-5.5rem)]">
           <img
             src={CHECKOUT_BG}
             alt=""
@@ -348,6 +369,12 @@ export default function CheckoutPage() {
             {isDowngrade ? (
               <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-snug text-amber-950">
                 Você está indo para um plano mais barato. A diferença já paga não é reembolsada. O plano novo entra na hora.
+              </p>
+            ) : skipBlocked ? (
+              <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-snug text-amber-950">
+                {nextAllowedSlug
+                  ? `Só é possível subir um plano por vez. Assine o ${commercialPlanLabel(nextAllowedSlug)} primeiro.`
+                  : "Só é possível subir um plano por vez."}
               </p>
             ) : null}
 
@@ -401,7 +428,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex items-center justify-between pt-1.5 text-sm font-bold">
                 <span>Total devido hoje</span>
-                <span style={{ color: GREEN }}>{formatMoney(dueToday)}</span>
+                <span style={{ color: GREEN }}>{isDowngrade ? formatMoney(0) : formatMoney(dueToday)}</span>
               </div>
             </div>
           </div>
@@ -413,9 +440,9 @@ export default function CheckoutPage() {
           </div>
         </section>
 
-        <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#E4EBE6] bg-white p-4 sm:p-5">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-[20px] border border-[#E4EBE6] bg-white lg:max-h-[calc(100dvh-5.5rem)]">
           {step === 3 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center">
+            <div className="flex h-full flex-col items-center justify-center overflow-y-auto p-4 text-center sm:p-5">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#E8F6EE] text-[#006B4D]">
                 <QrCode className="h-5 w-5" />
               </span>
@@ -470,6 +497,22 @@ export default function CheckoutPage() {
             </div>
           ) : (
             <>
+              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+              {skipBlocked ? (
+                <p className="mb-4 flex gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950">
+                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                  {nextAllowedSlug ? (
+                    <span>
+                      Cadastro começa no Essencial. Só dá para assinar o próximo plano.{" "}
+                      <Link className="font-semibold text-[#006B4D] hover:underline" to={checkoutPath(nextAllowedSlug, cycle)}>
+                        Ir para {commercialPlanLabel(nextAllowedSlug)}
+                      </Link>
+                    </span>
+                  ) : (
+                    "Só é possível subir um plano por vez."
+                  )}
+                </p>
+              ) : null}
               <div>
                 <h2 className="text-sm font-semibold">Contato</h2>
                 <label className="mt-2 block">
@@ -486,18 +529,20 @@ export default function CheckoutPage() {
                 </label>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <h2 className="text-sm font-semibold">Método de pagamento</h2>
+                {isDowngrade ? (
+                  <p className="mt-3 flex gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950">
+                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
+                    Plano mais barato: a diferença já paga não é reembolsada. Confirmar aplica o plano na hora, sem Pix e sem cartão.
+                  </p>
+                ) : (
+                  <>
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <PayTab active={payMethod === "pix"} onClick={() => setPayMethod("pix")} icon={QrCode} label="Pix" />
                   <PayTab active={payMethod === "card"} onClick={() => setPayMethod("card")} icon={CreditCard} label="Cartão" />
                 </div>
-                {isDowngrade ? (
-                  <p className="mt-3 flex gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950">
-                    <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                    Plano mais barato: a diferença já paga não é reembolsada. Confirmar aplica o plano na hora, sem Pix.
-                  </p>
-                ) : payMethod === "pix" ? (
+                {payMethod === "pix" ? (
                   <p className="mt-3 rounded-xl bg-[#F4FBF7] px-3 py-2.5 text-[13px] text-[#3D5C50]">
                     O Pix é gerado ao confirmar. Pague para o plano novo entrar. Enquanto isso, o plano atual segue ativo.
                   </p>
@@ -574,57 +619,74 @@ export default function CheckoutPage() {
                     )}
                   </div>
                 )}
+                  </>
+                )}
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <h2 className="text-sm font-semibold">Detalhes de faturamento</h2>
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   <IconField icon={User} value={fullName} onChange={setFullName} placeholder="Nome completo" />
                   <IconField icon={IdCard} value={document} onChange={(v) => setDocument(maskCpfOrCnpjInput(v))} placeholder="CPF ou CNPJ" />
                   <IconField icon={Phone} value={phone} onChange={(v) => setPhone(maskPhoneInput(v))} placeholder="Telefone" />
-                  <div className="relative">
+                  <div>
                     <IconField icon={MapPin} value={cep} onChange={(v) => setCep(maskCepInput(v))} placeholder="CEP" />
                     <a
                       href="https://buscacepinter.correios.com.br/app/endereco/index.php"
                       target="_blank"
                       rel="noreferrer"
-                      className="absolute right-3 top-3 text-[11px] font-semibold text-[#006B4D] hover:underline"
+                      className="mt-1.5 inline-block text-[11px] font-semibold text-[#006B4D] hover:underline"
                     >
                       Não sei meu CEP
                     </a>
                   </div>
                 </div>
               </div>
+              </div>
 
-              <div className="mt-5 flex items-start gap-2 text-sm text-[#3D5C50]">
+              <div className="sticky bottom-0 shrink-0 border-t border-[#E4EBE6] bg-white px-4 py-3 sm:px-5">
+              <div className="flex items-start gap-2 text-sm text-[#3D5C50]">
                 <Checkbox
                   id="checkout-terms"
                   checked={terms}
                   onCheckedChange={setTerms}
                   className={terms ? "border-[#006B4D] bg-[#006B4D]" : undefined}
                 />
-                <label htmlFor="checkout-terms" className="cursor-pointer leading-relaxed">
+                <label htmlFor="checkout-terms" className="min-w-0 flex-1 cursor-pointer leading-relaxed">
                   Li e concordo com os Termos de Uso e a Política de Privacidade.
                 </label>
               </div>
 
               <button
                 type="button"
-                onClick={() => void confirm()}
+                onClick={() => {
+                  if (skipBlocked && nextAllowedSlug) {
+                    navigate(checkoutPath(nextAllowedSlug, cycle))
+                    return
+                  }
+                  void confirm()
+                }}
                 disabled={submitting}
-                className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#006B4D] text-sm font-semibold text-white hover:bg-[#005a41] disabled:opacity-60"
+                className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#006B4D] text-sm font-semibold text-white hover:bg-[#005a41] disabled:opacity-60"
               >
                 <Lock className="h-4 w-4" />
-                {submitting ? "Confirmando..." : "Confirmar assinatura"}
+                {submitting
+                  ? "Confirmando..."
+                  : skipBlocked && nextAllowedSlug
+                    ? `Assinar ${commercialPlanLabel(nextAllowedSlug)} primeiro`
+                    : isDowngrade
+                      ? "Confirmar plano"
+                      : "Confirmar assinatura"}
               </button>
 
               <Link
                 to={loggedIn ? "/configuracoes/plano" : "/#planos"}
-                className="mt-4 inline-flex w-full items-center justify-center gap-1 text-sm font-medium text-[#6B7C74] hover:text-[#006B4D]"
+                className="mt-3 inline-flex w-full items-center justify-center gap-1 text-sm font-medium text-[#6B7C74] hover:text-[#006B4D]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Voltar aos planos
               </Link>
+              </div>
             </>
           )}
         </section>
