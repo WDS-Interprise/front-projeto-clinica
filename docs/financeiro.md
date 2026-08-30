@@ -2,7 +2,7 @@
 
 Documentação ponta a ponta do módulo financeiro: lógicas, funções, telas, APIs, modelos de dados, permissões, fluxos reais em terceira pessoa e o que ainda é placeholder.
 
-**Última revisão:** 21/08/2026
+**Última revisão:** 30/08/2026
 
 ---
 
@@ -12,11 +12,11 @@ Há **três dinheiros** distintos. Não misturar.
 
 | Fluxo | Quem paga | Onde a clínica vê | Status hoje |
 |-------|-----------|-------------------|-------------|
-| Livro-caixa da operação | Paciente / convênio para a clínica | Gestão → Finanças | **Funciona** (lançamento manual + Pix ClinMax Pay) |
-| ClinMax Pay | Paciente paga consulta via Pix | Config → Recebimentos + agenda | **Funciona no backend**; UI da agenda incompleta |
-| Assinatura SaaS | Clínica paga para usar o ClinMax | Config → Plano e assinatura | **Implementado** (trial, planos, faturas Pix, backoffice) |
+| Livro-caixa da operação | Paciente / convênio para a clínica | Gestão → Finanças | **Funciona** (lançamento manual, transferência, Pix ClinMax Pay e receipt da agenda) |
+| ClinMax Pay | Paciente paga consulta via Pix | Config → Recebimentos + detalhe da consulta | **Funciona** (charge, QR real, taxa 5% no líquido, repasse automático) |
+| Assinatura SaaS | Clínica paga para usar o ClinMax | Config → Plano e assinatura | **Implementado** (Essencial com fatura, checkout de upgrade, recorrência no primeiro PAID, job a cada 15 min) |
 
-**Cobrança do usuário (clínica):** no cadastro a clínica entra em trial (14 dias, plano Profissional por padrão). Não há checkout na landing. Depois do trial, o acesso some se ninguém gerar cobrança. A clínica paga Pix copiando o código em Plano e assinatura. O dono da plataforma gera a fatura no backoffice (`Gerar cobrança`). Recorrência Asaas existe no código, mas **não inicia sozinha** no fim do trial.
+**Cobrança do usuário (clínica):** cadastro novo entra no Essencial, `ACTIVE`, com `currentPeriodEnd` e primeira `SubscriptionInvoice` PENDING. Sem pagamento: `PAST_DUE`, grace de 3 dias, depois `SUSPENDED` (núcleo clínico permanece). Upgrade self-serve só para o próximo plano, com Pix ou cartão no `/checkout`. O plano novo entra depois do pagamento. Recorrência Asaas nasce no primeiro pagamento confirmado. O backoffice ainda pode gerar fatura (`Gerar cobrança`). Estado ponta a ponta: `docs/asaas-estado-atual.md`.
 
 **Clínicas antigas** entram no plano interno **Legacy** (grátis, todos os recursos, sem cobrança).
 
@@ -52,9 +52,9 @@ Não misturar estes três fluxos na documentação nem na implementação.
 | | **Caixa da clínica** | **ClinMax Pay** | **Assinatura SaaS** |
 |---|---|---|---|
 | Quem paga | Paciente ou convênio para a clínica | Paciente paga consulta via Pix | Clínica paga para usar o ClinMax |
-| Onde no front | Gestão (`/gestao/financas...`) | Config → Recebimentos + agenda | Config → Plano e assinatura; backoffice Assinaturas/Cobranças |
-| O que é | Receitas, despesas, extrato, fluxo | Pix → Asaas → repasse à chave Pix da clínica | Trial, plano, fatura Pix, limites de recursos |
-| Status | **Implementado** | **Implementado** (UI da agenda incompleta) | **Implementado** (recorrência Asaas ainda não dispara sozinha) |
+| Onde no front | Gestão (`/gestao/financas...`) | Config → Recebimentos + agenda | Config → Plano, `/checkout`; backoffice Assinaturas/Cobranças |
+| O que é | Receitas, despesas, extrato, fluxo | Pix → Asaas → taxa 5% → repasse à chave Pix da clínica | Essencial no cadastro, upgrade pago, fatura Pix/cartão, limites |
+| Status | **Implementado** | **Implementado** (QR e receipt no detalhe da consulta) | **Implementado** (fatura no cadastro, recorrência no primeiro PAID) |
 
 ```
 Paciente paga consulta (Pix ClinMax Pay ou dinheiro)
@@ -113,7 +113,7 @@ Todas protegidas por `PermissionRoute` dentro do `AppShell`.
 
 Entrada: **Configurações → Financeiro (cadastros)** na sidebar.
 
-**Plano da clínica** (não é caixa): `/configuracoes/plano` → `PlanoAssinaturaPage`, permissão `clinics:manage`. Grupo **Conta e plano** na sidebar.
+**Plano da clínica** (não é caixa): `/configuracoes/plano` → `PlanoAssinaturaPage`, permissão `clinics:manage`. Checkout: `/checkout` → `CheckoutPage`. Grupo **Conta e plano** na sidebar.
 
 ### 2.3 Navegação
 
@@ -125,11 +125,11 @@ Entrada: **Configurações → Financeiro (cadastros)** na sidebar.
 
 | Local | O que faz | Status |
 |-------|-----------|--------|
-| `PainelPage` | Card "Receita (prevista)" + link para Finanças | Funcional |
+| `PainelPage` | Card "Receita recebida" (INCOME PAID) + link para Finanças | Funcional |
 | `OnboardingPage` | `billingModel` (particular/convênio) | Modelo de atendimento, não SaaS |
-| `AppointmentFormModal` | Switch "Gerar link de pagamento" | Parcial |
-| `AppointmentDetailView` | Detalhe na agenda | Sem UI de cobrança |
-| `LandingPage` | Planos R$ 79/149/249 | Marketing only (preços **desatualizados** vs seed) |
+| `AppointmentFormModal` | Agenda da consulta | Sem link fake de pagamento |
+| `AppointmentDetailView` | Detalhe + cobrar / receber / QR Pix real | Funcional |
+| `LandingPage` | Planos R$ 99/199/349 | Catálogo oficial |
 | `PlanoAssinaturaPage` | Plano, uso, faturas Pix | Funcional |
 | `BackofficeAssinaturasPage` | Trial, cortesia, gerar cobrança | Funcional |
 | `BackofficeCobrancasPage` | MRR e lista de faturas | Funcional |
@@ -366,7 +366,7 @@ Taxa padrão: **5%** (`CLINMAX_PAY_FEE_PERCENT`).
 
 - Calcula `totalAmount` dos procedimentos (`computeTotal`)
 - Cria `AppointmentBilling` com `billingStatus: PENDING`
-- Se `generatePaymentLink: true`: define `paymentLinkUrl` fake (`https://pay.clinichub.local/...`) e `paymentStatus: PENDING` (legado, sem integração real)
+- Não grava URL fake de pagamento. A cobrança real nasce em `POST /appointments/:id/charge`
 
 ### 7.2 Cobrar (`POST /appointments/:id/charge`)
 
@@ -383,12 +383,13 @@ Permissão: `finance:operational` ou `finance:manage`
 ### 7.3 Receber manualmente (`POST /appointments/:id/receipt`)
 
 - Marca `AppointmentBilling.billingStatus = RECEIVED`
-- **Não cria** `FinancialTransaction` automaticamente
+- Cria `FinancialTransaction` INCOME PAID com `originKey = appointment-income:{appointmentId}`
+- Se o ClinMax Pay já lançou a mesma consulta, não duplica a receita
 
 ### 7.4 Consultar pagamento (`GET /appointments/:id/pay`)
 
 - Retorna último `PlatformPayment` da consulta
-- Front: `AppointmentDetailDrawer` carrega, mas **sem UI de cobrança renderizada** na agenda ativa
+- Front: `AppointmentDetailView` mostra QR real, Pix copia e cola, Cobrar e Receber
 
 ---
 
@@ -425,8 +426,8 @@ Repasse é **indicador**, não mecanismo de pagamento ao profissional.
 
 ### 8.4 Dashboard (`PainelPage`)
 
-- Campo `revenue` agrega transações `INCOME` no período
-- **Atenção:** não filtra `status: PAID` (diferente do resumo financeiro)
+- Campo `revenue` (label **Receita recebida**) soma só `INCOME` + `status: PAID` no período
+- PENDING e CANCELLED ficam de fora. Mesma regra do resumo financeiro (`incomePaid`)
 
 ---
 
@@ -448,17 +449,17 @@ Quem opera na plataforma: dono do backoffice.
 | `premium` | Premium | R$ 349 | R$ 3.490 | Sim | + WhatsApp com IA, automações, estoque, TISS. Limites finitos (30 usuários, 5 profissionais, 3 WhatsApps) |
 | `legacy` | Legacy | R$ 0 | R$ 0 | Não | Plano interno: todos os recursos, limites ilimitados |
 
-Trial padrão: **14 dias**. Grace period de inadimplência: **3 dias**. Plano padrão de signup: **Profissional**.
+Trial padrão comercial: **0 dias**. Grace period de inadimplência: **3 dias**. Plano padrão de signup: **Essencial**.
 
 A landing lê `GET /api/public/plans` (Essencial R$ 99, Profissional R$ 199, Premium R$ 349). Detalhes em `docs/planos.md`.
 
 ### 9.2 Como a clínica ganha uma assinatura
 
-1. **Cadastro novo** (`auth.service`): após criar a clínica, chama `ensureClinicSubscription(clinicId)` → status `TRIAL`, plano Profissional, `trialEndsAt` em 14 dias.
-2. **Clínica criada no backoffice:** igual.
-3. **Clínica antiga sem assinatura:** no boot, `migrateExistingClinicsToLegacy()` coloca no plano Legacy `ACTIVE` (não cobra).
+1. **Cadastro novo** (`auth.service`): após criar a clínica, chama `ensureClinicSubscription` → Essencial `ACTIVE`, `currentPeriodEnd` de 1 mês e primeira fatura PENDING. O slug da landing vira `requestedPlanSlug` e o onboarding manda para `/checkout` se não for Essencial.
+2. **Clínica criada no backoffice:** igual (Essencial, com ciclo e fatura).
+3. **Clínica antiga sem assinatura:** no boot, `migrateExistingClinicsToLegacy()` coloca no plano Legacy `ACTIVE` (não cobra). Clínicas Essencial já existentes recebem backfill de ciclo a partir de agora, sem cobrar o passado.
 
-Não há checkout de cartão. A landing envia `?plan=` e o onboarding grava o trial nesse plano. Sem escolha, usa Profissional.
+Checkout self-serve em `/checkout` (Pix e cartão). Self-serve só sobe um degrau por vez.
 
 ### 9.3 Tela da clínica: Plano e assinatura
 
@@ -473,11 +474,12 @@ O admin vê:
 - Uso vs limites (usuários, profissionais, WhatsApp, IA, storage)
 - Recursos incluídos vs bloqueados
 - Histórico de faturas: atualizar Pix, copiar Pix, link da fatura
-- Modal **Ver outros planos**: troca plano e ciclo (`POST /api/subscription/change-plan`)
+- Modal **Ver outros planos**: só o próximo plano tem botão Assinar. Premium no Essencial pede o Profissional primeiro. Checkout em `/checkout`.
+- Upgrade pendente: aviso + continuar no checkout ou cancelar a cobrança.
 
 Aviso se `PAST_DUE`: "Pagamento pendente. Regularize para evitar interrupções."
 
-A clínica **não gera** a própria fatura. Só paga o Pix de uma fatura que já existe.
+A clínica gera a própria cobrança de **upgrade** no checkout. Renovação recorrente ainda depende do backoffice ou de recorrência Asaas que não dispara sozinha.
 
 ### 9.4 Tela do backoffice
 
@@ -537,11 +539,16 @@ IDs Asaas dos dois fluxos **não podem coincidir**.
 
 Se a fatura vence: status `OVERDUE` e assinatura `PAST_DUE`.
 
-### 9.7 Recorrência Asaas (código existe, gatilho fraco)
+### 9.7 Recorrência Asaas (IMPLEMENTADO)
 
 `syncAsaasSubscription` cria/atualiza `POST /v3/subscriptions` (Pix mensal ou anual).
 
-Hoje só é chamado em **troca de plano se a clínica já tiver** `asaasSubscriptionId`. Trocar o plano no trial **não** cria a assinatura recorrente. O fim do trial **não** gera fatura sozinho. Sem o botão Gerar cobrança (ou um webhook de subscription já existente), a clínica simplesmente expira.
+Gatilhos:
+
+- primeiro webhook PAID de fatura comercial (depois de aplicar o plano localmente);
+- `changePlan` se a clínica já tiver `asaasSubscriptionId`.
+
+Fallback: o job a cada 15 minutos emite renovação local se não houver `asaasSubscriptionId` e não houver fatura aberta. Legacy (R$ 0) nunca entra na recorrência.
 
 ### 9.8 Gate de recursos
 
@@ -551,20 +558,18 @@ Hoje só é chamado em **troca de plano se a clínica já tiver** `asaasSubscrip
 
 Limites checados no write:
 
-- `maxUsers` / `maxDoctors` ao criar usuário
+- `maxUsers` / `maxDoctors` ao criar usuário e ao aceitar convite
 - `maxWhatsappConnections` ao conectar WhatsApp
-- `maxAiMessagesPerMonth` na IA do WhatsApp
+- `maxAiAutomationActionsPerMonth` na IA operacional do WhatsApp (não a quota assistiva)
 
-### 9.9 O que ainda não fecha o ciclo sozinho
+### 9.9 Ciclo de cobrança SaaS (IMPLEMENTADO)
 
-- Sem checkout self-serve (cartão, boleto, escolha de plano no cadastro)
-- Fim do trial não gera Pix automaticamente
-- Recorrência Asaas não inicia no primeiro pagamento
-- Landing com nomes e preços diferentes do catálogo real
-- Lifecycle só no boot da API (não há cron)
-- Clínica não consegue "pagar agora" se não houver fatura pendente
-- `invoiceUrl` existe no model, quase nunca preenchido
-- Bloqueio total do login por inadimplência: **não**. Só some a feature do plano
+- Checkout de upgrade em `/checkout` (Pix e cartão). Cadastro continua no Essencial.
+- Intenção da landing (`requestedPlanSlug`) segue para o checkout após o onboarding.
+- Primeira fatura no cadastro Essencial. Sem pagamento: `PAST_DUE` + grace 3 dias + `SUSPENDED` comercial.
+- Recorrência Asaas inicia no primeiro pagamento confirmado.
+- Lifecycle no boot e a cada 15 minutos.
+- Login nunca é bloqueado por inadimplência. Agenda, pacientes e prontuário permanecem.
 
 Ver também: `docs/backoffice-estrutura.md` e `docs/configuracoes.md`.
 
@@ -646,7 +651,7 @@ Permissão: `clinics:manage`.
 | GET | `/usage` | Uso vs limites + features |
 | GET | `/plans` | Planos públicos |
 | GET | `/invoices` | Faturas da clínica |
-| POST | `/change-plan` | Troca plano e ciclo |
+| POST | `/change-plan` | Upgrade (só o próximo plano) ou downgrade |
 | POST | `/invoices/:id/refresh-pix` | Atualiza QR Pix |
 
 ### 10.7 `/api/backoffice` (SaaS, dono da plataforma)
@@ -733,10 +738,11 @@ Permissão: `clinics:manage`.
 | `plan.service.ts` | CRUD de planos, lista pública |
 | `subscription.service.ts` | Lista, troca plano, trial, cortesia, cancelar, MRR |
 | `subscription-billing.service.ts` | Customer Asaas, fatura Pix, webhook de pagamento |
-| `subscription-lifecycle.service.ts` | Expira trial e suspende inadimplente (boot) |
-| `saas-billing-seed.ts` | Seed de planos + `ensureClinicSubscription` |
+| `subscription-lifecycle.service.ts` | Trial, PAST_DUE, grace, SUSPENDED, renovação local (boot + job 15 min) |
+| `saas-billing-seed.ts` | Seed de planos + `ensureClinicSubscription` (fatura + periodEnd) |
 | `plan-entitlements.ts` | Gate de feature/limite |
 | `asaas-webhook.service.ts` | Roteia webhook Pay vs SaaS |
+| `billing.scheduler.ts` | Intervalo de 15 minutos |
 
 `asaas.client.ts` extra SaaS: `createSubscription`, `updateSubscription`, `deleteSubscription`, `listSubscriptionPayments`.
 
@@ -746,6 +752,10 @@ Permissão: `clinics:manage`.
 |---------|--------|
 | `lib/money.ts` | `toCents`, `fromCents`, `roundMoney`, `moneyFromUnknown` |
 | `lib/pix-key.ts` | `detectPixKeyType`, `normalizePixKey`, `maskPixKey`, validação documento |
+| `lib/clinmax-pay-ledger.ts` | Taxa 5% no líquido e chave `appointment-income:{id}` |
+| `lib/finance-ledger.ts` | P&L vs saldo (TRANSFER no saldo, fora do resultado) |
+| `lib/asaas-webhook-auth.ts` | Token obrigatório em production, `timingSafeEqual` |
+| `lib/subscription-lifecycle-rules.ts` | ACCESS / PAST_DUE / SUSPEND / repair ghost |
 
 ---
 
@@ -773,7 +783,7 @@ PlatformPayoutStatus: PENDING | PROCESSING | PAID | FAILED | CANCELLED
 | `FinancialCategory` | Categoria receita/despesa |
 | `CostCenter` | Centro de custo |
 | `PaymentMethod` | Forma de pagamento |
-| `FinancialTransaction` | Lançamento do livro-caixa |
+| `FinancialTransaction` | Lançamento do livro-caixa. `originKey` único para receita de consulta |
 | `ClinicFinanceSettings` | Padrões e autoGenerate |
 | `ClinicPixRecipient` | Chave Pix para repasse |
 | `PlatformPayment` | Cobrança Asaas por consulta |
@@ -781,6 +791,7 @@ PlatformPayoutStatus: PENDING | PROCESSING | PAID | FAILED | CANCELLED
 | `AsaasWebhookEvent` | Idempotência webhook |
 | `AppointmentBilling` | Total/cobrança da consulta |
 | `Patient.asaasCustomerId` | Cache customer Asaas |
+| `ClinicSubscription.requestedPlanSlug` | Intenção da landing, separado do plano ativo |
 
 ### 12.4 Modelos SaaS (cobrança da clínica)
 
@@ -804,7 +815,7 @@ SubscriptionInvoiceStatus: PENDING | PAID | OVERDUE | REFUNDED | CANCELLED | FAI
 |-------|------------|
 | `InventoryProduct` | Sem preço |
 | `TissGuide` | `amount` informativo |
-| `Appointment.paymentLinkUrl` | URL fake legado |
+| `Appointment.paymentLinkUrl` | Campo legado no schema. Fluxo real não grava URL fake |
 
 ---
 
@@ -849,7 +860,7 @@ A recepcionista **Carla** abre a consulta de **Maria** e aciona Cobrar. O backen
 
 ### 14.6 Cobrança local sem Pix
 
-A clínica desativou o ClinMax Pay. **Carla** cobra a consulta na agenda; o sistema marca o billing como CHARGED e retorna `mode: "local"` sem QR. Depois ela confirma recebimento em dinheiro via receipt. O billing fica RECEIVED, mas **nenhuma receita entra no extrato** até **Ricardo** lançar manualmente.
+A clínica desativou o ClinMax Pay. **Carla** cobra a consulta na agenda; o sistema marca o billing como CHARGED e retorna `mode: "local"` sem QR. Depois ela confirma recebimento em dinheiro via receipt. O billing fica RECEIVED e a receita entra no extrato com a mesma chave de origem da consulta.
 
 ### 14.7 Estorno após repasse
 
@@ -865,11 +876,11 @@ O consultor **Paulo** (sem acesso ao extrato) cria a categoria "Procedimento est
 
 ### 14.10 Contratação e pagamento do software
 
-O dono **João** cria conta na landing sem cartão. O sistema coloca a clínica no plano Profissional em **trial de 14 dias**. Ele usa agenda e financeiro normalmente.
+O dono **João** cria conta na landing escolhendo Premium. O sistema coloca a clínica no plano **Essencial**, `ACTIVE`, com fatura PENDING de R$ 99 e encaminha o checkout do Premium após o onboarding. Agenda e prontuário funcionam na hora.
 
-No dia 15, se a API subir de novo, o lifecycle marca a assinatura `EXPIRED`. Gestão e WhatsApp passam a mostrar "Recurso não incluído no plano".
+Se a fatura do Essencial não for paga, após o vencimento a assinatura vai para `PAST_DUE` e, depois do grace de 3 dias, `SUSPENDED`. Módulos comerciais somem. Login, agenda, pacientes e prontuário permanecem.
 
-Para cobrar, o dono da plataforma abre Backoffice → Assinaturas → **Gerar cobrança**. **João** entra em Configurações → Plano e assinatura, copia o Pix e paga. O webhook marca a fatura `PAID` e a assinatura `ACTIVE` por mais um mês.
+Para o upgrade, **João** paga o Pix no `/checkout`. O webhook marca a fatura `PAID`, aplica o Profissional e cria a recorrência Asaas.
 
 Clínicas que já existiam antes do billing ficam no plano **Legacy** e não são cobradas.
 
@@ -883,41 +894,33 @@ Clínicas que já existiam antes do billing ficam no plano **Legacy** e não sã
 | Extrato receitas/despesas | Sim | Sim | Real |
 | Fluxo de caixa | Sim | Sim | Real |
 | Criação lançamentos | Sim | Sim | Real |
-| Edição/cancelamento UI | Não | Sim | - |
+| Edição/cancelamento UI | Sim (status e cancelar) | Sim | Real |
 | Cadastros (create) | Sim | Sim | Real |
 | Cadastros (edit/delete) | Não | Parcial | - |
 | ClinMax Pay config | Sim | Sim | Real |
-| ClinMax Pay cobrança agenda | Parcial | Sim | Real |
+| ClinMax Pay cobrança agenda | Sim (Cobrar, Receber, QR) | Sim | Real |
 | Receita automática atendimento | Checkbox | Não ligado | - |
 | Estoque | Sim | Sim | Real (sem R$) |
 | TISS | Sim | Sim | Real (sem ledger) |
 | Repasse profissional | Sim | Sim | Real |
-| Assinatura SaaS (trial, plano, fatura) | Sim | Sim | Real |
-| Gerar cobrança Pix da mensalidade | Clínica vê; backoffice gera | Sim | Real se Asaas |
-| Recorrência Asaas automática | Não | Código sem gatilho | - |
-| Checkout na landing | Marketing | Não | N/A |
-| paymentLinkUrl fake | Switch | Fake URL | Mock |
+| Assinatura SaaS (Essencial, checkout, fatura) | Sim | Sim | Real |
+| Gerar cobrança Pix da mensalidade | Clínica no upgrade; backoffice na renovação | Sim | Real se Asaas |
+| Recorrência Asaas automática | Primeiro PAID | Sim | Real se Asaas |
+| Checkout na landing | `/checkout` | Sim (change-plan) | Real se Asaas |
+| paymentLinkUrl | Não usado na UI | Campo legado | - |
 
 ---
 
-## 16. Lacunas conhecidas
+## 16. Lacunas conhecidas (PLANEJADO / P2)
 
-1. UI de cobrança Pix na agenda (`AppointmentDetailView` sem seção financeira)
-2. `receipt` manual não gera lançamento no extrato
-3. `autoGenerateOnAppointment` não conectado ao encerramento de atendimento
-4. Front não expõe PATCH status nem DELETE de lançamentos
-5. Sem botão "Nova transferência" no extrato
-6. Cadastros sem editar/desativar na UI
-7. TISS aprovada não gera receita
-8. Estoque OUT não gera despesa
-9. Recorrência SaaS não inicia sozinha (trial expira sem Pix)
-10. Landing com preços/nomes diferentes do seed (79/149/249 vs 99/199/349)
-11. Lifecycle de assinatura só no boot da API
-12. `paymentLinkUrl` legado fake na agenda
-13. Validação Pix sem consulta externa (DICT)
-14. Dashboard `revenue` inclui INCOME não filtrado por PAID
-15. Clínica não gera a própria fatura SaaS
-16. Login não é bloqueado por inadimplência (só some feature)
+1. `autoGenerateOnAppointment` não conectado ao encerramento de atendimento
+2. Cadastros financeiros sem editar/desativar na UI
+3. TISS aprovada não gera receita
+4. Estoque OUT não gera despesa
+5. Proration e downgrade só no fim do ciclo
+6. Validação Pix sem consulta externa (DICT)
+7. Sem botão de saque. Só repasse Pix automático após `PAYMENT_RECEIVED`
+8. Login não é bloqueado por inadimplência (só some feature gated). Regra de produto.
 
 ---
 
@@ -938,6 +941,9 @@ src/pages/gestao/
 src/pages/configuracoes/
   FinanceConfigPage.tsx
   PlanoAssinaturaPage.tsx
+
+src/pages/checkout/
+  CheckoutPage.tsx
 
 src/pages/backoffice/
   BackofficeAssinaturasPage.tsx
@@ -1050,15 +1056,17 @@ api.finance.createAccount / createCategory / createCostCenter / createPaymentMet
 api.finance.getPaySettings() / savePaySettings() / setPayEnabled()
 ```
 
-**Não expostos no front (existem no backend):**
-- `PATCH /finance/transactions/:id/status`
-- `DELETE /finance/transactions/:id`
+**Lançamentos no front:**
+```typescript
+api.finance.updateTransactionStatus(id, status)
+api.finance.cancelTransaction(id)
+```
 
 **Cobrança agenda:**
 ```typescript
 api.appointments.charge(id, amount?)
 api.appointments.getPay(id)
-api.appointments.receipt(id)  // sem UI
+api.appointments.receipt(id)
 ```
 
 **Assinatura SaaS (clínica):**

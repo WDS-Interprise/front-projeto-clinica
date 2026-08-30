@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState, useRef } from "react"
-import { Plus, User, Building2, Clock, DollarSign, UserPlus, MessageCircle, Stethoscope } from "lucide-react"
+import { Plus, User, Building2, Clock, UserPlus, MessageCircle, Stethoscope } from "lucide-react"
 import { format } from "date-fns"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
@@ -118,7 +118,6 @@ export default function AppointmentFormModal({
   const [patientFieldError, setPatientFieldError] = useState(false)
   const [recurrence, setRecurrence] = useState<CreateAppointmentInput["recurrence"]>("NONE")
   const [notes, setNotes] = useState("")
-  const [paymentLink, setPaymentLink] = useState(false)
   const [notifyPatient, setNotifyPatient] = useState(() => getAgendaNotifyPatient())
   const [originalSchedule, setOriginalSchedule] = useState<{
     doctorId: string
@@ -195,7 +194,6 @@ export default function AppointmentFormModal({
           setEndTime(aptEnd)
           setInsurancePlan(apt.insurancePlan ?? "Particular")
           setNotes(apt.notes ?? "")
-          setPaymentLink(Boolean(apt.generatePaymentLink))
           setRecurrence("NONE")
           setNotifyPatient(getAgendaNotifyPatient())
           setOriginalSchedule({
@@ -476,7 +474,7 @@ export default function AppointmentFormModal({
         endTime,
         insurancePlan: insurancePlan || "Particular",
         notes,
-        generatePaymentLink: paymentLink,
+        generatePaymentLink: false,
         procedures: type === "SCHEDULE" ? lines : [],
         ...(isEditing
           ? scheduleChanged
@@ -987,14 +985,6 @@ export default function AppointmentFormModal({
                   </select>
                 </div>
               )}
-
-              <div className="flex items-center justify-between rounded-[4px] border border-[#E8EDF2] bg-[#F8FAFC] px-3 py-2.5">
-                <div className="flex items-center gap-2 text-sm text-[#334155]">
-                  <DollarSign className="h-4 w-4 text-[#64748B]" />
-                  Gerar link de pagamento
-                </div>
-                <Switch checked={paymentLink} onChange={setPaymentLink} />
-              </div>
 
               {type === "SCHEDULE" && canNotifyWhatsapp && (
                 <div className="flex items-center justify-between rounded-[4px] border border-[#E8EDF2] bg-[#F8FAFC] px-3 py-2.5">

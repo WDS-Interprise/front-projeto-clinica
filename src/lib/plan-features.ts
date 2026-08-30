@@ -95,6 +95,7 @@ export type ClinicSubscriptionView = {
     amount: number
     invoiceId: string
   } | null
+  requestedPlanSlug?: string | null
   features: PlanFeature[]
   limits: Partial<Record<PlanLimitKey, number | null>>
 }
@@ -156,6 +157,35 @@ export type SubscriptionInvoiceView = {
 }
 
 export const SELECTED_PLAN_STORAGE_KEY = "clinichub_selected_plan"
+
+export const COMMERCIAL_PLAN_SLUGS = ["essencial", "profissional", "premium"] as const
+export const DEFAULT_SIGNUP_PLAN_SLUG = "essencial"
+
+export function commercialPlanLabel(slug: string) {
+  if (slug === "essencial") return "Essencial"
+  if (slug === "profissional") return "Profissional"
+  if (slug === "premium") return "Premium"
+  return slug
+}
+
+export function nextCommercialPlanSlug(fromSlug: string | null | undefined): string | null {
+  if (!fromSlug || !(COMMERCIAL_PLAN_SLUGS as readonly string[]).includes(fromSlug)) {
+    return DEFAULT_SIGNUP_PLAN_SLUG
+  }
+  const index = (COMMERCIAL_PLAN_SLUGS as readonly string[]).indexOf(fromSlug)
+  return COMMERCIAL_PLAN_SLUGS[index + 1] ?? null
+}
+
+export function isNextCommercialUpgrade(fromSlug: string | null | undefined, toSlug: string) {
+  return nextCommercialPlanSlug(fromSlug) === toSlug
+}
+
+export function isCommercialRankUpgrade(fromSlug: string | null | undefined, toSlug: string) {
+  const to = (COMMERCIAL_PLAN_SLUGS as readonly string[]).indexOf(toSlug)
+  if (to < 0) return false
+  const from = fromSlug ? (COMMERCIAL_PLAN_SLUGS as readonly string[]).indexOf(fromSlug) : -1
+  return to > from
+}
 
 export function checkoutPath(slug: string, cycle: "MONTHLY" | "ANNUAL" = "MONTHLY") {
   return `/checkout?plan=${encodeURIComponent(slug)}&cycle=${cycle}`

@@ -2,13 +2,14 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { Trash2, Calendar, Clock, Stethoscope, Building2, ChevronLeft, CheckCircle } from "lucide-react"
-import { api } from "@/services/api"
+import { Trash2, Calendar, Clock, Stethoscope, Building2, ChevronLeft, CheckCircle, Copy } from "lucide-react"
+import { api, type ClinmaxPayCharge } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
 import { useAuth } from "@/context/AuthContext"
 import { useConfirm } from "@/hooks/useConfirm"
 import type { Appointment } from "@/types"
+import { Button } from "@/components/ui/button"
 
 const statusOptions = [
   { value: "SCHEDULED", label: "Agendado" },
@@ -35,15 +36,25 @@ export default function AppointmentDetailView({ appointmentId, onBack, onUpdated
   const canStartClinical = hasPermission("records:write")
   const canOpenRecord = hasPermission("records:view")
   const canManageAgenda = hasPermission("agenda:manage")
+  const canCharge = hasPermission("finance:operational") || hasPermission("finance:manage")
   const [apt, setApt] = useState<Appointment | null>(null)
   const [loading, setLoading] = useState(false)
+  const [pay, setPay] = useState<ClinmaxPayCharge | null>(null)
+  const [chargeBusy, setChargeBusy] = useState(false)
+
+  const reload = (id: string) =>
+    Promise.all([
+      api.appointments.getById(id),
+      api.appointments.getPay(id).catch(() => ({ pay: null })),
+    ]).then(([data, payRes]) => {
+      setApt(data)
+      setPay(payRes.pay)
+    })
 
   useEffect(() => {
     if (!appointmentId) return
     setLoading(true)
-    api.appointments
-      .getById(appointmentId)
-      .then((data) => setApt(data))
+    reload(appointmentId)
       .catch((err: unknown) => {
         toast(toastMessageFromApiError(err, "Erro ao carregar agendamento"), "error")
       })
@@ -204,6 +215,116 @@ export default function AppointmentDetailView({ appointmentId, onBack, onUpdated
                 </div>
               </div>
             </div>
+
+            {apt.type !== "BLOCK" && (
+              <div className="mt-4 bg-white border border-[#E2E8F0] rounded-[12px] p-4">
+                <h3 className="text-sm font-semibold text-[#0F172A] mb-3">Cobrança da consulta</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs mb-4">
+                  <div>
+                    <div className="text-[#64748B] mb-1">Valor</div>
+                    <div className="font-medium text-[#334155]">
+                      {(apt.totalAmount ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[#64748B] mb-1">Status</div>
+                    <div className="font-medium text-[#334155]">
+                      {apt.billingStatus === "RECEIVED"
+                        ? "Recebido"
+                        : apt.billingStatus === "CHARGED"
+                          ? "Aguardando pagamento"
+                          : pay?.status === "REFUNDED"
+                            ? "Estornado"
+                            : pay?.status === "CONFIRMED"
+                              ? "Pagamento confirmado"
+                              : pay?.status === "RECEIVED"
+                                ? "Pagamento confirmado"
+                                : "Pendente"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[#64748B] mb-1">Forma</div>
+                    <div className="font-medium text-[#334155]">
+                      {pay?.pixPayload ? "Pix ClinMax Pay" : apt.billingStatus === "RECEIVED" ? "Manual" : "-"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[#64748B] mb-1">Repasse</div>
+                    <div className="font-medium text-[#334155]">{pay?.payoutStatus ?? "-"}</div>
+                  </div>
+                </div>
+                {pay?.pixEncodedImage && pay.status !== "RECEIVED" && pay.status !== "REFUNDED" && (
+                  <div className="mb-4 flex flex-col sm:flex-row gap-4 items-start">
+                    <img
+                      src={`data:image/png;base64,${pay.pixEncodedImage}`}
+                      alt="QR Code Pix"
+                      className="w-40 h-40 border border-[#E2E8F0] rounded-lg"
+                    />
+                    {pay.pixPayload && (
+                      <div className="flex-1">
+                        <div className="text-[11px] text-[#64748B] mb-1">Pix copia e cola</div>
+                        <p className="text-xs break-all bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-2">{pay.pixPayload}</p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="mt-2"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(pay.pixPayload || "")
+                            toast("Pix copiado.")
+                          }}
+                        >
+                          <Copy className="w-3.5 h-3.5 mr-1" /> Copiar Pix
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {canCharge && apt.billingStatus !== "RECEIVED" && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      disabled={chargeBusy}
+                      onClick={() => {
+                        setChargeBusy(true)
+                        api.appointments
+                          .charge(appointmentId)
+                          .then((res) => {
+                            setPay(res.pay)
+                            toast(res.mode === "pix" ? "Cobrança Pix gerada." : "Consulta marcada como cobrada.")
+                            return reload(appointmentId)
+                          })
+                          .catch((err: unknown) => {
+                            toast(toastMessageFromApiError(err, "Erro ao cobrar consulta"), "error")
+                          })
+                          .finally(() => setChargeBusy(false))
+                      }}
+                    >
+                      Cobrar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={chargeBusy}
+                      onClick={() => {
+                        setChargeBusy(true)
+                        api.appointments
+                          .receipt(appointmentId)
+                          .then(() => {
+                            toast("Consulta recebida e lançada no financeiro.")
+                            return reload(appointmentId)
+                          })
+                          .catch((err: unknown) => {
+                            toast(toastMessageFromApiError(err, "Erro ao receber consulta"), "error")
+                          })
+                          .finally(() => setChargeBusy(false))
+                      }}
+                    >
+                      Receber manualmente
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 h-[66px] bg-white border border-[#E2E8F0] rounded-[10px] px-3.5 py-3 flex items-center justify-between">
               <button

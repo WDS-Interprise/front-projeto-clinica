@@ -20,7 +20,7 @@ import { useClinicPlan, usePublicPlans } from "@/hooks/useClinicPlan"
 import { BillingStatusBadge } from "@/components/billing/PlanBadges"
 import { PlanFeatureList, PlanUsagePanel } from "@/components/billing/PlanUsage"
 import { LANDING_SPECIALIST_EMAIL } from "@/lib/landing-content"
-import { PLAN_FEATURES, checkoutPath } from "@/lib/plan-features"
+import { PLAN_FEATURES, checkoutPath, commercialPlanLabel, nextCommercialPlanSlug } from "@/lib/plan-features"
 import { Button } from "@/components/ui/button"
 import { api } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
@@ -316,7 +316,7 @@ export default function PlanoAssinaturaPage() {
         <div className="space-y-3 text-sm leading-relaxed text-[#3D5C50]">
           <p>O plano é a assinatura do software ClinMax, paga pela clínica.</p>
           <p>Isso é separado do livro-caixa (Finanças) e do Pix de consulta (ClinMax Pay).</p>
-          <p>Você usa o plano atual normalmente. Para subir de plano (upgrade), é preciso pagar o Pix. O plano novo só entra depois do pagamento.</p>
+          <p>Você usa o plano atual normalmente. Cadastro novo entra no Essencial. Para subir, só vale o próximo plano, e só depois do pagamento. Do Essencial, o próximo é o Profissional. Do Profissional, o próximo é o Premium.</p>
         </div>
       </Modal>
 
@@ -402,6 +402,9 @@ export default function PlanoAssinaturaPage() {
                 const Icon = PLAN_ICONS[plan.slug as keyof typeof PLAN_ICONS] ?? Briefcase
                 const current = plan.id === subscription?.planId
                 const price = billingCycle === "ANNUAL" ? plan.annualPrice : plan.monthlyPrice
+                const nextSlug = nextCommercialPlanSlug(subscription?.planSlug)
+                const isNext = plan.slug === nextSlug
+                const isCheaper = plan.monthlyPrice < (plans.find((p) => p.id === subscription?.planId)?.monthlyPrice ?? 0)
                 return (
                   <article
                     key={plan.id}
@@ -429,13 +432,11 @@ export default function PlanoAssinaturaPage() {
                     </p>
                     {current ? (
                       <p className="mt-4 text-sm font-semibold text-[#006B4D]">Plano atual</p>
-                    ) : (
+                    ) : isNext ? (
                       <>
-                        {plan.monthlyPrice < (plans.find((p) => p.id === subscription?.planId)?.monthlyPrice ?? 0) ? (
-                          <p className="mt-3 text-[12px] leading-snug text-amber-800">
-                            Plano mais barato: a diferença já paga não é reembolsada.
-                          </p>
-                        ) : null}
+                        <p className="mt-3 text-[12px] leading-snug text-[#3D5C50]">
+                          Próximo plano. O pagamento libera os recursos novos.
+                        </p>
                         <Button
                           className="mt-4 bg-[#006B4D] text-white hover:bg-[#005a41]"
                           onClick={() => navigate(checkoutPath(plan.slug, billingCycle))}
@@ -443,6 +444,24 @@ export default function PlanoAssinaturaPage() {
                           Assinar {plan.name}
                         </Button>
                       </>
+                    ) : isCheaper ? (
+                      <>
+                        <p className="mt-3 text-[12px] leading-snug text-amber-800">
+                          Plano mais barato: a diferença já paga não é reembolsada.
+                        </p>
+                        <Button
+                          className="mt-4 bg-[#006B4D] text-white hover:bg-[#005a41]"
+                          onClick={() => navigate(checkoutPath(plan.slug, billingCycle))}
+                        >
+                          Assinar {plan.name}
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="mt-4 text-[12px] leading-snug text-[#6B7C74]">
+                        {nextSlug
+                          ? `Assine o ${commercialPlanLabel(nextSlug)} primeiro. Só é possível subir um plano por vez.`
+                          : "Este já é o plano mais alto."}
+                      </p>
                     )}
                   </article>
                 )

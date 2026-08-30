@@ -438,6 +438,19 @@ function PlanCard({
         >
           {plan.ctaLabel}
         </Link>
+        {plan.slug === "premium" ? (
+          <p className="mt-2 text-xs leading-snug text-[#5b6573]">
+            Cadastro começa no Essencial. O Premium só entra depois do Profissional.
+          </p>
+        ) : plan.slug === "profissional" ? (
+          <p className="mt-2 text-xs leading-snug text-[#5b6573]">
+            Cadastro começa no Essencial. Este é o primeiro upgrade pago.
+          </p>
+        ) : (
+          <p className="mt-2 text-xs leading-snug text-[#5b6573]">
+            Plano inicial de toda clínica nova.
+          </p>
+        )}
 
         <ul className="mt-6 space-y-2.5">
           {plan.marketingFeatures.map((feature) => (

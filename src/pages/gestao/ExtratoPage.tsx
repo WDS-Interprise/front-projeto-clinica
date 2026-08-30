@@ -7,6 +7,7 @@ import { api, type FinanceTransaction, type FinanceLookup } from "@/services/api
 import { useToast } from "@/context/ToastContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
 import { useAuth } from "@/context/AuthContext"
+import { useConfirm } from "@/hooks/useConfirm"
 import TransactionFormModal from "@/components/gestao/TransactionFormModal"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +31,7 @@ export default function ExtratoPage({
   pageDescription?: string
 }) {
   const { toast } = useToast()
+  const { confirm, ConfirmDialog } = useConfirm()
   const { hasPermission } = useAuth()
   const canManage = hasPermission("finance:manage")
 
@@ -105,6 +107,9 @@ export default function ExtratoPage({
             <Button type="button" variant="outline" onClick={() => openModal("EXPENSE")}>
               Nova despesa
             </Button>
+            <Button type="button" variant="outline" onClick={() => openModal("TRANSFER")}>
+              Nova transferência
+            </Button>
           </div>
         )}
       </div>
@@ -119,12 +124,13 @@ export default function ExtratoPage({
               <th className="text-left p-3">Conta / Categoria</th>
               <th className="text-left p-3">Status</th>
               <th className="text-right p-3">Valor</th>
+              {canManage && <th className="text-right p-3">Ações</th>}
             </tr>
           </thead>
           <tbody>
             {!transactions.length && !loading && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-text-secondary">
+                <td colSpan={canManage ? 7 : 6} className="p-8 text-center text-text-secondary">
                   Nenhum lançamento encontrado.
                 </td>
               </tr>
@@ -168,6 +174,57 @@ export default function ExtratoPage({
                 >
                   {formatCurrency(tx.amount)}
                 </td>
+                {canManage && (
+                  <td className="p-3 text-right whitespace-nowrap">
+                    <select
+                      className="h-8 mr-2 rounded-md border border-border bg-surface px-2 text-xs"
+                      value={tx.status}
+                      onChange={(e) => {
+                        const status = e.target.value as "PAID" | "PENDING" | "CANCELLED"
+                        api.finance
+                          .updateTransactionStatus(tx.id, status)
+                          .then(() => {
+                            load()
+                            toast("Status atualizado.")
+                          })
+                          .catch((err: unknown) => {
+                            toast(toastMessageFromApiError(err, "Erro ao alterar status"), "error")
+                          })
+                      }}
+                    >
+                      <option value="PAID">Pago</option>
+                      <option value="PENDING">Pendente</option>
+                      <option value="CANCELLED">Cancelado</option>
+                    </select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-8 px-2 text-xs"
+                      onClick={() => {
+                        void confirm({
+                          title: "Cancelar lançamento",
+                          message: "O lançamento fica cancelado e deixa de entrar no saldo. O histórico é preservado.",
+                          confirmLabel: "Cancelar lançamento",
+                          cancelLabel: "Manter",
+                          variant: "danger",
+                        }).then((ok) => {
+                          if (!ok) return
+                          api.finance
+                            .cancelTransaction(tx.id)
+                            .then(() => {
+                              load()
+                              toast("Lançamento cancelado.")
+                            })
+                            .catch((err: unknown) => {
+                              toast(toastMessageFromApiError(err, "Erro ao cancelar lançamento"), "error")
+                            })
+                        })
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -187,6 +244,7 @@ export default function ExtratoPage({
           }}
         />
       )}
+      <ConfirmDialog />
     </GestaoPageShell>
   )
 }
