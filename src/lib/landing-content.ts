@@ -18,6 +18,7 @@ import {
   UserRound,
   Users,
 } from "lucide-react"
+import { COMPANY_LEGAL } from "@/lib/company-legal"
 
 export type LandingFeature = {
   icon: LucideIcon
@@ -187,7 +188,7 @@ export const LANDING_PLAN_FALLBACK: import("@/lib/plan-features").PublicCatalog 
   ],
 }
 
-export const LANDING_SPECIALIST_EMAIL = "contato@clinmax.com.br"
+export const LANDING_SPECIALIST_EMAIL = COMPANY_LEGAL.contactEmail
 
 export const LANDING_FOOTER_BLURB =
   "Gestão clínica e prontuário eletrônico para consultórios e equipes que querem mais tempo para cuidar de pessoas."

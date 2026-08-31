@@ -19,7 +19,6 @@ import { useForceLightTheme } from "@/hooks/useForceLightTheme"
 import {
   LANDING_GREEN,
   BRAND_BLUE_DARK,
-  APP_NAME,
   LANDING_HERO_IMAGE_ALT,
   LANDING_HERO_IMAGE_SRC,
   LANDING_HERO_SUBTITLE,
@@ -36,6 +35,7 @@ import {
   LANDING_SPECIALIST_EMAIL,
   LANDING_STEPS,
 } from "@/lib/landing-content"
+import { formatCompanyAddress, formatCompanyCopyright } from "@/lib/company-legal"
 import { api } from "@/services/api"
 import { rememberSelectedPlan, checkoutPath, type PublicCatalog, type PublicCatalogPlan } from "@/lib/plan-features"
 
@@ -572,9 +572,10 @@ function LandingFooter() {
       </div>
 
       <LandingReveal className="mx-auto mt-10 flex max-w-6xl flex-col items-start justify-between gap-3 border-t border-[#e6eaf0] pt-6 sm:flex-row sm:items-center" delay={120}>
-        <p className="text-[11px] text-[#5b6573]">
-          © {new Date().getFullYear()} {APP_NAME}. Todos os direitos reservados.
-        </p>
+        <div className="text-[11px] text-[#5b6573]">
+          <p>{formatCompanyCopyright()}</p>
+          <p className="mt-1">{formatCompanyAddress()}</p>
+        </div>
         <Link
           to="/backoffice/login"
           className="cursor-pointer text-[11px] text-[#5b6573] transition-colors duration-200 hover:text-[#0A1F44]"
