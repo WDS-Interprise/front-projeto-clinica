@@ -150,7 +150,6 @@ export default function AppointmentFormModal({
       setEndTime(addMinutesToTime(schedule.agendaStartTime, schedule.slotIntervalMinutes))
     }
     setNotes("")
-    setPaymentLink(false)
     setRecurrence("NONE")
     setNotifyPatient(getAgendaNotifyPatient())
     setOriginalSchedule(null)
