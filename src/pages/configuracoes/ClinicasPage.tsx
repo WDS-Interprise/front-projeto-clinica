@@ -65,10 +65,10 @@ function fromClinic(c: Record<string, unknown>): ClinicForm {
     name: String(c.name ?? ""),
     phone: String(c.phone ?? ""),
     email: String(c.email ?? ""),
-    cnpj: String(c.cnpj ?? ""),
+    cnpj: maskCnpjInput(String(c.cnpj ?? "")),
     addressStreet: String(c.addressStreet ?? ""),
     cityState: splitCityState(c.addressCity as string, c.addressState as string),
-    addressZip: String(c.addressZip ?? ""),
+    addressZip: maskCepInput(String(c.addressZip ?? "")),
     website: String(c.website ?? ""),
     notes: String(c.notes ?? ""),
     logoUrl: String(c.logoUrl ?? ""),
@@ -125,9 +125,16 @@ export default function ClinicasPage() {
       toast("A logo deve ter no máximo 400 KB", "error")
       return
     }
+    const allowed = ["image/png", "image/jpeg", "image/webp"]
+    if (!allowed.includes(file.type)) {
+      toast("Use PNG, JPEG ou WebP. SVG não é aceito na logo.", "error")
+      return
+    }
     const reader = new FileReader()
+    reader.onerror = () => toast("Não foi possível ler o arquivo da logo", "error")
     reader.onload = () => {
       patch({ logoUrl: String(reader.result ?? ""), logoFileName: file.name })
+      toast("Logo selecionada. Clique em Salvar alterações para gravar.")
     }
     reader.readAsDataURL(file)
   }
@@ -265,13 +272,13 @@ export default function ClinicasPage() {
             )}
           </div>
           <p className="mt-3 text-[13px] text-[#6B7C74]">
-            Arquivo atual: {form.logoFileName || "-"}
+            Arquivo atual: {form.logoFileName || "-"}. A logo entra nos e-mails de convite da clínica. Clique em Salvar alterações depois de enviar o arquivo.
           </p>
           <div className="mt-3 flex items-center gap-2">
             <input
               ref={logoInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              accept="image/png,image/jpeg,image/webp"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0]

@@ -1,5 +1,7 @@
+import { COMPANY_LEGAL } from "@/lib/company-legal"
+
 /** Marca exibida na UI (ClinMax, clinmax.com.br) */
-export const APP_NAME = "ClinMax"
+export const APP_NAME = COMPANY_LEGAL.brandName
 export const APP_TAGLINE = "Gestão clínica"
 export const APP_LOGO_TAGLINE = "Gestão Clínica e Prontuário Eletrônico"
 export const APP_LOGO_SRC = "/clinmax-logo.png"

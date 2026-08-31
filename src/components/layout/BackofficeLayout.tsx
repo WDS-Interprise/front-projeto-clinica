@@ -17,6 +17,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatCompanyCopyright } from "@/lib/company-legal"
 import { backofficeApi, clearBackofficeSession } from "@/services/backoffice-api"
 
 const navItems = [
@@ -160,7 +161,7 @@ export default function BackofficeLayout() {
         <footer className="shrink-0 border-t border-[#E4EBE6] bg-white px-6 py-4 text-xs text-[#8A9A90]">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span>ClinMax Backoffice v2.4.0</span>
-            <span>© 2025 ClinMax. Todos os direitos reservados.</span>
+            <span>{formatCompanyCopyright()}</span>
           </div>
         </footer>
       </div>

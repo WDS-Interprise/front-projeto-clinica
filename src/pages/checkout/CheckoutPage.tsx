@@ -22,6 +22,8 @@ import { useForceLightTheme } from "@/hooks/useForceLightTheme"
 import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/context/ToastContext"
 import { toastMessageFromApiError } from "@/lib/api-errors"
+import { formattedCompanyCnpj } from "@/lib/company-legal"
+import { maskCepInput, maskCpfOrCnpjInput, maskPhoneInput, validateCpfOrCnpj, validateEmail } from "@/lib/form-validation"
 import { LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL } from "@/lib/landing-content"
 import {
   checkoutPath,
@@ -34,7 +36,6 @@ import {
   type PublicCatalogPlan,
   type PublicPlan,
 } from "@/lib/plan-features"
-import { maskCepInput, maskCpfOrCnpjInput, maskPhoneInput, validateCpfOrCnpj, validateEmail } from "@/lib/form-validation"
 import { api } from "@/services/api"
 import { cn } from "@/lib/utils"
 
@@ -654,6 +655,9 @@ export default function CheckoutPage() {
                 />
                 <label htmlFor="checkout-terms" className="min-w-0 flex-1 cursor-pointer leading-relaxed">
                   Li e concordo com os Termos de Uso e a Política de Privacidade.
+                  <span className="mt-1 block text-xs text-[#6B7C74]">
+                    ClinMax. CNPJ {formattedCompanyCnpj()}.
+                  </span>
                 </label>
               </div>
 
