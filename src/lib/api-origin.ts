@@ -4,7 +4,7 @@ export function getApiOrigin(): string {
   if (fromEnv) return fromEnv.replace(/\/$/, "")
 
   if (import.meta.env.DEV) {
-    return "http://localhost:3001"
+    return "http://localhost:3002"
   }
 
   return window.location.origin.replace(/\/$/, "")

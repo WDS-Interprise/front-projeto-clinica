@@ -1,6 +1,39 @@
 import { useCallback, useEffect, useState } from "react"
 import { api } from "@/services/api"
-import type { ClinicSubscriptionView, PlanFeature, PlanLimitKey, PlanUsageItem, PublicPlan } from "@/lib/plan-features"
+import { LANDING_PLAN_FALLBACK } from "@/lib/landing-content"
+import type {
+  ClinicSubscriptionView,
+  PlanFeature,
+  PlanLimitKey,
+  PlanUsageItem,
+  PublicCatalogPlan,
+  PublicPlan,
+} from "@/lib/plan-features"
+
+function catalogToPublicPlan(plan: PublicCatalogPlan): PublicPlan {
+  return {
+    id: plan.slug,
+    name: plan.name,
+    slug: plan.slug,
+    description: plan.description,
+    monthlyPrice: plan.monthlyPrice,
+    annualPrice: plan.annualPrice,
+    trialDays: plan.trialDays,
+    highlighted: plan.highlighted,
+    features: [],
+    limits: plan.limits,
+  }
+}
+
+function normalizePlans(value: unknown): PublicPlan[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is PublicPlan => Boolean(item && typeof item === "object" && "slug" in item))
+  }
+  if (value && typeof value === "object" && "plans" in value && Array.isArray((value as { plans: unknown }).plans)) {
+    return (value as { plans: PublicCatalogPlan[] }).plans.map(catalogToPublicPlan)
+  }
+  return []
+}
 
 type ClinicPlanState = {
   subscription: ClinicSubscriptionView | null
@@ -20,11 +53,13 @@ export function useClinicPlan(): ClinicPlanState {
 
   const refresh = useCallback(() => {
     setLoading(true)
-    Promise.all([api.subscription.current(), api.subscription.usage()])
-      .then(([sub, usageRes]) => {
-        setSubscription(sub)
+    Promise.allSettled([api.subscription.current(), api.subscription.usage()])
+      .then(([subRes, usageRes]) => {
+        const sub = subRes.status === "fulfilled" ? subRes.value : null
+        const usageValue = usageRes.status === "fulfilled" ? usageRes.value : null
+        setSubscription(sub ?? usageValue?.subscription ?? null)
         setUsage(
-          usageRes.usage.map((item) => {
+          (usageValue?.usage ?? []).map((item) => {
             const raw = String(item.key)
             const key: PlanLimitKey =
               raw === "maxAiMessagesPerMonth"
@@ -35,11 +70,13 @@ export function useClinicPlan(): ClinicPlanState {
             return { ...item, key }
           })
         )
-        setFeatures(usageRes.features)
-        setError(null)
-      })
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Erro ao carregar plano")
+        setFeatures(usageValue?.features ?? [])
+        if (sub || usageValue?.subscription) {
+          setError(null)
+        } else {
+          const failed = [subRes, usageRes].find((r) => r.status === "rejected") as PromiseRejectedResult | undefined
+          setError(failed?.reason instanceof Error ? failed.reason.message : "Erro ao carregar plano")
+        }
       })
       .finally(() => setLoading(false))
   }, [])
@@ -60,14 +97,33 @@ export function usePlanLimit(usage: PlanUsageItem[], key: PlanUsageItem["key"]) 
 }
 
 export function usePublicPlans() {
-  const [plans, setPlans] = useState<PublicPlan[]>([])
+  const [plans, setPlans] = useState<PublicPlan[]>(LANDING_PLAN_FALLBACK.plans.map(catalogToPublicPlan))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+    const apply = (rows: PublicPlan[]) => {
+      if (!cancelled && rows.length) {
+        setPlans(rows.filter((plan) => plan.slug !== "teste-webhook"))
+      }
+    }
+
     api.subscription
       .plans()
-      .then(setPlans)
-      .finally(() => setLoading(false))
+      .then((rows) => apply(normalizePlans(rows)))
+      .catch(() =>
+        api.public
+          .plans()
+          .then((catalog) => apply(normalizePlans(catalog)))
+          .catch(() => apply(LANDING_PLAN_FALLBACK.plans.map(catalogToPublicPlan)))
+      )
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return { plans, loading }

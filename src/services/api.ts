@@ -4,14 +4,14 @@ function apiNetworkErrorMessage(): string {
   if (import.meta.env.PROD) {
     return `Não foi possível conectar à API (${BASE}). O serviço em api.clinmax.com.br pode estar fora do ar. Isso não depende do backend no seu PC.`
   }
-  return "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3001)."
+  return "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3002)."
 }
 
 function apiUnavailableMessage(): string {
   if (import.meta.env.PROD) {
     return `API indisponível (${BASE}). Verifique na VPS se o backend está rodando (PM2, porta 3550).`
   }
-  return "Servidor indisponível. Verifique se o backend está rodando em http://localhost:3001."
+  return "Servidor indisponível. Verifique se o backend está rodando em http://localhost:3002."
 }
 
 export type ApiFieldErrors = Partial<Record<"name" | "email" | "cpf", string>>
@@ -200,6 +200,7 @@ export type AttendanceReport = {
 }
 
 export class ApiError extends Error {
+  status?: number
   fields?: ApiFieldErrors
   existing?: {
     id: string
@@ -214,13 +215,14 @@ export class ApiError extends Error {
   constructor(
     message: string,
     fields?: ApiFieldErrors,
-    extra?: { existing?: ApiError["existing"]; code?: string }
+    extra?: { existing?: ApiError["existing"]; code?: string; status?: number }
   ) {
     super(message)
     this.name = "ApiError"
     this.fields = fields
     this.existing = extra?.existing
     this.code = extra?.code
+    this.status = extra?.status
   }
 }
 
@@ -263,7 +265,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!res.ok) {
     if (res.status === 502 || res.status === 503 || res.status === 504) {
-      throw new ApiError(apiUnavailableMessage())
+      throw new ApiError(apiUnavailableMessage(), undefined, { status: res.status })
     }
     const body = data as {
       error?: string
@@ -274,6 +276,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new ApiError(body.error || "Erro na requisicao", body.fields, {
       existing: body.existing,
       code: body.code,
+      status: res.status,
     })
   }
 

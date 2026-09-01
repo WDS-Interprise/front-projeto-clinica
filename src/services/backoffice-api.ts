@@ -32,7 +32,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     res = await fetch(`${BASE}${path}`, { ...options, headers })
   } catch {
     throw new ApiError(
-      "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3001)."
+      "Não foi possível conectar à API. Inicie o backend (npm run dev na pasta back-projeto-clinica, porta 3002)."
     )
   }
 
@@ -61,7 +61,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
     if (res.status === 502 || res.status === 503 || res.status === 504) {
       throw new ApiError(
-        "Servidor indisponível (502). Verifique se o backend está rodando em http://localhost:3001. Apenas uma instância por vez."
+        "Servidor indisponível (502). Verifique se o backend está rodando em http://localhost:3002. Apenas uma instância por vez."
       )
     }
     throw new ApiError(data.error || `Erro na requisição (${res.status})`, data.fields)

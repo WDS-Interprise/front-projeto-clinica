@@ -152,18 +152,22 @@ export default function PlanFormModal({
             <span className="text-[#6B7C74]">Mensal (R$)</span>
             <input
               type="number"
+              min="0"
+              step="0.01"
               className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
               value={form.monthlyPrice}
-              onChange={(e) => setForm({ ...form, monthlyPrice: Number(e.target.value) })}
+              onChange={(e) => setForm({ ...form, monthlyPrice: Number(e.target.value.replace(",", ".")) || 0 })}
             />
           </label>
           <label className="text-sm">
             <span className="text-[#6B7C74]">Anual (R$)</span>
             <input
               type="number"
+              min="0"
+              step="0.01"
               className="mt-1 w-full rounded-lg border border-[#E4EBE6] px-3 py-2 text-sm"
               value={form.annualPrice}
-              onChange={(e) => setForm({ ...form, annualPrice: Number(e.target.value) })}
+              onChange={(e) => setForm({ ...form, annualPrice: Number(e.target.value.replace(",", ".")) || 0 })}
             />
           </label>
           <label className="text-sm">
@@ -176,6 +180,9 @@ export default function PlanFormModal({
             />
           </label>
         </div>
+        <p className="text-[12px] text-[#6B7C74]">
+          Pode usar 0,01 para teste de Pix. O valor salvo aqui vale na hora.
+        </p>
 
         <div className="flex flex-wrap gap-4 text-sm">
           <label className="flex items-center gap-2">

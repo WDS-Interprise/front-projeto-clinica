@@ -44,7 +44,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md", zIn
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="max-h-[min(72vh,40rem)] overflow-y-auto px-6 py-5">{children}</div>
         {footer && <div className="px-6 py-4 border-t border-border">{footer}</div>}
       </div>
     </div>

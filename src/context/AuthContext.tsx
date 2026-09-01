@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import { api } from "@/services/api"
+import { ApiError, api } from "@/services/api"
 import { can, type Permission } from "@/lib/permissions"
 import { applyAuthRedirectFlags, clearOnboardingFlags } from "@/lib/onboarding"
 
@@ -43,6 +43,18 @@ type AuthState = {
 }
 
 const AuthContext = createContext<AuthState | null>(null)
+
+function isInvalidSessionError(err: unknown) {
+  if (err instanceof ApiError && err.status === 401) return true
+  const msg = (err instanceof Error ? err.message : String(err)).toLowerCase()
+  return (
+    msg.includes("token inválido") ||
+    msg.includes("token invalido") ||
+    msg.includes("jwt") ||
+    msg.includes("não autenticado") ||
+    msg.includes("nao autenticado")
+  )
+}
 
 function readJsonStorage<T>(key: string, fallback: T): T {
   const raw = localStorage.getItem(key)
@@ -111,20 +123,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         needsOnboarding: me.needsOnboarding,
       })
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : ""
-      if (msg.toLowerCase().includes("token")) {
-        /* JWT inválido após troca de secret ou backend reiniciado */
+      if (isInvalidSessionError(err)) {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        localStorage.removeItem("clinicId")
+        localStorage.removeItem("clinicName")
+        localStorage.removeItem("clinics")
+        localStorage.removeItem("permissions")
+        setUser(null)
+        setClinicId(null)
+        setClinicName(null)
+        setPermissions([])
       }
-      localStorage.removeItem("token")
-      localStorage.removeItem("user")
-      localStorage.removeItem("clinicId")
-      localStorage.removeItem("clinicName")
-      localStorage.removeItem("clinics")
-      localStorage.removeItem("permissions")
-      setUser(null)
-      setClinicId(null)
-      setClinicName(null)
-      setPermissions([])
     } finally {
       setLoading(false)
     }

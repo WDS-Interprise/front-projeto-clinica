@@ -158,13 +158,15 @@ export type SubscriptionInvoiceView = {
 
 export const SELECTED_PLAN_STORAGE_KEY = "clinichub_selected_plan"
 
-export const COMMERCIAL_PLAN_SLUGS = ["essencial", "profissional", "premium"] as const
-export const DEFAULT_SIGNUP_PLAN_SLUG = "essencial"
+export const COMMERCIAL_PLAN_SLUGS = ["gratis", "essencial", "profissional", "premium"] as const
+export const DEFAULT_SIGNUP_PLAN_SLUG = "gratis"
 
 export function commercialPlanLabel(slug: string) {
+  if (slug === "gratis") return "Grátis"
   if (slug === "essencial") return "Essencial"
   if (slug === "profissional") return "Profissional"
   if (slug === "premium") return "Premium"
+  if (slug === "teste-webhook") return "Teste 1 centavo"
   return slug
 }
 

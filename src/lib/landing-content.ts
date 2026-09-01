@@ -118,6 +118,28 @@ export const LANDING_PLAN_FALLBACK: import("@/lib/plan-features").PublicCatalog 
   comparisonRows: [],
   plans: [
     {
+      slug: "gratis",
+      name: "Grátis",
+      description: "Comece sem pagar. Agenda, pacientes e painel, com limites reduzidos.",
+      monthlyPrice: 0,
+      annualPrice: 0,
+      annualEquivalentMonthly: 0,
+      trialDays: 0,
+      highlighted: false,
+      badge: "Padrão",
+      ctaLabel: "Começar grátis",
+      marketingFeatures: [
+        "Painel",
+        "Agenda",
+        "Pacientes",
+        "1 usuário",
+        "1 profissional",
+        "Sem WhatsApp, financeiro e IA",
+      ],
+      limits: {},
+      comparison: [],
+    },
+    {
       slug: "essencial",
       name: "Essencial",
       description: "Operação clínica básica para profissional individual ou consultório pequeno.",
