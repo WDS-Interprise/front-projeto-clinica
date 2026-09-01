@@ -6,7 +6,7 @@ import http from 'node:http'
 import net from 'node:net'
 
 function apiTarget() {
-  const raw = process.env.VITE_API_TARGET || 'http://127.0.0.1:3001'
+  const raw = process.env.VITE_API_TARGET || 'http://127.0.0.1:3002'
   const url = new URL(raw)
   return { hostname: url.hostname, port: Number(url.port || 80) }
 }

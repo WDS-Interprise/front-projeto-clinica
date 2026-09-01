@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom"
 import { createPortal } from "react-dom"
 import {
   ChevronDown,
+  Gem,
   HelpCircle,
   LogOut,
   Palette,
@@ -17,6 +18,7 @@ import UserAvatar from "@/components/user/UserAvatar"
 import { useUserAvatar } from "@/hooks/useUserAvatar"
 import { useAnchoredDropdown } from "@/hooks/useAnchoredDropdown"
 import { useAuth } from "@/context/AuthContext"
+import { useClinicPlan } from "@/hooks/useClinicPlan"
 import { cn } from "@/lib/utils"
 
 const ROLE_LABELS: Record<string, string> = {
@@ -43,6 +45,8 @@ const menuItems: MenuItem[] = [
 export default function UserMenu() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { subscription } = useClinicPlan()
+  const planName = subscription?.planName ?? "Grátis"
   const { imageUrl, name } = useUserAvatar()
   const { anchorRef, menuRef, open, toggle, close, menuStyle } = useAnchoredDropdown("right")
   const [logoutOpen, setLogoutOpen] = useState(false)
@@ -133,6 +137,21 @@ export default function UserMenu() {
             </div>
 
             <nav className="py-1">
+              <NavLink
+                to="/configuracoes/plano"
+                role="menuitem"
+                onClick={close}
+                className="mx-3 my-1 flex items-center justify-between gap-2 rounded-xl bg-[#E8F6EE] px-3 py-2.5 text-sm text-[#12261E] transition-colors hover:bg-[#D8F0E4]"
+              >
+                <span className="inline-flex min-w-0 items-center gap-2.5">
+                  <Gem className="h-4 w-4 shrink-0 text-[#006B4D]" />
+                  <span className="min-w-0">
+                    <span className="block text-[11px] font-medium text-[#6B7C74]">Meu plano</span>
+                    <span className="block truncate font-semibold">{planName}</span>
+                  </span>
+                </span>
+                <span className="shrink-0 text-[11px] font-semibold text-[#006B4D]">Gerenciar</span>
+              </NavLink>
               {menuItems.map(({ label, icon: Icon, to }) => (
                 <NavLink
                   key={label}

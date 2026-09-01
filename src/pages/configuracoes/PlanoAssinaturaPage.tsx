@@ -7,6 +7,7 @@ import {
   CircleHelp,
   FileText,
   Gem,
+  Gift,
   Headset,
   Leaf,
   Link2,
@@ -20,7 +21,7 @@ import { useClinicPlan, usePublicPlans } from "@/hooks/useClinicPlan"
 import { BillingStatusBadge } from "@/components/billing/PlanBadges"
 import { PlanFeatureList, PlanUsagePanel } from "@/components/billing/PlanUsage"
 import { LANDING_SPECIALIST_EMAIL } from "@/lib/landing-content"
-import { PLAN_FEATURES, checkoutPath, commercialPlanLabel, nextCommercialPlanSlug } from "@/lib/plan-features"
+import { PLAN_FEATURES, checkoutPath } from "@/lib/plan-features"
 import { Button } from "@/components/ui/button"
 import { api } from "@/services/api"
 import { useToast } from "@/context/ToastContext"
@@ -35,6 +36,7 @@ function formatMoney(v: number) {
 const card = "rounded-[14px] border border-[#E4EBE6] bg-white"
 
 const PLAN_ICONS = {
+  gratis: Gift,
   essencial: Leaf,
   profissional: Briefcase,
   premium: Rocket,
@@ -141,8 +143,18 @@ export default function PlanoAssinaturaPage() {
       />
 
       {!subscription ? (
-        <div className={cn(card, "p-6 text-sm text-[#6B7C74]")}>
-          Nenhuma assinatura vinculada à clínica. Entre em contato com o suporte ClinMax.
+        <div className={cn(card, "space-y-3 p-6")}>
+          <p className="text-sm text-[#6B7C74]">
+            Ainda estamos ligando o plano desta clínica. Recarregue a página ou escolha um plano abaixo.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => refresh()}>
+              Tentar de novo
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setPlansOpen(true)}>
+              Ver planos
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-5">
@@ -316,7 +328,7 @@ export default function PlanoAssinaturaPage() {
         <div className="space-y-3 text-sm leading-relaxed text-[#3D5C50]">
           <p>O plano é a assinatura do software ClinMax, paga pela clínica.</p>
           <p>Isso é separado do livro-caixa (Finanças) e do Pix de consulta (ClinMax Pay).</p>
-          <p>Você usa o plano atual normalmente. Cadastro novo entra no Essencial. Para subir, só vale o próximo plano, e só depois do pagamento. Do Essencial, o próximo é o Profissional. Do Profissional, o próximo é o Premium.</p>
+          <p>Você usa o plano atual normalmente. Cadastro novo entra no Grátis, que é limitado. Dá para assinar qualquer plano pago direto. O plano novo entra depois do pagamento.</p>
         </div>
       </Modal>
 
@@ -397,14 +409,17 @@ export default function PlanoAssinaturaPage() {
                 </button>
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            {plans.length === 0 ? (
+              <p className="text-sm text-[#6B7C74]">Não foi possível carregar os planos agora. Feche e abra de novo.</p>
+            ) : null}
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {plans.map((plan) => {
                 const Icon = PLAN_ICONS[plan.slug as keyof typeof PLAN_ICONS] ?? Briefcase
-                const current = plan.id === subscription?.planId
+                const current = plan.id === subscription?.planId || plan.slug === subscription?.planSlug
                 const price = billingCycle === "ANNUAL" ? plan.annualPrice : plan.monthlyPrice
-                const nextSlug = nextCommercialPlanSlug(subscription?.planSlug)
-                const isNext = plan.slug === nextSlug
-                const isCheaper = plan.monthlyPrice < (plans.find((p) => p.id === subscription?.planId)?.monthlyPrice ?? 0)
+                const currentPrice =
+                  plans.find((p) => p.id === subscription?.planId || p.slug === subscription?.planSlug)?.monthlyPrice ?? 0
+                const isCheaper = plan.monthlyPrice < currentPrice
                 return (
                   <article
                     key={plan.id}
@@ -432,36 +447,22 @@ export default function PlanoAssinaturaPage() {
                     </p>
                     {current ? (
                       <p className="mt-4 text-sm font-semibold text-[#006B4D]">Plano atual</p>
-                    ) : isNext ? (
+                    ) : (
                       <>
                         <p className="mt-3 text-[12px] leading-snug text-[#3D5C50]">
-                          Próximo plano. O pagamento libera os recursos novos.
+                          {isCheaper
+                            ? "Plano mais barato: a diferença já paga não é reembolsada."
+                            : plan.monthlyPrice <= 0
+                              ? "Sem cobrança. Entra na hora."
+                              : "O pagamento libera os recursos deste plano."}
                         </p>
                         <Button
                           className="mt-4 bg-[#006B4D] text-white hover:bg-[#005a41]"
                           onClick={() => navigate(checkoutPath(plan.slug, billingCycle))}
                         >
-                          Assinar {plan.name}
+                          {plan.monthlyPrice <= 0 ? `Usar ${plan.name}` : `Assinar ${plan.name}`}
                         </Button>
                       </>
-                    ) : isCheaper ? (
-                      <>
-                        <p className="mt-3 text-[12px] leading-snug text-amber-800">
-                          Plano mais barato: a diferença já paga não é reembolsada.
-                        </p>
-                        <Button
-                          className="mt-4 bg-[#006B4D] text-white hover:bg-[#005a41]"
-                          onClick={() => navigate(checkoutPath(plan.slug, billingCycle))}
-                        >
-                          Assinar {plan.name}
-                        </Button>
-                      </>
-                    ) : (
-                      <p className="mt-4 text-[12px] leading-snug text-[#6B7C74]">
-                        {nextSlug
-                          ? `Assine o ${commercialPlanLabel(nextSlug)} primeiro. Só é possível subir um plano por vez.`
-                          : "Este já é o plano mais alto."}
-                      </p>
                     )}
                   </article>
                 )

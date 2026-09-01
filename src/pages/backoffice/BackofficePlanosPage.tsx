@@ -116,22 +116,17 @@ export default function BackofficePlanosPage() {
                 </span>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-[#8A9A90]">Mensal</p>
-                  <p className="font-semibold text-[#12261E]">{formatMoney(plan.monthlyPrice)}</p>
-                </div>
-                <div>
-                  <p className="text-[#8A9A90]">Anual</p>
-                  <p className="font-semibold text-[#12261E]">{formatMoney(plan.annualPrice)}</p>
-                </div>
-                <div>
-                  <p className="text-[#8A9A90]">Clínicas</p>
-                  <p className="font-semibold text-[#12261E]">{plan.clinicsUsing}</p>
-                </div>
-                <div>
-                  <p className="text-[#8A9A90]">Trial</p>
-                  <p className="font-semibold text-[#12261E]">{plan.trialDays} dias</p>
+              <div className="mt-4 space-y-3 text-sm">
+                <PlanPriceEditor plan={plan} onSaved={load} />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[#8A9A90]">Clínicas</p>
+                    <p className="font-semibold text-[#12261E]">{plan.clinicsUsing}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#8A9A90]">Trial</p>
+                    <p className="font-semibold text-[#12261E]">{plan.trialDays} dias</p>
+                  </div>
                 </div>
               </div>
 
@@ -174,6 +169,87 @@ export default function BackofficePlanosPage() {
           load()
         }}
       />
+    </div>
+  )
+}
+
+function parseMoneyInput(value: string) {
+  const n = Number(value.replace(",", ".").trim())
+  return Number.isFinite(n) && n >= 0 ? n : null
+}
+
+function PlanPriceEditor({ plan, onSaved }: { plan: PlanRow; onSaved: () => void }) {
+  const { toast } = useToast()
+  const [monthly, setMonthly] = useState(String(plan.monthlyPrice))
+  const [annual, setAnnual] = useState(String(plan.annualPrice))
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setMonthly(String(plan.monthlyPrice))
+    setAnnual(String(plan.annualPrice))
+  }, [plan.id, plan.monthlyPrice, plan.annualPrice])
+
+  const dirty =
+    parseMoneyInput(monthly) !== plan.monthlyPrice || parseMoneyInput(annual) !== plan.annualPrice
+
+  const save = async () => {
+    const monthlyPrice = parseMoneyInput(monthly)
+    const annualPrice = parseMoneyInput(annual)
+    if (monthlyPrice == null || annualPrice == null) {
+      toast("Informe valores válidos. Use 0,01 para um centavo.", "error")
+      return
+    }
+    setSaving(true)
+    try {
+      await backofficeApi.plans.update(plan.id, { monthlyPrice, annualPrice })
+      toast("Preços atualizados")
+      onSaved()
+    } catch (err: unknown) {
+      toast(toastMessageFromApiError(err, "Erro ao salvar preços"), "error")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-[#E4EBE6] bg-[#F8FAF9] p-3">
+      <div className="grid grid-cols-2 gap-3">
+        <label>
+          <span className="text-[#8A9A90]">Mensal (R$)</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] bg-white px-2 py-1.5 text-sm font-semibold text-[#12261E]"
+            value={monthly}
+            onChange={(e) => setMonthly(e.target.value)}
+          />
+        </label>
+        <label>
+          <span className="text-[#8A9A90]">Anual (R$)</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            className="mt-1 w-full rounded-lg border border-[#E4EBE6] bg-white px-2 py-1.5 text-sm font-semibold text-[#12261E]"
+            value={annual}
+            onChange={(e) => setAnnual(e.target.value)}
+          />
+        </label>
+      </div>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <p className="text-[11px] text-[#6B7C74]">
+          {formatMoney(Number(monthly) || 0)} / mês
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!dirty || saving}
+          onClick={() => void save()}
+        >
+          {saving ? "Salvando..." : "Salvar preços"}
+        </Button>
+      </div>
     </div>
   )
 }

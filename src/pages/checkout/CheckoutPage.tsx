@@ -27,10 +27,6 @@ import { maskCepInput, maskCpfOrCnpjInput, maskPhoneInput, validateCpfOrCnpj, va
 import { LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL } from "@/lib/landing-content"
 import {
   checkoutPath,
-  commercialPlanLabel,
-  isCommercialRankUpgrade,
-  isNextCommercialUpgrade,
-  nextCommercialPlanSlug,
   rememberSelectedPlan,
   type ClinicSubscriptionView,
   type PublicCatalogPlan,
@@ -94,11 +90,20 @@ export default function CheckoutPage() {
       api.subscription
         .plans()
         .then((rows) => {
-          setClinicPlans(rows)
-          const found = rows.find((p) => p.slug === slug)
-          if (found) setPlanId(found.id)
+          const list = Array.isArray(rows) ? rows : []
+          setClinicPlans(list)
+          const found = list.find((p) => p.slug === slug)
+          if (found?.id) setPlanId(found.id)
         })
-        .catch(() => undefined)
+        .catch(() =>
+          api.public
+            .plans()
+            .then((data) => {
+              const found = data.plans.find((p) => p.slug === slug)
+              if (found) setPlanId(found.slug)
+            })
+            .catch(() => undefined)
+        )
       api.subscription
         .current()
         .then(setCurrentSub)
@@ -118,6 +123,22 @@ export default function CheckoutPage() {
     }
   }, [slug, clinicId, loggedIn])
 
+  useEffect(() => {
+    if (step !== 3) return
+    const timer = window.setInterval(() => {
+      api.subscription
+        .current()
+        .then((sub) => {
+          if (!sub.pendingUpgrade) {
+            toast("Pagamento confirmado. Plano atualizado.")
+            navigate("/configuracoes/plano")
+          }
+        })
+        .catch(() => undefined)
+    }, 4000)
+    return () => window.clearInterval(timer)
+  }, [step])
+
   const cycle = annual ? "ANNUAL" : "MONTHLY"
   const monthlyPrice = plan?.monthlyPrice ?? 0
   const annualPrice = plan?.annualPrice ?? 0
@@ -128,17 +149,11 @@ export default function CheckoutPage() {
 
   const features = plan?.marketingFeatures ?? []
   const currentPlan = clinicPlans.find((p) => p.slug === currentSub?.planSlug)
+  const isFreePlan = (plan?.monthlyPrice ?? 0) <= 0
   const isDowngrade = Boolean(
     loggedIn && currentPlan && plan && plan.monthlyPrice < currentPlan.monthlyPrice
   )
-  const assumedFromSlug = loggedIn ? currentSub?.planSlug : "essencial"
-  const nextAllowedSlug = nextCommercialPlanSlug(assumedFromSlug)
-  const skipBlocked = Boolean(
-    plan &&
-      (!loggedIn || currentSub) &&
-      isCommercialRankUpgrade(assumedFromSlug ?? "legacy", plan.slug) &&
-      !isNextCommercialUpgrade(assumedFromSlug, plan.slug)
-  )
+  const applyWithoutCharge = isDowngrade || isFreePlan
 
   const confirm = async () => {
     const emailOk = validateEmail(email)
@@ -151,26 +166,17 @@ export default function CheckoutPage() {
       toast(docOk.msg, "error")
       return
     }
-    if (skipBlocked) {
-      toast(
-        nextAllowedSlug
-          ? `Só é possível subir um plano por vez. Assine o ${commercialPlanLabel(nextAllowedSlug)} primeiro.`
-          : "Só é possível subir um plano por vez.",
-        "error"
-      )
-      return
-    }
     if (!terms) {
       toast("Aceite os termos para continuar", "error")
       return
     }
-    if (!isDowngrade && payMethod !== "pix" && payMethod !== "card") {
+    if (!applyWithoutCharge && payMethod !== "pix" && payMethod !== "card") {
       toast("Escolha Pix ou cartão", "error")
       return
     }
 
     const expiryParts = cardExpiry.replace(/\D/g, "")
-    if (!isDowngrade && payMethod === "card" && cardKind === "credit") {
+    if (!applyWithoutCharge && payMethod === "card" && cardKind === "credit") {
       if (cardNumber.replace(/\D/g, "").length < 13) {
         toast("Informe um número de cartão válido", "error")
         return
@@ -195,7 +201,8 @@ export default function CheckoutPage() {
       navigate(`/register?plan=${encodeURIComponent(slug)}&next=/checkout`)
       return
     }
-    if (!planId) {
+    const resolvedPlanId = planId || slug
+    if (!resolvedPlanId) {
       toast("Não foi possível identificar o plano", "error")
       return
     }
@@ -211,11 +218,11 @@ export default function CheckoutPage() {
         })
       }
       await api.auth.updateMe({ name: fullName, email, phone: phone.replace(/\D/g, "") || undefined })
-      const usingCard = !isDowngrade && payMethod === "card"
+      const usingCard = !applyWithoutCharge && payMethod === "card"
       const digits = cardNumber.replace(/\D/g, "")
       const exp = cardExpiry.replace(/\D/g, "")
       await api.subscription.changePlan({
-        planId,
+        planId: resolvedPlanId,
         billingCycle: cycle,
         paymentMethod: usingCard ? "CREDIT_CARD" : "PIX",
         ...(usingCard && cardKind === "credit"
@@ -244,10 +251,12 @@ export default function CheckoutPage() {
           (inv.status === "PENDING" || inv.status === "OVERDUE") &&
           String(inv.reference ?? "").startsWith("upgrade:")
       )
-      if (isDowngrade || !pending) {
+      if (applyWithoutCharge || !pending) {
         toast(
           isDowngrade
             ? "Plano alterado. A diferença já paga não é reembolsada."
+            : isFreePlan
+              ? "Plano Grátis ativado. Sem cobrança."
             : usingCard
               ? "Pagamento aprovado. Plano atualizado."
               : "Plano atualizado."
@@ -300,8 +309,10 @@ export default function CheckoutPage() {
   }
 
   const qrSrc = useMemo(() => {
-    if (!pix?.qr) return ""
-    return pix.qr.startsWith("data:") ? pix.qr : `data:image/png;base64,${pix.qr}`
+    if (pix?.qr) {
+      return pix.qr.startsWith("data:") ? pix.qr : `data:image/png;base64,${pix.qr}`
+    }
+    return ""
   }, [pix])
 
   if (!plan) return null
@@ -367,15 +378,9 @@ export default function CheckoutPage() {
               {formatMoney(annualPrice)} cobrados anualmente
             </p>
 
-            {isDowngrade ? (
+            {applyWithoutCharge && isDowngrade ? (
               <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-snug text-amber-950">
                 Você está indo para um plano mais barato. A diferença já paga não é reembolsada. O plano novo entra na hora.
-              </p>
-            ) : skipBlocked ? (
-              <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-[12px] leading-snug text-amber-950">
-                {nextAllowedSlug
-                  ? `Só é possível subir um plano por vez. Assine o ${commercialPlanLabel(nextAllowedSlug)} primeiro.`
-                  : "Só é possível subir um plano por vez."}
               </p>
             ) : null}
 
@@ -429,7 +434,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex items-center justify-between pt-1.5 text-sm font-bold">
                 <span>Total devido hoje</span>
-                <span style={{ color: GREEN }}>{isDowngrade ? formatMoney(0) : formatMoney(dueToday)}</span>
+                <span style={{ color: GREEN }}>{applyWithoutCharge ? formatMoney(0) : formatMoney(dueToday)}</span>
               </div>
             </div>
           </div>
@@ -463,7 +468,7 @@ export default function CheckoutPage() {
                   Pagar com cartão na fatura Asaas
                 </a>
               ) : qrSrc ? (
-                <img src={qrSrc} alt="QR Code Pix da assinatura ClinMax" className="mt-3 h-40 w-40 rounded-xl border border-[#E4EBE6] bg-white p-2" />
+                <img src={qrSrc} alt="QR Code Pix da assinatura ClinMax" className="mt-3 h-56 w-56 rounded-xl border border-[#E4EBE6] bg-white p-2" />
               ) : (
                 <p className="mt-3 text-[13px] text-[#6B7C74]">
                   QR em processamento. Cancele e confirme de novo se o código não aparecer.
@@ -499,21 +504,6 @@ export default function CheckoutPage() {
           ) : (
             <>
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
-              {skipBlocked ? (
-                <p className="mb-4 flex gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950">
-                  <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                  {nextAllowedSlug ? (
-                    <span>
-                      Cadastro começa no Essencial. Só dá para assinar o próximo plano.{" "}
-                      <Link className="font-semibold text-[#006B4D] hover:underline" to={checkoutPath(nextAllowedSlug, cycle)}>
-                        Ir para {commercialPlanLabel(nextAllowedSlug)}
-                      </Link>
-                    </span>
-                  ) : (
-                    "Só é possível subir um plano por vez."
-                  )}
-                </p>
-              ) : null}
               <div>
                 <h2 className="text-sm font-semibold">Contato</h2>
                 <label className="mt-2 block">
@@ -532,10 +522,12 @@ export default function CheckoutPage() {
 
               <div className="mt-4">
                 <h2 className="text-sm font-semibold">Método de pagamento</h2>
-                {isDowngrade ? (
+                {applyWithoutCharge ? (
                   <p className="mt-3 flex gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950">
                     <Info className="mt-0.5 h-4 w-4 shrink-0" />
-                    Plano mais barato: a diferença já paga não é reembolsada. Confirmar aplica o plano na hora, sem Pix e sem cartão.
+                    {isFreePlan
+                      ? "O plano Grátis não tem cobrança. Confirmar aplica o plano na hora, sem Pix e sem cartão."
+                      : "Plano mais barato: a diferença já paga não é reembolsada. Confirmar aplica o plano na hora, sem Pix e sem cartão."}
                   </p>
                 ) : (
                   <>
@@ -663,24 +655,12 @@ export default function CheckoutPage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (skipBlocked && nextAllowedSlug) {
-                    navigate(checkoutPath(nextAllowedSlug, cycle))
-                    return
-                  }
-                  void confirm()
-                }}
+                onClick={() => void confirm()}
                 disabled={submitting}
                 className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#006B4D] text-sm font-semibold text-white hover:bg-[#005a41] disabled:opacity-60"
               >
                 <Lock className="h-4 w-4" />
-                {submitting
-                  ? "Confirmando..."
-                  : skipBlocked && nextAllowedSlug
-                    ? `Assinar ${commercialPlanLabel(nextAllowedSlug)} primeiro`
-                    : isDowngrade
-                      ? "Confirmar plano"
-                      : "Confirmar assinatura"}
+                {submitting ? "Confirmando..." : applyWithoutCharge ? "Confirmar plano" : "Confirmar assinatura"}
               </button>
 
               <Link

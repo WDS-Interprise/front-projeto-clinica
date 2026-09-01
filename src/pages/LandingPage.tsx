@@ -270,7 +270,12 @@ function PricingSection() {
     api.public
       .plans()
       .then((data) => {
-        if (data?.plans?.length) setCatalog(data)
+        if (data?.plans?.length) {
+          setCatalog({
+            ...data,
+            plans: data.plans.filter((plan) => plan.slug !== "teste-webhook"),
+          })
+        }
       })
       .catch(() => undefined)
   }, [])
@@ -283,7 +288,7 @@ function PricingSection() {
             Planos que cabem <span style={{ color: LANDING_GREEN }}>no seu momento</span>
           </h2>
           <p className="mt-3 text-base leading-relaxed text-[#5b6573]">
-            Escolha o plano da sua clínica. O Essencial cobre o básico. Profissional e Premium liberam mais recursos depois do pagamento.
+            Escolha o plano da sua clínica. Toda conta nova começa no Grátis, limitado. Dá para assinar Essencial, Profissional ou Premium direto.
           </p>
         </LandingReveal>
 
@@ -311,7 +316,7 @@ function PricingSection() {
           </p>
         ) : null}
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-3 lg:items-stretch">
+        <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4 xl:items-stretch">
           {catalog.plans.map((plan, index) => (
             <PlanCard key={plan.slug} plan={plan} cycle={cycle} delay={index * 120} />
           ))}
@@ -438,17 +443,13 @@ function PlanCard({
         >
           {plan.ctaLabel}
         </Link>
-        {plan.slug === "premium" ? (
+        {plan.slug === "gratis" ? (
           <p className="mt-2 text-xs leading-snug text-[#5b6573]">
-            Cadastro começa no Essencial. O Premium só entra depois do Profissional.
-          </p>
-        ) : plan.slug === "profissional" ? (
-          <p className="mt-2 text-xs leading-snug text-[#5b6573]">
-            Cadastro começa no Essencial. Este é o primeiro upgrade pago.
+            Plano inicial de toda clínica nova. Limitado e sem cobrança.
           </p>
         ) : (
           <p className="mt-2 text-xs leading-snug text-[#5b6573]">
-            Plano inicial de toda clínica nova.
+            Pode assinar este plano direto, sem passar pelos outros.
           </p>
         )}
 
