@@ -65,6 +65,7 @@ import PermissionRoute from "@/components/PermissionRoute"
 import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
 import CheckoutPage from "@/pages/checkout/CheckoutPage"
 import LandingPage from "@/pages/LandingPage"
+import LegalPage from "@/pages/legal/LegalPage"
 import { defaultHomePath } from "@/lib/permissions"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
@@ -137,6 +138,12 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<RootRoute />} />
+          <Route path="/privacidade" element={<LegalPage slug="privacidade" />} />
+          <Route path="/termos" element={<LegalPage slug="termos" />} />
+          <Route path="/lgpd" element={<LegalPage slug="lgpd" />} />
+          <Route path="/seguranca" element={<LegalPage slug="seguranca" />} />
+          <Route path="/sobre" element={<LegalPage slug="sobre" />} />
+          <Route path="/contato" element={<LegalPage slug="contato" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/checkout" element={<CheckoutPage />} />
