@@ -228,28 +228,28 @@ export const LANDING_FOOTER_COLUMNS = [
   {
     title: "Empresa",
     links: [
-      { label: "Sobre nós", href: "#funcionalidades" },
-      { label: "Blog", href: "#contato" },
-      { label: "Carreiras", href: "#contato" },
-      { label: "Contato", href: "#contato" },
+      { label: "Sobre nós", href: "/sobre" },
+      { label: "Blog", href: "/contato" },
+      { label: "Carreiras", href: "/contato" },
+      { label: "Contato", href: "/contato" },
     ],
   },
   {
     title: "Suporte",
     links: [
-      { label: "Central de ajuda", href: "#contato" },
+      { label: "Central de ajuda", href: "/contato" },
       { label: "Tutoriais", href: "#como-funciona" },
-      { label: "Status do sistema", href: "#contato" },
-      { label: "Suporte", href: "#contato" },
+      { label: "Status do sistema", href: "/contato" },
+      { label: "Suporte", href: "/contato" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Política de privacidade", href: "#contato" },
-      { label: "Termos de uso", href: "#contato" },
-      { label: "LGPD", href: "#contato" },
-      { label: "Segurança", href: "#contato" },
+      { label: "Política de privacidade", href: "/privacidade" },
+      { label: "Termos de uso", href: "/termos" },
+      { label: "LGPD", href: "/lgpd" },
+      { label: "Segurança", href: "/seguranca" },
     ],
   },
 ] as const

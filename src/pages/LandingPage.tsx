@@ -558,12 +558,21 @@ function LandingFooter() {
               <ul className="mt-3 space-y-2">
                 {column.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="cursor-pointer text-sm text-[#5b6573] transition-colors duration-200 hover:text-[#0A1F44]"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href.startsWith("/") ? (
+                      <Link
+                        to={link.href}
+                        className="cursor-pointer text-sm text-[#5b6573] transition-colors duration-200 hover:text-[#0A1F44]"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="cursor-pointer text-sm text-[#5b6573] transition-colors duration-200 hover:text-[#0A1F44]"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
