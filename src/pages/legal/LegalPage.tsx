@@ -10,11 +10,16 @@ export default function LegalPage({ slug }: { slug: LegalSlug }) {
   const doc = LEGAL_DOCUMENTS[slug]
 
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "auto"
     window.scrollTo(0, 0)
+    return () => {
+      document.body.style.overflow = prevOverflow || "hidden"
+    }
   }, [slug])
 
   return (
-    <div className="min-h-screen bg-surface-alt text-text">
+    <div className="legal-page min-h-dvh overflow-y-auto bg-surface-alt text-text">
       <header className="border-b border-border/80 bg-surface/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4 sm:px-6">
           <Link

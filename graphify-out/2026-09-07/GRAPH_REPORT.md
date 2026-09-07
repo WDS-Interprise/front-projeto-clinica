@@ -1,16 +1,16 @@
-# Graph Report - front-projeto-clinica  (2026-09-07)
+# Graph Report - front-projeto-clinica  (2026-08-21)
 
 ## Corpus Check
-- 259 files · ~422,956 words
+- 251 files · ~402,357 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2077 nodes · 2046 edges · 301 communities (202 shown, 99 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.85)
+- 1939 nodes · 1900 edges · 289 communities (193 shown, 96 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 4 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4abf6cbe`
+- Built from commit: `cd5cee95`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -54,7 +54,6 @@
 - 14. Exemplos em terceira pessoa (fluxos reais)
 - AgendaWeekGrid.tsx
 - plan-features.ts
-- LandingPage.tsx
 - 9. Cobrança do usuário: assinatura SaaS
 - BackofficeDashboard.tsx
 - BulasPage.tsx
@@ -153,7 +152,7 @@
 - 10. Modelos de banco usados
 - 2. Como acessar
 - 10. O que ainda não existe
-- Politicas ClinMax (rascunho interno)
+- 8. Dados e modelos Prisma
 - 17. Arquivos do projeto
 - 5. Configurações financeiras
 - 16. Variaveis de ambiente
@@ -167,7 +166,6 @@
 - AppointmentDetailDrawer.tsx
 - AppointmentDetailView.tsx
 - PlanFormModal.tsx
-- PlanUsage.tsx
 - CidDetailCard.tsx
 - GestaoPageShell.tsx
 - TransactionFormModal.tsx
@@ -260,16 +258,6 @@
 - tsconfig.json
 - mcp.json
 - README.md
-- 1. Assinatura SaaS (clínica paga o ClinMax)
-- 2. Parte legal no site hoje
-- company-legal.ts
-- AppHeader.tsx
-- legal-documents.ts
-- CheckoutPage.tsx
-- PatientFormModal.tsx
-- 9. Arquivos principais
-- request
-- ApiError
 
 ## God Nodes (most connected - your core abstractions)
 1. `Inventario ponta a ponta do site (frontend + backend)` - 37 edges
@@ -279,9 +267,9 @@
 5. `compilerOptions` - 19 edges
 6. `ClinMax Backoffice: inventário completo` - 19 edges
 7. `5. Relatório do dia inteiro` - 19 edges
-8. `Planos ClinMax` - 17 edges
-9. `compilerOptions` - 16 edges
-10. `Bulas e CID: guia completo (ClinMax)` - 16 edges
+8. `compilerOptions` - 16 edges
+9. `Bulas e CID: guia completo (ClinMax)` - 16 edges
+10. `Planos ClinMax` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `HistoryRecordShell()` --calls--> `formatDuration()`  [EXTRACTED]
@@ -294,15 +282,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (301 total, 99 thin omitted)
+## Communities (289 total, 96 thin omitted)
 
 ### Community 0 - "Processo: médico atende o paciente"
 Cohesion: 0.04
 Nodes (48): 10. Processo completo (passo a passo), 11. IA, 12. Prescrição ligada ao Encounter, 13. Financeiro separado, 14. Auditoria clínica, 15. Fluxograma definitivo, 16. O que a recepção faz em paralelo, 17. Casos especiais (mesmo motor) (+40 more)
 
 ### Community 1 - "api.ts"
-Cohesion: 0.10
-Nodes (14): ApiFieldErrors, AttendanceReport, ClinicRole, ClinmaxPayCharge, ClinmaxPaySettings, FinanceLookup, FinanceSummary, FinanceTransaction (+6 more)
+Cohesion: 0.06
+Nodes (24): allNav, AppHeader(), NavItem, emptyForm, Props, ApiError, ApiFieldErrors, apiNetworkErrorMessage() (+16 more)
 
 ### Community 2 - "devDependencies"
 Cohesion: 0.05
@@ -358,7 +346,7 @@ Nodes (22): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 
 ### Community 15 - "Planos ClinMax"
 Cohesion: 0.09
-Nodes (22): 10. Troca de plano, 11. Add-ons (PLANEJADO), 12. Landing (IMPLEMENTADO), 13. Lifecycle (IMPLEMENTADO), 14. O que já funciona, 15. Pendências (PLANEJADO), 16. Arquivos relacionados, 1. Resumo (+14 more)
+Nodes (22): 10. Troca de plano, 11. Diferença entre catálogo real e landing, 12. O que já funciona, 13. Pendências, 14. Arquivos relacionados, 1. Resumo, 2. Planos comerciais, 3. Benefícios por plano (+14 more)
 
 ### Community 16 - "Aba Configurações"
 Cohesion: 0.09
@@ -385,8 +373,8 @@ Cohesion: 0.11
 Nodes (17): Admin + clínico, Admin (sem perfil clínico), Configurações, Consultor, Drawer do agendamento (a mesma tela muda), Escopo da agenda (não é só ter/não ter permissão), Financeiro, Gestão (+9 more)
 
 ### Community 22 - "FinanceConfigPage.tsx"
-Cohesion: 0.19
-Nodes (11): ACCOUNT_TILE_STYLES, accountInitials(), AccountsSummary(), COST_CENTER_ICON_STYLES, FinanceConfigPage(), formatBRL(), isTabId(), paymentMethodIcon() (+3 more)
+Cohesion: 0.15
+Nodes (12): ACCOUNT_TILE_STYLES, accountInitials(), AccountsSummary(), COST_CENTER_ICON_STYLES, FinanceConfigPage(), formatBRL(), isTabId(), nameById() (+4 more)
 
 ### Community 23 - "Protegidos (Bearer + `requirePlatformOwner`)"
 Cohesion: 0.12
@@ -409,8 +397,8 @@ Cohesion: 0.15
 Nodes (12): APIs, Arquivar, não excluir, Arquivos, Cadastro administrativo (simples), Duplicidade (antes de criar), Fluxos, Modelo mental, Paciente já existe (+4 more)
 
 ### Community 28 - "landing-content.ts"
-Cohesion: 0.17
-Nodes (11): LANDING_FEATURES, LANDING_FOOTER_BLURB, LANDING_FOOTER_COLUMNS, LANDING_HERO_TRUST, LANDING_NAV, LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL, LANDING_STEPS (+3 more)
+Cohesion: 0.15
+Nodes (12): LANDING_FEATURES, LANDING_FOOTER_BLURB, LANDING_FOOTER_COLUMNS, LANDING_HERO_TRUST, LANDING_NAV, LANDING_PLANS, LANDING_SPECIALIST_EMAIL, LANDING_STEPS (+4 more)
 
 ### Community 29 - "medicamentos-preferences.ts"
 Cohesion: 0.31
@@ -422,7 +410,7 @@ Nodes (12): 5.10 Configurações da plataforma (`BackofficePlatformPage.tsx`), 5
 
 ### Community 31 - "Financeiro ClinMax: inventário completo"
 Cohesion: 0.17
-Nodes (11): 13. Variáveis de ambiente, 15. Matriz: funciona vs placeholder, 16. Lacunas conhecidas (PLANEJADO / P2), 18. Checklist mental, 1. Três dinheiros no produto, 3. Permissões e cargos, Cliente HTTP do front (`api.finance`), Estado atual (resumo) (+3 more)
+Nodes (11): 13. Variáveis de ambiente, 15. Matriz: funciona vs placeholder, 16. Lacunas conhecidas, 18. Checklist mental, 1. Três dinheiros no produto, 3. Permissões e cargos, Cliente HTTP do front (`api.finance`), Estado atual (resumo) (+3 more)
 
 ### Community 32 - "BulaDetailView.tsx"
 Cohesion: 0.23
@@ -449,16 +437,12 @@ Cohesion: 0.27
 Nodes (8): AgendaWeekGrid(), AppointmentCard(), appointmentCardTitle(), buildSlots(), durationMinutes(), Props, sameSlotAppointments(), stackLayout()
 
 ### Community 38 - "plan-features.ts"
-Cohesion: 0.09
-Nodes (18): ClinicSubscriptionView, COMMERCIAL_PLAN_SLUGS, DEFAULT_SIGNUP_PLAN_SLUG, isNextCommercialUpgrade(), nextCommercialPlanSlug(), PLAN_FEATURE_LABELS, PLAN_FEATURES, PLAN_LIMIT_KEYS (+10 more)
-
-### Community 39 - "LandingPage.tsx"
-Cohesion: 0.15
-Nodes (3): formatLandingPrice(), PLAN_ICONS, PlanCard()
+Cohesion: 0.18
+Nodes (10): ClinicSubscriptionView, PLAN_FEATURE_LABELS, PLAN_FEATURES, PLAN_LIMIT_KEYS, PLAN_LIMIT_LABELS, PlanFeature, PlanLimitKey, PlanUsageItem (+2 more)
 
 ### Community 40 - "9. Cobrança do usuário: assinatura SaaS"
 Cohesion: 0.20
-Nodes (10): 9.1 Planos reais (seed no boot da API), 9.2 Como a clínica ganha uma assinatura, 9.3 Tela da clínica: Plano e assinatura, 9.4 Tela do backoffice, 9.5 Status da assinatura e o que a clínica consegue usar, 9.6 Como a clínica paga de verdade, 9.7 Recorrência Asaas (IMPLEMENTADO), 9.8 Gate de recursos (+2 more)
+Nodes (10): 9.1 Planos reais (seed no boot da API), 9.2 Como a clínica ganha uma assinatura, 9.3 Tela da clínica: Plano e assinatura, 9.4 Tela do backoffice, 9.5 Status da assinatura e o que a clínica consegue usar, 9.6 Como a clínica paga de verdade, 9.7 Recorrência Asaas (código existe, gatilho fraco), 9.8 Gate de recursos (+2 more)
 
 ### Community 41 - "BackofficeDashboard.tsx"
 Cohesion: 0.27
@@ -473,8 +457,8 @@ Cohesion: 0.20
 Nodes (9): ExamFormValues, MedicationFormValues, Prescription, PrescriptionContext, PrescriptionItem, PrescriptionItemType, PrescriptionStatus, PrescriptionTemplate (+1 more)
 
 ### Community 44 - "ClinMax Backoffice: estrutura atual"
-Cohesion: 0.22
-Nodes (7): 2. Arquitetura, 8. Dados e modelos Prisma, ClinMax Backoffice: estrutura atual, Não existe ainda (impede assinaturas/MRR real), Separação do CRM, Usados pelo backoffice, Índice
+Cohesion: 0.20
+Nodes (8): 2. Arquitetura, 9. Arquivos principais, Backend (`back-projeto-clinica`), ClinMax Backoffice: estrutura atual, Documentação relacionada, Frontend (`front-projeto-clinica`), Separação do CRM, Índice
 
 ### Community 45 - "7. Telas: o que cada uma faz"
 Cohesion: 0.22
@@ -524,6 +508,10 @@ Nodes (8): 15.1 Estrutura do monorepo, 15.2 Pre-requisitos, 15.3 Primeira vez (b
 Cohesion: 0.25
 Nodes (8): 6.1 Onboarding e acesso, 6.2 Agenda e atendimento, 6.3 Leitura e envio via WhatsApp, 6.4 Prescricoes, 6.5 Financeiro, pagos e relatórios, 6.6 Estoque e TISS, 6.7 Pesquisa de satisfacao, 6. Fluxos principais (como o produto funciona)
 
+### Community 58 - "App.tsx"
+Cohesion: 0.36
+Nodes (4): App(), isAuthenticated(), ProtectedRoute(), RootRoute()
+
 ### Community 59 - "SettingsSidebar.tsx"
 Cohesion: 0.25
 Nodes (4): groups, outrosIcons, SettingsNavGroup, SettingsNavItem
@@ -565,8 +553,8 @@ Cohesion: 0.33
 Nodes (4): Props, sizeMap, WhatsappChatAvatar(), Props
 
 ### Community 70 - "AuthContext.tsx"
-Cohesion: 0.32
-Nodes (6): AuthContext, AuthProvider(), AuthState, AuthUser, isInvalidSessionError(), readJsonStorage()
+Cohesion: 0.33
+Nodes (5): AuthContext, AuthProvider(), AuthState, AuthUser, readJsonStorage()
 
 ### Community 71 - "ToastContext.tsx"
 Cohesion: 0.29
@@ -647,10 +635,6 @@ Nodes (5): DatePicker(), DatePickerProps, DateTimePicker(), formatDisplayDate(),
 ### Community 92 - "UserAvatar.tsx"
 Cohesion: 0.40
 Nodes (5): initialsFromName(), sizeClasses, UserAvatar(), UserAvatarProps, UserAvatarSize
-
-### Community 94 - "useClinicPlan.ts"
-Cohesion: 0.36
-Nodes (4): catalogToPublicPlan(), ClinicPlanState, normalizePlans(), usePublicPlans()
 
 ### Community 96 - "ConvitesConfigPage.tsx"
 Cohesion: 0.40
@@ -769,8 +753,8 @@ Cohesion: 0.80
 Nodes (4): loadReadState(), mergeReadState(), saveReadState(), useNotifications()
 
 ### Community 130 - "avatar-events.ts"
-Cohesion: 0.36
-Nodes (8): AVATAR_UPDATED_EVENT, AvatarUpdatedDetail, dispatchAvatarUpdated(), isEphemeralUrl(), isSignedOrQueryUrl(), readCachedAvatarUrl(), withAvatarCacheBuster(), writeCachedAvatarUrl()
+Cohesion: 0.50
+Nodes (4): AVATAR_UPDATED_EVENT, AvatarUpdatedDetail, dispatchAvatarUpdated(), withAvatarCacheBuster()
 
 ### Community 132 - "BackofficeAssinaturasPage.tsx"
 Cohesion: 0.60
@@ -804,9 +788,9 @@ Nodes (4): 2. Como acessar, Credenciais de desenvolvimento, Pontos de entrada no
 Cohesion: 0.50
 Nodes (4): 10. O que ainda não existe, Funcionalidades de produto, Melhorias técnicas sugeridas, UI decorativa (sem backend)
 
-### Community 140 - "Politicas ClinMax (rascunho interno)"
-Cohesion: 0.04
-Nodes (45): 0.1 Identidade (publico), 0.2 Ainda pendente (nao inventar), 0.3 Onde o produto consome este bloco, 0. Dados da empresa, 1.10 Alteracoes, 1.11 Lei e foro, 1.1 Objeto, 1.2 Conta e elegibilidade (+37 more)
+### Community 140 - "8. Dados e modelos Prisma"
+Cohesion: 0.67
+Nodes (3): 8. Dados e modelos Prisma, Não existe ainda (impede assinaturas/MRR real), Usados pelo backoffice
 
 ### Community 141 - "17. Arquivos do projeto"
 Cohesion: 0.50
@@ -861,8 +845,8 @@ Cohesion: 0.67
 Nodes (3): BackofficeCobrancasPage(), filters, formatMoney()
 
 ### Community 176 - "BackofficePlanosPage.tsx"
-Cohesion: 0.47
-Nodes (4): formatMoney(), parseMoneyInput(), PlanPriceEditor(), PlanRow
+Cohesion: 0.67
+Nodes (3): BackofficePlanosPage(), formatMoney(), PlanRow
 
 ### Community 178 - "ExtratoPage.tsx"
 Cohesion: 0.67
@@ -888,57 +872,25 @@ Nodes (3): 7. API backend, Endpoints, Objeto `saas` em `/metrics` (campos atuais
 Cohesion: 0.67
 Nodes (3): 2.1 Autenticacao e protecoes, 2.2 Estrutura de rotas do frontend (`src/App.tsx`), 2. Como o site navega (Frontend)
 
-### Community 234 - "PlanoAssinaturaPage.tsx"
-Cohesion: 0.40
-Nodes (4): formatMoney(), PLAN_ICONS, PlanoAssinaturaPage(), STATUS_LABEL
-
-### Community 289 - "1. Assinatura SaaS (clínica paga o ClinMax)"
-Cohesion: 0.10
-Nodes (19): 1.1 Planos, 1.2 Cadastro, 1.3 Escada de upgrade (self-serve), 1.4 Como a clínica paga o plano, 1.5 O que não está pronto no SaaS, 1. Assinatura SaaS (clínica paga o ClinMax), 2.1 Taxa da plataforma (não é Split API), 2.2 Foi testado? (+11 more)
-
-### Community 290 - "2. Parte legal no site hoje"
-Cohesion: 0.11
-Nodes (18): 1.1 Frase principal (hero), 1.2 O que o site promete à clínica, 1.3 Planos que a clínica assina (texto comercial da landing), 1. O que é a clínica no site, 2.1 Coluna Legal do rodapé (landing), 2.2 Copyright e identificação, 2.3 Checkout: aceite de termos, 2.4 Afirmações de segurança e cancelamento (marketing, não política) (+10 more)
-
-### Community 291 - "company-legal.ts"
-Cohesion: 0.31
-Nodes (9): COMPANY_LEGAL, CompanyLegalAddress, CompanyLegalInfo, digitsOnly(), formatCep(), formatCnpj(), formatCompanyAddress(), formatCompanyCopyright() (+1 more)
-
-### Community 292 - "AppHeader.tsx"
-Cohesion: 0.29
-Nodes (3): allNav, AppHeader(), NavItem
-
-### Community 293 - "legal-documents.ts"
-Cohesion: 0.25
-Nodes (7): address, cnpj, LEGAL_DOCUMENTS, LEGAL_NAV, LegalDocument, LegalSection, LegalSlug
-
-### Community 296 - "9. Arquivos principais"
-Cohesion: 0.50
-Nodes (4): 9. Arquivos principais, Backend (`back-projeto-clinica`), Documentação relacionada, Frontend (`front-projeto-clinica`)
-
-### Community 297 - "request"
-Cohesion: 0.50
-Nodes (4): apiNetworkErrorMessage(), apiUnavailableMessage(), getToken(), request()
-
 ## Knowledge Gaps
-- **1140 isolated node(s):** `21st`, `$schema`, `style`, `rsc`, `tsx` (+1135 more)
+- **1054 isolated node(s):** `21st`, `$schema`, `style`, `rsc`, `tsx` (+1049 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **99 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **96 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Inventario ponta a ponta do site (frontend + backend)` connect `Inventario ponta a ponta do site (frontend + backend)` to `9.2 App principal (pos-login)`, `4. Endpoints HTTP do backend (o que existe e como se usa)`, `16. Variaveis de ambiente`, `17. Estrutura de pastas`, `21. Matriz de permissoes completa`, `25. Financeiro da clinica e Clinmax Pay`, `33. Backoffice plataforma`, `7. O que nao funciona (checagem tecnica feita aqui)`, `8. Navegacao, layout e permissoes`, `11. Fluxos ponta a ponta (jornadas)`, `20. Modelo Prisma detalhado (todas as tabelas)`, `3. Integrações e sistemas relacionados (o que e e pra que serve)`, `15. Como rodar localmente`, `2. Como o site navega (Frontend)`, `6. Fluxos principais (como o produto funciona)`, `24. Pacientes e duplicidade`, `30. Seed e dados de desenvolvimento`, `32. Agenda: regras de negocio`, `26. Bot WhatsApp (arquitetura e regras)`, `28. Contexts, hooks e estado global (frontend)`, `23. Onboarding ramificado (completo)`, `31. Prescricoes e validacao publica`, `34. Erros de build e debitos tecnicos`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `ClinMax Backoffice: inventário completo` connect `ClinMax Backoffice: inventário completo` to `6. Layout e navegação`, `10. Modelos de banco usados`, `2. Como acessar`, `ClinMax Backoffice: estrutura atual`, `7. Telas: o que cada uma faz`, `Scripts`, `3. Autenticação e segurança`, `15. Arquivos do projeto`, `1. O que é e para quem serve`, `Protegidos (Bearer + `requirePlatformOwner`)`, `9. Métricas do dashboard: real vs simulado`, `12. Fluxos de usuário`?**
+  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `ClinMax Backoffice: estrutura atual` connect `ClinMax Backoffice: estrutura atual` to `10. O que ainda não existe`, `8. Dados e modelos Prisma`, `3. Autenticação`, `4. Shell: layout, menu e scroll`, `6. Visão geral (dashboard)`, `1. Resumo executivo`, `7. API backend`, `5. Seções do menu`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `ClinMax Backoffice: estrutura atual` connect `ClinMax Backoffice: estrutura atual` to `9. Arquivos principais`, `10. O que ainda não existe`, `3. Autenticação`, `4. Shell: layout, menu e scroll`, `6. Visão geral (dashboard)`, `1. Resumo executivo`, `7. API backend`, `5. Seções do menu`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `21st`, `$schema`, `style` to the rest of the system?**
-  _1140 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1054 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Processo: médico atende o paciente` be split into smaller, more focused modules?**
   _Cohesion score 0.04081632653061224 - nodes in this community are weakly interconnected._
 - **Should `api.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05512820512820513 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._

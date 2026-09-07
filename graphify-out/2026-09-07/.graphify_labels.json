@@ -139,7 +139,7 @@
   "137": "10. Modelos de banco usados",
   "138": "2. Como acessar",
   "139": "10. O que ainda não existe",
-  "140": "Politicas ClinMax (rascunho interno)",
+  "140": "8. Dados e modelos Prisma",
   "141": "17. Arquivos do projeto",
   "142": "5. Configurações financeiras",
   "143": "16. Variaveis de ambiente",
@@ -287,17 +287,5 @@
   "285": "Records.tsx",
   "286": "Settings.tsx",
   "287": "avatar-service.ts",
-  "288": "eslint.config.js",
-  "289": "1. Assinatura SaaS (clínica paga o ClinMax)",
-  "290": "2. Parte legal no site hoje",
-  "291": "company-legal.ts",
-  "292": "AppHeader.tsx",
-  "293": "legal-documents.ts",
-  "294": "CheckoutPage.tsx",
-  "295": "PatientFormModal.tsx",
-  "296": "9. Arquivos principais",
-  "297": "request",
-  "298": "LegalPage.tsx",
-  "299": "ApiError",
-  "300": "prep-checkout-bg.py"
+  "288": "eslint.config.js"
 }

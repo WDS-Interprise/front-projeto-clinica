@@ -66,6 +66,7 @@ import ProfissionalFormPage from "@/pages/configuracoes/ProfissionalFormPage"
 import CheckoutPage from "@/pages/checkout/CheckoutPage"
 import LandingPage from "@/pages/LandingPage"
 import LegalPage from "@/pages/legal/LegalPage"
+import ValidarReceitaPage from "@/pages/public/ValidarReceitaPage"
 import { defaultHomePath } from "@/lib/permissions"
 import { getAuthHome } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
@@ -144,6 +145,7 @@ export default function App() {
           <Route path="/seguranca" element={<LegalPage slug="seguranca" />} />
           <Route path="/sobre" element={<LegalPage slug="sobre" />} />
           <Route path="/contato" element={<LegalPage slug="contato" />} />
+          <Route path="/validar-receita/:code" element={<ValidarReceitaPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/checkout" element={<CheckoutPage />} />
