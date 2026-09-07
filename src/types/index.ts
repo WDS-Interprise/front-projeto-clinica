@@ -153,6 +153,16 @@ export interface PanelMetrics {
       revenue: number
     }
   }
+  prescriptions?: {
+    finalizedToday: number
+    finalizedWeek: number
+    sharesFailed: number
+    sharesPending: number
+    simulatedToday: number
+    unsignedToday: number
+    whatsappConnected: boolean
+    outboxPending: number
+  }
 }
 
 export interface TodayPatientSlot {

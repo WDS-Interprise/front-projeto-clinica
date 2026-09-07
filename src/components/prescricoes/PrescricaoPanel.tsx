@@ -44,6 +44,7 @@ export function PrescricaoPanel({
   const [ctx, setCtx] = useState<PrescriptionContext | null>(null)
   const [patientName, setPatientName] = useState(patientNameProp ?? "")
   const [patientPhone, setPatientPhone] = useState(patientPhoneProp ?? "")
+  const [patientEmail, setPatientEmail] = useState("")
   const [templates, setTemplates] = useState<PrescriptionTemplate[]>([])
   const [prescription, setPrescription] = useState<Prescription | null>(null)
   const [resending, setResending] = useState(false)
@@ -71,10 +72,12 @@ export function PrescricaoPanel({
           if (context.recentPrescriptions[0]?.patient) {
             const p = context.recentPrescriptions[0].patient
             setPatientPhone(p.whatsapp?.trim() || p.phone?.trim() || "")
+            setPatientEmail(p.email?.trim() || "")
           } else {
             api.patients.getById(context.patientId).then((p) => {
               setPatientName(p.name)
               setPatientPhone(p.whatsapp?.trim() || p.phone?.trim() || "")
+              setPatientEmail(p.email?.trim() || "")
             }).catch(() => {})
           }
         }
@@ -263,7 +266,10 @@ export function PrescricaoPanel({
 
   const handleFinalize = async (opts: {
     shareWhatsApp: boolean
+    shareSms: boolean
+    shareEmail: boolean
     sharePhone?: string
+    shareEmailAddress?: string
     signDigital: boolean
   }) => {
     if (!prescription) return
@@ -390,6 +396,7 @@ export function PrescricaoPanel({
         <PrescricaoStepAssinar
           prescription={prescription}
           patientPhone={patientPhone}
+          patientEmail={patientEmail || prescription.patient?.email || ""}
           saving={saving}
           onBack={() => setFlowStep(0)}
           onFinalize={handleFinalize}

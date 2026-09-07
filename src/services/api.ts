@@ -1154,12 +1154,36 @@ export const api = {
       ),
     finalize: (
       id: string,
-      data?: { shareWhatsApp?: boolean; sharePhone?: string; signDigital?: boolean }
+      data?: {
+        shareWhatsApp?: boolean
+        shareSms?: boolean
+        shareEmail?: boolean
+        sharePhone?: string
+        shareEmailAddress?: string
+        signDigital?: boolean
+      }
     ) =>
       request<import("@/types/prescription").Prescription>(
         `/prescriptions/${id}/finalize`,
         { method: "POST", body: JSON.stringify(data ?? {}) }
       ),
+    validatePublic: (code: string, accessCode?: string) => {
+      const q = new URLSearchParams()
+      if (accessCode) q.set("accessCode", accessCode)
+      return request<{
+        valid: boolean
+        reason?: string
+        document?: {
+          located: boolean
+          documentType: string
+          date: string | null
+          professionalName: string
+          itemCount: number
+          integrity: string
+          signature: { status: string; icpBrasil: boolean; note: string }
+        }
+      }>(`/public/prescriptions/validate/${encodeURIComponent(code)}${q.toString() ? `?${q}` : ""}`)
+    },
     renew: (id: string) =>
       request<import("@/types/prescription").Prescription>(
         `/prescriptions/${id}/renew`,
@@ -1513,6 +1537,31 @@ export const api = {
       if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
       if (params?.dateTo) q.set("dateTo", params.dateTo)
       return request<{ rows: Array<{ id: string; name: string; total: number; count: number }> }>(`/reports/repasse?${q}`)
+    },
+    prescriptions: (params?: { dateFrom?: string; dateTo?: string }) => {
+      const q = new URLSearchParams()
+      if (params?.dateFrom) q.set("dateFrom", params.dateFrom)
+      if (params?.dateTo) q.set("dateTo", params.dateTo)
+      return request<{
+        totals: {
+          finalized: number
+          simulated: number
+          unsigned: number
+          sharesSent: number
+          sharesFailed: number
+          sharesPending: number
+          byChannel: Record<string, number>
+        }
+        byProfessional: Array<{ id: string; name: string; count: number }>
+        failedShares: Array<{
+          date: string
+          channel: string
+          recipient: string
+          error: string
+          patientName: string
+          professionalName: string
+        }>
+      }>(`/reports/prescriptions?${q}`)
     },
   },
 

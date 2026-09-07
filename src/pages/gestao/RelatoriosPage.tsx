@@ -15,6 +15,7 @@ const tabs = [
   { id: "repasse", label: "Repasse profissional" },
   { id: "receitas", label: "Análise receitas" },
   { id: "despesas", label: "Análise despesas" },
+  { id: "prescricoes", label: "Prescrições e envios" },
 ] as const
 
 type TabId = (typeof tabs)[number]["id"]
@@ -34,6 +35,7 @@ export default function RelatoriosPage() {
   const [birthdays, setBirthdays] = useState<Awaited<ReturnType<typeof api.reports.birthdays>> | null>(null)
   const [repasse, setRepasse] = useState<Awaited<ReturnType<typeof api.reports.repasse>> | null>(null)
   const [analysis, setAnalysis] = useState<Awaited<ReturnType<typeof api.finance.analysis>> | null>(null)
+  const [prescriptions, setPrescriptions] = useState<Awaited<ReturnType<typeof api.reports.prescriptions>> | null>(null)
 
   const load = () => {
     if (tab === "atendimento") return
@@ -44,6 +46,7 @@ export default function RelatoriosPage() {
       tab === "cid" ? api.reports.cid(p) :
       tab === "aniversario" ? api.reports.birthdays(new Date().getMonth() + 1) :
       tab === "repasse" ? api.reports.repasse(p) :
+      tab === "prescricoes" ? api.reports.prescriptions(p) :
       tab === "receitas" ? api.finance.analysis({ type: "INCOME", ...p }) :
       api.finance.analysis({ type: "EXPENSE", ...p })
 
@@ -54,6 +57,7 @@ export default function RelatoriosPage() {
         setBirthdays(tab === "aniversario" ? result as typeof birthdays : null)
         setRepasse(tab === "repasse" ? result as typeof repasse : null)
         setAnalysis(tab === "receitas" || tab === "despesas" ? result as typeof analysis : null)
+        setPrescriptions(tab === "prescricoes" ? result as typeof prescriptions : null)
       })
       .catch((e: unknown) => toast(toastMessageFromApiError(e, "Erro ao gerar relatório"), "error"))
       .finally(() => setLoading(false))
@@ -140,6 +144,43 @@ export default function RelatoriosPage() {
           headers={["Profissional", "Receitas", "Lançamentos"]}
           rows={repasse.rows.map((r) => [r.name, formatCurrency(r.total), String(r.count)])}
         />
+      )}
+
+      {tab === "prescricoes" && prescriptions && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {[
+              ["Finalizadas", prescriptions.totals.finalized],
+              ["Simulação", prescriptions.totals.simulated],
+              ["Sem assinatura", prescriptions.totals.unsigned],
+              ["Envios falhos", prescriptions.totals.sharesFailed],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-xl border border-border bg-surface p-4">
+                <p className="text-xs text-text-secondary">{label}</p>
+                <p className="mt-1 text-2xl font-semibold text-text">{value}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-text-secondary">
+            WhatsApp: {prescriptions.totals.byChannel.WHATSAPP ?? 0}. E-mail:{" "}
+            {prescriptions.totals.byChannel.EMAIL ?? 0}. SMS: {prescriptions.totals.byChannel.SMS ?? 0}.
+            Enviados: {prescriptions.totals.sharesSent}. Pendentes: {prescriptions.totals.sharesPending}.
+          </p>
+          <ReportTable
+            headers={["Profissional", "Receitas"]}
+            rows={prescriptions.byProfessional.map((r) => [r.name, String(r.count)])}
+          />
+          <ReportTable
+            headers={["Data", "Canal", "Paciente", "Destino", "Erro"]}
+            rows={prescriptions.failedShares.map((r) => [
+              format(new Date(r.date), "dd/MM/yyyy HH:mm"),
+              r.channel,
+              r.patientName,
+              r.recipient || "-",
+              r.error,
+            ])}
+          />
+        </div>
       )}
 
       {(tab === "receitas" || tab === "despesas") && analysis && (

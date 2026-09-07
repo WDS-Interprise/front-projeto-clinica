@@ -10,7 +10,9 @@ import {
   BarChart3,
   CalendarCheck,
   ChevronDown,
+  FileText,
   Lightbulb,
+  MessageCircle,
   RefreshCw,
   Stethoscope,
   UserCheck,
@@ -296,8 +298,74 @@ export default function PainelPage() {
           </Button>
         </div>
 
+        {metrics?.prescriptions && !metrics.prescriptions.whatsappConnected && (
+          <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+            WhatsApp da clínica está desconectado.
+            {metrics.prescriptions.sharesPending > 0
+              ? ` Há ${metrics.prescriptions.sharesPending} envio(s) de receita pendente(s).`
+              : ""}{" "}
+            <Link to="/configuracoes/whatsapp" className="font-semibold underline">
+              Conectar em Configurações
+            </Link>
+          </div>
+        )}
+
+        {metrics?.prescriptions && (
+          <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Link
+              to="/gestao/relatorios"
+              className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]"
+            >
+              <div className="flex items-start justify-between">
+                <p className="text-[13px] text-[#6B7C73]">Receitas hoje</p>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F6EE] text-[#007D5C]">
+                  <FileText className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="mt-2 text-[32px] font-bold leading-none tracking-tight text-[#1B2E26]">
+                {metrics.prescriptions.finalizedToday}
+              </p>
+              <p className="mt-2 text-[12px] text-[#8A9A90]">
+                {metrics.prescriptions.finalizedWeek} nesta semana
+              </p>
+            </Link>
+            <div className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
+              <div className="flex items-start justify-between">
+                <p className="text-[13px] text-[#6B7C73]">Envios falhos</p>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FDECEC] text-[#B42318]">
+                  <MessageCircle className="h-5 w-5" />
+                </div>
+              </div>
+              <p className="mt-2 text-[32px] font-bold leading-none tracking-tight text-[#1B2E26]">
+                {metrics.prescriptions.sharesFailed}
+              </p>
+              <p className="mt-2 text-[12px] text-[#8A9A90]">
+                {metrics.prescriptions.sharesPending} pendente(s) na fila
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
+              <p className="text-[13px] text-[#6B7C73]">Simulação hoje</p>
+              <p className="mt-2 text-[32px] font-bold leading-none tracking-tight text-[#1B2E26]">
+                {metrics.prescriptions.simulatedToday}
+              </p>
+              <p className="mt-2 text-[12px] text-[#8A9A90]">
+                {metrics.prescriptions.unsignedToday} sem assinatura
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
+              <p className="text-[13px] text-[#6B7C73]">WhatsApp</p>
+              <p className="mt-2 text-[20px] font-bold leading-none tracking-tight text-[#1B2E26]">
+                {metrics.prescriptions.whatsappConnected ? "Conectado" : "Desconectado"}
+              </p>
+              <p className="mt-2 text-[12px] text-[#8A9A90]">
+                Fila outbox: {metrics.prescriptions.outboxPending}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {loading && !metrics
+          {loading && !metrics}
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-[132px] animate-pulse rounded-2xl bg-white shadow-sm" />
               ))

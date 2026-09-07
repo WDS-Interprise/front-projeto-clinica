@@ -35,7 +35,14 @@ export type Prescription = {
   createdAt: string
   updatedAt: string
   items: PrescriptionItem[]
-  patient?: { id: string; name: string; cpf?: string; phone?: string; whatsapp?: string | null }
+  patient?: {
+    id: string
+    name: string
+    cpf?: string
+    phone?: string
+    whatsapp?: string | null
+    email?: string | null
+  }
   professional?: { id: string; name: string }
   shares?: Array<{
     id: string
