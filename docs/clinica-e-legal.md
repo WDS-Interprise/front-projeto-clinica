@@ -54,7 +54,7 @@ Na seção **Como funciona**:
 
 Confiança no hero: "Sem cartão para testar", "Multi-usuários", "WhatsApp integrado".
 
-Prova social no carrossel (ilustrativa, não são parceiros reais no código): Clínica Vitalis, Instituto Bem Estar, Clínica Harmonia, Clínica Pró-Saúde, Saúde & Cuidado, Clínica Vida.
+A home não exibe faixa de “clínicas que confiam” com nomes genéricos. Prova social só volta quando houver clientes reais comprováveis.
 
 Rodapé da marca:
 

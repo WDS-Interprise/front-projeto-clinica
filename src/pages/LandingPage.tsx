@@ -13,7 +13,6 @@ import {
   Star,
 } from "lucide-react"
 import AppLogo from "@/components/brand/AppLogo"
-import LandingMarquee from "@/components/landing/LandingMarquee"
 import LandingReveal from "@/components/landing/LandingReveal"
 import { useForceLightTheme } from "@/hooks/useForceLightTheme"
 import {
@@ -621,7 +620,6 @@ export default function LandingPage() {
 
       <main id="conteudo-principal">
         <HeroSection />
-        <LandingMarquee />
         <FeaturesSection />
         <HowItWorksSection />
         <PricingSection />

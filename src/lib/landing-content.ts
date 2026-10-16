@@ -4,18 +4,12 @@ import {
   Building2,
   CalendarClock,
   CalendarDays,
-  CirclePlus,
   CreditCard,
   DollarSign,
   FilePlus,
-  Flower2,
   FolderOpen,
-  HeartHandshake,
-  HeartPulse,
   MessageCircle,
-  Plus,
   TrendingUp,
-  UserRound,
   Users,
 } from "lucide-react"
 import { COMPANY_LEGAL } from "@/lib/company-legal"
@@ -95,16 +89,6 @@ export const LANDING_HERO_TRUST = [
   { icon: Users, label: "Multi-usuários" },
   { icon: MessageCircle, label: "WhatsApp integrado" },
 ] as const
-
-/** Faixa de clínicas (prova social ilustrativa até parcerias reais). */
-export const LANDING_TRUST_CLINICS: { icon: LucideIcon; name: string }[] = [
-  { icon: Plus, name: "Clínica Vitalis" },
-  { icon: HeartHandshake, name: "Instituto Bem Estar" },
-  { icon: UserRound, name: "Clínica Harmonia" },
-  { icon: Flower2, name: "Clínica Pró-Saúde" },
-  { icon: CirclePlus, name: "Saúde & Cuidado" },
-  { icon: HeartPulse, name: "Clínica Vida" },
-]
 
 export const LANDING_NAV = [
   { id: "funcionalidades", label: "Funcionalidades" },

@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* shadcn / 21st.dev tokens, bridged to ClinicHub theme */
+/* shadcn / 21st.dev tokens, bridged to ClinMax theme */
 :root {
   --radius: 0.5rem;
   --background: oklch(0.985 0.002 247.8);
@@ -476,19 +476,6 @@ html.dark * {
     animation: none;
   }
 
-  .landing-logo-track {
-    animation: none;
-  }
-
-  .landing-marquee-row {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .landing-marquee-row::-webkit-scrollbar {
-    display: none;
-  }
-
   .landing-reveal {
     opacity: 1;
     transform: none;
@@ -520,61 +507,6 @@ html.dark * {
 
 .font-landing-body {
   font-family: var(--font-landing-body);
-}
-
-.landing-logo-loop {
-  width: 100%;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-
-.landing-logo-track {
-  display: flex;
-  align-items: center;
-  gap: 44px;
-  width: max-content;
-  margin: 0;
-  padding: 8px 22px;
-  list-style: none;
-  animation: landingLogoScroll 26s linear infinite;
-}
-
-.landing-logo-loop:hover .landing-logo-track {
-  animation-play-state: paused;
-}
-
-@keyframes landingLogoScroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.landing-logo-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-  color: #8b96a5;
-  cursor: default;
-  transition: transform 0.24s cubic-bezier(0.3, 0.9, 0.4, 1), color 0.24s ease;
-}
-
-.landing-logo-item:hover {
-  transform: scale(1.08);
-  color: #00914a;
-}
-
-.landing-logo-item svg {
-  width: 21px;
-  height: 21px;
-}
-
-.landing-logo-item span {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
 }
 
 @keyframes onboardingFadeIn {
