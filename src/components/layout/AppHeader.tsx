@@ -21,6 +21,7 @@ import NotificationsMenu from "@/components/layout/NotificationsMenu"
 import ClinicSwitcher from "@/components/layout/ClinicSwitcher"
 import UserMenu from "@/components/layout/UserMenu"
 import HeaderIconButton from "@/components/layout/HeaderIconButton"
+import ThemeToggle from "@/components/ui/ThemeToggle"
 import { useUnreadMessages } from "@/hooks/useUnreadMessages"
 import { usePlanFeatures } from "@/context/PlanFeatureContext"
 import { useAnchoredDropdown } from "@/hooks/useAnchoredDropdown"
@@ -84,7 +85,7 @@ export default function AppHeader() {
   const showMessagesInNav = mainNav.some((item) => item.to === "/mensagens")
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 h-16 border-b border-[#E6EEE9] bg-white">
+    <header className="fixed top-0 right-0 left-0 z-50 h-16 border-b border-border bg-surface">
       <div className="flex h-full min-w-0 items-center gap-2 px-2 sm:gap-3 sm:px-3">
         <NavLink
           to={mainNav[0]?.to ?? "/agenda"}
@@ -125,7 +126,7 @@ export default function AppHeader() {
               ref={quickRef}
               type="button"
               onClick={toggleQuick}
-              className="hidden h-9 items-center gap-1.5 rounded-lg bg-[#006B4D] px-2.5 text-[13px] font-medium text-white shadow-sm hover:bg-[#005840] sm:flex xl:px-3"
+              className="hidden h-9 items-center gap-1.5 rounded-lg bg-primary px-2.5 text-[13px] font-medium text-white shadow-sm hover:bg-primary-dark sm:flex xl:px-3"
               title="Ações rápidas"
             >
               <Plus className="h-4 w-4 shrink-0" />
@@ -138,32 +139,32 @@ export default function AppHeader() {
                   <div className="fixed inset-0 z-[100]" onClick={closeQuick} aria-hidden />
                   <div
                     ref={quickMenuRef}
-                    className="fixed z-[101] w-56 rounded-xl border border-[#E6EEE9] bg-white py-1 shadow-lg"
+                    className="fixed z-[101] w-56 rounded-xl border border-border bg-surface py-1 shadow-lg"
                     style={quickMenuStyle}
                   >
                   {hasPermission("agenda:manage") && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-[#1B2E26] hover:bg-[#F3F7F5]"
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-alt"
                       onClick={() => {
                         closeQuick()
                         navigate("/agenda", { state: { openNewAppointment: true } })
                       }}
                     >
-                      <CalendarPlus className="h-4 w-4 text-[#006B4D]" />
+                      <CalendarPlus className="h-4 w-4 text-primary" />
                       Novo Agendamento
                     </button>
                   )}
                   {hasPermission("patients:create") && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-[#1B2E26] hover:bg-[#F3F7F5]"
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-alt"
                       onClick={() => {
                         closeQuick()
                         navigate("/pacientes", { state: { openNewPatient: true } })
                       }}
                     >
-                      <UserPlus className="h-4 w-4 text-[#006B4D]" />
+                      <UserPlus className="h-4 w-4 text-primary" />
                       Adicionar paciente
                     </button>
                   )}
@@ -171,24 +172,24 @@ export default function AppHeader() {
                     <>
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-[#1B2E26] hover:bg-[#F3F7F5]"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-alt"
                         onClick={() => {
                           closeQuick()
                           navigate("/configuracoes/usuarios/profissional/novo")
                         }}
                       >
-                        <Stethoscope className="h-4 w-4 text-[#006B4D]" />
+                        <Stethoscope className="h-4 w-4 text-primary" />
                         Adicionar Prof. de Saúde
                       </button>
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-[#1B2E26] hover:bg-[#F3F7F5]"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-text hover:bg-surface-alt"
                         onClick={() => {
                           closeQuick()
                           navigate("/configuracoes/usuarios/novo")
                         }}
                       >
-                        <UserPlus className="h-4 w-4 text-[#006B4D]" />
+                        <UserPlus className="h-4 w-4 text-primary" />
                         Adicionar Recepcionista
                       </button>
                     </>
@@ -199,6 +200,7 @@ export default function AppHeader() {
               )}
           </div>
 
+          <ThemeToggle compact />
           <NotificationsMenu />
           <ClinicSwitcher />
           {!showMessagesInNav && (

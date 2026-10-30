@@ -19,6 +19,7 @@ import { api } from "@/services/api"
 import { applyAuthRedirectFlags } from "@/lib/onboarding"
 import { useAuth } from "@/context/AuthContext"
 import { getGoogleAuthStartUrl } from "@/lib/api-origin"
+import { usePageSeo } from "@/lib/seo"
 
 const REMEMBER_EMAIL_KEY = "clinmax_remember_email"
 
@@ -32,6 +33,11 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
   const { setSession } = useAuth()
+  usePageSeo({
+    title: "Entrar | ClinMax",
+    description: "Acesse a conta da sua clínica na ClinMax.",
+    path: "/login",
+  })
 
   useEffect(() => {
     const savedEmail = localStorage.getItem(REMEMBER_EMAIL_KEY)

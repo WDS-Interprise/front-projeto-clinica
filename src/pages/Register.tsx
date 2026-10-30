@@ -17,8 +17,8 @@ import { fieldsFromApiError, messageFromApiError } from "@/lib/api-errors"
 import { markSelfRegisteredUser } from "@/lib/onboarding"
 import { rememberSelectedPlan } from "@/lib/plan-features"
 import { useAuth } from "@/context/AuthContext"
-import { useTheme } from "@/context/ThemeContext"
 import { cn } from "@/lib/utils"
+import { usePageSeo } from "@/lib/seo"
 import {
   formatCPFInput,
   sanitizePersonName,
@@ -98,7 +98,11 @@ export default function Register() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { setSession } = useAuth()
-  const { setTheme } = useTheme()
+  usePageSeo({
+    title: "Criar conta | ClinMax",
+    description: "Crie a conta da clínica e comece a usar a ClinMax.",
+    path: "/register",
+  })
 
   useEffect(() => {
     const plan = searchParams.get("plan")
@@ -141,7 +145,6 @@ export default function Register() {
         permissions: result.permissions ?? [],
       })
       markSelfRegisteredUser()
-      setTheme("light")
       navigate("/dashboard", { replace: true })
     } catch (err: unknown) {
       setFieldErrors(fieldsFromApiError(err))

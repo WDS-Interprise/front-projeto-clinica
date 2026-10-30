@@ -35,6 +35,7 @@ import {
   LANDING_STEPS,
 } from "@/lib/landing-content"
 import { formatCompanyAddress, formatCompanyCopyright } from "@/lib/company-legal"
+import { HOME_DESCRIPTION, HOME_JSON_LD, HOME_TITLE, usePageSeo } from "@/lib/seo"
 import { api } from "@/services/api"
 import { rememberSelectedPlan, checkoutPath, type PublicCatalog, type PublicCatalogPlan } from "@/lib/plan-features"
 
@@ -57,15 +58,25 @@ function LandingHeader() {
           className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 md:flex"
           aria-label="Navegação principal"
         >
-          {LANDING_NAV.map(({ id, label }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-200 hover:bg-surface-alt hover:text-text"
-            >
-              {label}
-            </a>
-          ))}
+          {LANDING_NAV.map(({ href, label }) =>
+            href.startsWith("/") ? (
+              <Link
+                key={href}
+                to={href}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-200 hover:bg-surface-alt hover:text-text"
+              >
+                {label}
+              </Link>
+            ) : (
+              <a
+                key={href}
+                href={href}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-200 hover:bg-surface-alt hover:text-text"
+              >
+                {label}
+              </a>
+            )
+          )}
         </nav>
 
         <div className="relative z-10 ml-auto flex items-center gap-2 sm:gap-3">
@@ -550,7 +561,7 @@ function LandingFooter() {
           </div>
         </LandingReveal>
 
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
           {LANDING_FOOTER_COLUMNS.map((column, index) => (
             <LandingReveal key={column.title} delay={index * 80} variant="fade-up">
               <p className="font-landing-heading text-sm font-bold text-[#0A1F44]">{column.title}</p>
@@ -598,6 +609,12 @@ function LandingFooter() {
 
 export default function LandingPage() {
   useForceLightTheme()
+  usePageSeo({
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    path: "/",
+    jsonLd: HOME_JSON_LD,
+  })
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow
@@ -608,7 +625,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="landing-page min-h-screen bg-surface-alt font-landing-body text-text">
+    <div className="landing-page min-h-screen bg-[#f8fafc] font-landing-body text-[#0f172a]">
       <a
         href="#conteudo-principal"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg"

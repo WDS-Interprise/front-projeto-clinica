@@ -91,9 +91,11 @@ export const LANDING_HERO_TRUST = [
 ] as const
 
 export const LANDING_NAV = [
-  { id: "funcionalidades", label: "Funcionalidades" },
-  { id: "como-funciona", label: "Como funciona" },
-  { id: "planos", label: "Planos" },
+  { label: "Funcionalidades", href: "#funcionalidades" },
+  { label: "Como funciona", href: "#como-funciona" },
+  { label: "Planos", href: "#planos" },
+  { label: "Sobre", href: "/sobre" },
+  { label: "Contato", href: "/contato" },
 ] as const
 
 export const LANDING_PLAN_FALLBACK: import("@/lib/plan-features").PublicCatalog = {
@@ -206,25 +208,16 @@ export const LANDING_FOOTER_COLUMNS = [
       { label: "Funcionalidades", href: "#funcionalidades" },
       { label: "Como funciona", href: "#como-funciona" },
       { label: "Planos", href: "#planos" },
-      { label: "Integrações", href: "#funcionalidades" },
+      { label: "Criar conta", href: "/register" },
     ],
   },
   {
     title: "Empresa",
     links: [
-      { label: "Sobre nós", href: "/sobre" },
-      { label: "Blog", href: "/contato" },
-      { label: "Carreiras", href: "/contato" },
+      { label: "Página inicial", href: "/" },
+      { label: "Sobre", href: "/sobre" },
       { label: "Contato", href: "/contato" },
-    ],
-  },
-  {
-    title: "Suporte",
-    links: [
-      { label: "Central de ajuda", href: "/contato" },
-      { label: "Tutoriais", href: "#como-funciona" },
-      { label: "Status do sistema", href: "/contato" },
-      { label: "Suporte", href: "/contato" },
+      { label: "Entrar", href: "/login" },
     ],
   },
   {

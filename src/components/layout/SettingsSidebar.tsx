@@ -25,8 +25,8 @@ import { useAuth } from "@/context/AuthContext"
 import { outrosItems, canAccessOutrosItem, isOutrosPath } from "@/lib/outros-nav"
 import type { Permission } from "@/lib/permissions"
 
-const navActive = "bg-[#E8F6EE] text-[#006B4D]"
-const navIdle = "text-[#1B2E26] hover:bg-[#F4F7F5]"
+const navActive = "bg-primary-light text-primary"
+const navIdle = "text-text hover:bg-surface-alt"
 
 type SettingsNavItem = {
   to: string
@@ -96,7 +96,7 @@ function NavItem({ item }: { item: SettingsNavItem }) {
     >
       {({ isActive }) => (
         <>
-          <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-[#006B4D]" : "text-[#5B6B63]")} />
+          <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-primary" : "text-text-secondary")} />
           {item.label}
         </>
       )}
@@ -144,7 +144,7 @@ function OutrosAccordion() {
                   isActive ? navActive : navIdle
                 )}
               >
-                <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-[#006B4D]" : "text-[#5B6B63]")} />
+                <Icon className={cn("h-[18px] w-[18px] shrink-0", isActive ? "text-primary" : "text-text-secondary")} />
                 {item.label}
               </NavLink>
             )
@@ -167,10 +167,10 @@ export default function SettingsSidebar() {
     .filter((group) => group.items.length > 0)
 
   return (
-    <aside className="flex h-full w-[268px] shrink-0 flex-col overflow-hidden rounded-[16px] border border-[#E4EBE6] bg-white">
-      <div className="shrink-0 border-b border-[#E4EBE6] px-5 py-4">
-        <p className="select-none text-[17px] font-bold leading-tight text-[#12261E]">Configurações</p>
-        <p className="mt-0.5 truncate text-[13px] text-[#6B7C74]">{clinicName ?? "Sua clínica"}</p>
+    <aside className="flex h-full w-[268px] shrink-0 flex-col overflow-hidden rounded-[16px] border border-border bg-surface">
+      <div className="shrink-0 border-b border-border px-5 py-4">
+        <p className="select-none text-[17px] font-bold leading-tight text-text">Configurações</p>
+        <p className="mt-0.5 truncate text-[13px] text-text-secondary">{clinicName ?? "Sua clínica"}</p>
       </div>
 
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-2.5 py-4">

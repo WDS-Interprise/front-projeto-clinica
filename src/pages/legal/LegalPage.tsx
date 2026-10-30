@@ -4,10 +4,27 @@ import AppLogo from "@/components/brand/AppLogo"
 import { useForceLightTheme } from "@/hooks/useForceLightTheme"
 import { formatCompanyCopyright } from "@/lib/company-legal"
 import { LEGAL_DOCUMENTS, LEGAL_NAV, type LegalSlug } from "@/lib/legal-documents"
+import { breadcrumbJsonLd, usePageSeo } from "@/lib/seo"
+
+const SEO_DESCRIPTION: Record<LegalSlug, string> = {
+  privacidade: "Como a ClinMax trata dados pessoais no site e na plataforma.",
+  termos: "Regras de uso da plataforma ClinMax, planos e responsabilidades da clínica.",
+  lgpd: "Papéis, bases legais e direitos de quem tem dados tratados na ClinMax.",
+  seguranca: "Como a ClinMax protege o acesso e os dados da clínica.",
+  sobre: "Quem opera a ClinMax, o endereço da empresa e como falar com a gente.",
+  contato: "Canais oficiais da ClinMax para comercial, suporte e assuntos legais.",
+}
 
 export default function LegalPage({ slug }: { slug: LegalSlug }) {
   useForceLightTheme()
   const doc = LEGAL_DOCUMENTS[slug]
+  const path = `/${slug}`
+  usePageSeo({
+    title: `${doc.title} | ClinMax`,
+    description: SEO_DESCRIPTION[slug],
+    path,
+    jsonLd: breadcrumbJsonLd(doc.title, path),
+  })
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow
@@ -39,7 +56,14 @@ export default function LegalPage({ slug }: { slug: LegalSlug }) {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">{doc.updatedLabel}</p>
+        <p className="text-sm text-text-secondary">
+          <Link to="/" className="font-medium text-[#0A1F44] hover:underline">
+            Início
+          </Link>
+          <span className="px-1.5">/</span>
+          <span>{doc.title}</span>
+        </p>
+        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-text-secondary">{doc.updatedLabel}</p>
         <h1 className="mt-2 text-3xl font-bold text-[#0A1F44]">{doc.title}</h1>
         <p className="mt-4 text-sm leading-relaxed text-text-secondary">{doc.intro}</p>
 
