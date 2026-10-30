@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import SettingsLayout from "@/components/layout/SettingsLayout"
+import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/context/ToastContext"
 import { api } from "@/services/api"
 import { toastMessageFromApiError } from "@/lib/api-errors"
@@ -13,6 +14,7 @@ export default function UsuarioFormPage() {
   const isEdit = Boolean(id && id !== "novo")
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { clinicName } = useAuth()
   const [loading, setLoading] = useState(false)
   const [doctors, setDoctors] = useState<{ id: string; name: string }[]>([])
   const [linkedDoctorIds, setLinkedDoctorIds] = useState<string[]>([])
@@ -123,7 +125,7 @@ export default function UsuarioFormPage() {
           <h2 className="text-sm font-semibold text-text-secondary uppercase">Clínica</h2>
           <div className="flex items-center justify-between p-4 rounded-xl border border-border">
             <div>
-              <p className="font-medium text-text">ClinMax. Clínica Geral</p>
+              <p className="font-medium text-text">{clinicName ?? "ClinMax"}</p>
               <p className="text-xs text-text-secondary">Administrador da clínica</p>
             </div>
             <Switch checked={form.isClinicAdmin} onChange={(v) => setForm({ ...form, isClinicAdmin: v })} />

@@ -8,11 +8,36 @@ export const KIND_META: Record<
   AptKind,
   { label: string; bg: string; border: string; accent: string }
 > = {
-  consulta: { label: "Consulta", bg: "#F0FBF6", border: "#BCE8D3", accent: "#4DBA83" },
-  retorno: { label: "Retorno", bg: "#F1F8FF", border: "#B9DBF8", accent: "#4AA3DF" },
-  exame: { label: "Exame", bg: "#F6F3FF", border: "#D8CCFA", accent: "#8B75D7" },
-  tele: { label: "Teleconsulta", bg: "#FFF9EA", border: "#F6DFA3", accent: "#D7A72D" },
-  block: { label: "Bloqueio", bg: "#F8FAFC", border: "#E2E8F0", accent: "#94A3B8" },
+  consulta: {
+    label: "Consulta",
+    bg: "var(--apt-consulta-bg, #F0FBF6)",
+    border: "var(--apt-consulta-border, #BCE8D3)",
+    accent: "var(--apt-consulta-accent, #4DBA83)",
+  },
+  retorno: {
+    label: "Retorno",
+    bg: "var(--apt-retorno-bg, #F1F8FF)",
+    border: "var(--apt-retorno-border, #B9DBF8)",
+    accent: "var(--apt-retorno-accent, #4AA3DF)",
+  },
+  exame: {
+    label: "Exame",
+    bg: "var(--apt-exame-bg, #F6F3FF)",
+    border: "var(--apt-exame-border, #D8CCFA)",
+    accent: "var(--apt-exame-accent, #8B75D7)",
+  },
+  tele: {
+    label: "Teleconsulta",
+    bg: "var(--apt-tele-bg, #FFF9EA)",
+    border: "var(--apt-tele-border, #F6DFA3)",
+    accent: "var(--apt-tele-accent, #D7A72D)",
+  },
+  block: {
+    label: "Bloqueio",
+    bg: "var(--apt-block-bg, #F8FAFC)",
+    border: "var(--apt-block-border, #E2E8F0)",
+    accent: "var(--apt-block-accent, #94A3B8)",
+  },
 }
 
 const NAME_PARTICLES = new Set(["de", "da", "das", "do", "dos", "e"])

@@ -223,10 +223,10 @@ export default function AgendaPage() {
       <aside className="hidden w-[280px] shrink-0 flex-col gap-4 overflow-auto border-r border-[#E2EBE5] bg-white p-4 xl:flex">
         <section>
           <h2 className="flex items-center gap-2 text-[14px] font-semibold text-[#1B2E26]">
-            <CalendarDays className="h-4 w-4 text-[#006B4D]" />
+            <CalendarDays className="h-4 w-4 text-[#2563EB]" />
             Pacientes do dia
           </h2>
-          <p className="mt-3 text-[40px] font-bold leading-none text-[#16A34A]">{todayApts.length}</p>
+          <p className="mt-3 text-[40px] font-bold leading-none text-[#2563EB]">{todayApts.length}</p>
           <p className="mt-1 text-[13px] text-[#6B7C73]">agendamentos hoje</p>
           <button
             type="button"
@@ -239,7 +239,7 @@ export default function AgendaPage() {
             {todayApts.length === 0 && (
               <EmptyState
                 className="rounded-xl border border-[#E8EEEA] bg-[#F8FBF9] px-3 py-6"
-                icon={<CalendarDays className="h-8 w-8 text-[#006B4D]" />}
+                icon={<CalendarDays className="h-8 w-8 text-[#2563EB]" />}
                 title="Nenhum paciente hoje"
                 description="Não há agendamentos para esta data."
                 actionLabel="Novo agendamento"
@@ -443,21 +443,21 @@ export default function AgendaPage() {
             </div>
 
             {loadError && (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-[#5c4a1f] dark:bg-[#241e12] dark:text-[#f5e6c8]">
                 Não foi possível carregar consultas: {loadError}.
               </div>
             )}
 
             {emptyWeek && !hideEmptyHint && (
-              <div className="mt-4 flex items-center gap-3 rounded-[8px] border border-[#D1E9FF] bg-[#F0F7FF] px-4 py-3 text-[12px] text-[#1E3A5F]">
-                <Info className="h-4 w-4 shrink-0 text-[#2563EB]" />
+              <div className="mt-4 flex items-center gap-3 rounded-[8px] border border-[#D1E9FF] bg-[#F0F7FF] px-4 py-3 text-[12px] text-[#1E3A5F] dark:border-[#2a2a2a] dark:bg-[#171717] dark:text-[#e5e5e5]">
+                <Info className="h-4 w-4 shrink-0 text-[#2563EB] dark:text-[#60a5fa]" />
                 <p className="flex-1">
                   Nenhuma consulta nesta semana. Clique em{" "}
-                  <strong className="text-[#1D4ED8]">Novo agendamento</strong> ou no{" "}
+                  <strong className="text-[#1D4ED8] dark:text-[#93c5fd]">Novo agendamento</strong> ou no{" "}
                   <strong>+</strong> na grade.
                 </p>
                 <button type="button" onClick={() => setHideEmptyHint(true)} aria-label="Fechar aviso">
-                  <X className="h-4 w-4 text-[#64748B]" />
+                  <X className="h-4 w-4 text-[#64748B] dark:text-[#a3a3a3]" />
                 </button>
               </div>
             )}

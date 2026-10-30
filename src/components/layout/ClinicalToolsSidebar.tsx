@@ -7,8 +7,8 @@ import {
   clinicalToolsItems,
 } from "@/lib/clinical-tools-nav"
 
-const navActive = "bg-[#E8F6EE] text-[#006B4D]"
-const navIdle = "text-[#1B2E26] hover:bg-[#F4F7F5]"
+const navActive = "bg-primary-light text-primary"
+const navIdle = "text-text hover:bg-surface-alt"
 
 const itemIcons: Record<string, LucideIcon> = {
   Medicamentos: Pill,
@@ -24,12 +24,12 @@ export default function ClinicalToolsSidebar() {
   )
 
   return (
-    <aside className="flex h-full w-[268px] shrink-0 flex-col overflow-hidden rounded-[16px] border border-[#E4EBE6] bg-white">
-      <div className="shrink-0 border-b border-[#E4EBE6] px-5 py-4">
-        <p className="select-none text-[17px] font-bold leading-tight text-[#12261E]">
+    <aside className="flex h-full w-[268px] shrink-0 flex-col overflow-hidden rounded-[16px] border border-border bg-surface">
+      <div className="shrink-0 border-b border-border px-5 py-4">
+        <p className="select-none text-[17px] font-bold leading-tight text-text">
           Ferramentas clínicas
         </p>
-        <p className="mt-0.5 text-[13px] text-[#6B7C74]">
+        <p className="mt-0.5 text-[13px] text-text-secondary">
           Medicamentos, CID e referências
         </p>
       </div>
@@ -52,7 +52,7 @@ export default function ClinicalToolsSidebar() {
                 <Icon
                   className={cn(
                     "h-[18px] w-[18px] shrink-0",
-                    isActive ? "text-[#006B4D]" : "text-[#5B6B63]"
+                    isActive ? "text-primary" : "text-text-secondary"
                   )}
                 />
                 {item.label}

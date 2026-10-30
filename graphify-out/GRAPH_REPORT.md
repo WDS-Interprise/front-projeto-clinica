@@ -1,16 +1,16 @@
-# Graph Report - front-projeto-clinica  (2026-09-07)
+# Graph Report - front-projeto-clinica  (2026-10-27)
 
 ## Corpus Check
-- 259 files · ~422,956 words
+- 259 files · ~424,280 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2077 nodes · 2046 edges · 301 communities (202 shown, 99 thin omitted)
+- 2081 nodes · 2056 edges · 301 communities (200 shown, 101 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4abf6cbe`
+- Built from commit: `02c6d68e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -194,8 +194,8 @@
 - ExtratoPage.tsx
 - ContatosPage.tsx
 - vite.config.ts
-- 15. Arquivos do projeto
-- 1. O que é e para quem serve
+- 8. API do backend: todos os endpoints
+- 5. Rotas do frontend
 - 1. Resumo executivo
 - 7. API backend
 - 2. Como o site navega (Frontend)
@@ -260,6 +260,8 @@
 - tsconfig.json
 - mcp.json
 - README.md
+- ValidarReceitaPage.tsx
+- LogsPage.tsx
 - 1. Assinatura SaaS (clínica paga o ClinMax)
 - 2. Parte legal no site hoje
 - company-legal.ts
@@ -294,7 +296,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (301 total, 99 thin omitted)
+## Communities (301 total, 101 thin omitted)
 
 ### Community 0 - "Processo: médico atende o paciente"
 Cohesion: 0.04
@@ -389,8 +391,8 @@ Cohesion: 0.19
 Nodes (11): ACCOUNT_TILE_STYLES, accountInitials(), AccountsSummary(), COST_CENTER_ICON_STYLES, FinanceConfigPage(), formatBRL(), isTabId(), paymentMethodIcon() (+3 more)
 
 ### Community 23 - "Protegidos (Bearer + `requirePlatformOwner`)"
-Cohesion: 0.12
-Nodes (16): 8. API do backend: todos os endpoints, `DELETE /users/:id`, `GET /clinics`, `GET /me`, `GET /metrics`, `GET /patients`, `GET /status`, `GET /users` (+8 more)
+Cohesion: 0.17
+Nodes (12): `DELETE /users/:id`, `GET /clinics`, `GET /me`, `GET /metrics`, `GET /patients`, `GET /users`, `GET /users/:id`, `POST /clinics` (+4 more)
 
 ### Community 24 - "format-bula-content.ts"
 Cohesion: 0.23
@@ -409,8 +411,8 @@ Cohesion: 0.15
 Nodes (12): APIs, Arquivar, não excluir, Arquivos, Cadastro administrativo (simples), Duplicidade (antes de criar), Fluxos, Modelo mental, Paciente já existe (+4 more)
 
 ### Community 28 - "landing-content.ts"
-Cohesion: 0.17
-Nodes (11): LANDING_FEATURES, LANDING_FOOTER_BLURB, LANDING_FOOTER_COLUMNS, LANDING_HERO_TRUST, LANDING_NAV, LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL, LANDING_STEPS (+3 more)
+Cohesion: 0.18
+Nodes (10): LANDING_FEATURES, LANDING_FOOTER_BLURB, LANDING_FOOTER_COLUMNS, LANDING_HERO_TRUST, LANDING_NAV, LANDING_PLAN_FALLBACK, LANDING_SPECIALIST_EMAIL, LANDING_STEPS (+2 more)
 
 ### Community 29 - "medicamentos-preferences.ts"
 Cohesion: 0.31
@@ -437,8 +439,8 @@ Cohesion: 0.17
 Nodes (11): AgendaNote, Appointment, AppointmentProcedureLine, CreateAppointmentInput, Doctor, MedicalRecord, PanelMetrics, Patient (+3 more)
 
 ### Community 35 - "ClinMax Backoffice: inventário completo"
-Cohesion: 0.18
-Nodes (11): 13. Matriz funcional vs placeholder, 14. Lacunas, bugs e inconsistências, 16. Próximas fases sugeridas, 4. Arquitetura técnica, 5. Rotas do frontend, Arquivos principais, ClinMax Backoffice: inventário completo, Protegidas (exigem `backoffice_token`) (+3 more)
+Cohesion: 0.14
+Nodes (14): 13. Matriz funcional vs placeholder, 14. Lacunas, bugs e inconsistências, 15. Arquivos do projeto, 16. Próximas fases sugeridas, 1. O que é e para quem serve, 4. Arquitetura técnica, Arquivos principais, Backend (`back-projeto-clinica`) (+6 more)
 
 ### Community 36 - "14. Exemplos em terceira pessoa (fluxos reais)"
 Cohesion: 0.18
@@ -501,8 +503,8 @@ Cohesion: 0.28
 Nodes (5): canAccessOutrosItem(), canSeeSettingsNav(), OutrosItem, outrosItems, settingsNavHome()
 
 ### Community 51 - "theme.ts"
-Cohesion: 0.31
-Nodes (6): applyTheme(), applyThemeToDocument(), initTheme(), Theme, THEME_STORAGE_KEY, toggleTheme()
+Cohesion: 0.30
+Nodes (11): applyTheme(), applyThemeToDocument(), DEFAULT_THEME, getStoredTheme(), initTheme(), migrateDefaultTheme(), pushForcedLightTheme(), resolveTheme() (+3 more)
 
 ### Community 53 - "WhatsappPage.tsx"
 Cohesion: 0.28
@@ -868,13 +870,13 @@ Nodes (4): formatMoney(), parseMoneyInput(), PlanPriceEditor(), PlanRow
 Cohesion: 0.67
 Nodes (3): ExtratoPage(), formatCurrency(), typeLabels
 
-### Community 181 - "15. Arquivos do projeto"
-Cohesion: 0.67
-Nodes (3): 15. Arquivos do projeto, Backend (`back-projeto-clinica`), Frontend (`front-projeto-clinica`)
+### Community 181 - "8. API do backend: todos os endpoints"
+Cohesion: 0.50
+Nodes (4): 8. API do backend: todos os endpoints, `GET /status`, `POST /login`, Públicos
 
-### Community 182 - "1. O que é e para quem serve"
+### Community 182 - "5. Rotas do frontend"
 Cohesion: 0.67
-Nodes (3): 1. O que é e para quem serve, O que aparece no menu mas ainda não funciona de verdade, O que ele permite hoje
+Nodes (3): 5. Rotas do frontend, Protegidas (exigem `backoffice_token`), Pública
 
 ### Community 183 - "1. Resumo executivo"
 Cohesion: 0.67
@@ -921,21 +923,21 @@ Cohesion: 0.50
 Nodes (4): apiNetworkErrorMessage(), apiUnavailableMessage(), getToken(), request()
 
 ## Knowledge Gaps
-- **1140 isolated node(s):** `21st`, `$schema`, `style`, `rsc`, `tsx` (+1135 more)
+- **1142 isolated node(s):** `21st`, `$schema`, `style`, `rsc`, `tsx` (+1137 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **99 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **101 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Inventario ponta a ponta do site (frontend + backend)` connect `Inventario ponta a ponta do site (frontend + backend)` to `9.2 App principal (pos-login)`, `4. Endpoints HTTP do backend (o que existe e como se usa)`, `16. Variaveis de ambiente`, `17. Estrutura de pastas`, `21. Matriz de permissoes completa`, `25. Financeiro da clinica e Clinmax Pay`, `33. Backoffice plataforma`, `7. O que nao funciona (checagem tecnica feita aqui)`, `8. Navegacao, layout e permissoes`, `11. Fluxos ponta a ponta (jornadas)`, `20. Modelo Prisma detalhado (todas as tabelas)`, `3. Integrações e sistemas relacionados (o que e e pra que serve)`, `15. Como rodar localmente`, `2. Como o site navega (Frontend)`, `6. Fluxos principais (como o produto funciona)`, `24. Pacientes e duplicidade`, `30. Seed e dados de desenvolvimento`, `32. Agenda: regras de negocio`, `26. Bot WhatsApp (arquitetura e regras)`, `28. Contexts, hooks e estado global (frontend)`, `23. Onboarding ramificado (completo)`, `31. Prescricoes e validacao publica`, `34. Erros de build e debitos tecnicos`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `ClinMax Backoffice: inventário completo` connect `ClinMax Backoffice: inventário completo` to `6. Layout e navegação`, `10. Modelos de banco usados`, `2. Como acessar`, `ClinMax Backoffice: estrutura atual`, `7. Telas: o que cada uma faz`, `Scripts`, `3. Autenticação e segurança`, `15. Arquivos do projeto`, `1. O que é e para quem serve`, `Protegidos (Bearer + `requirePlatformOwner`)`, `9. Métricas do dashboard: real vs simulado`, `12. Fluxos de usuário`?**
+- **Why does `ClinMax Backoffice: inventário completo` connect `ClinMax Backoffice: inventário completo` to `6. Layout e navegação`, `10. Modelos de banco usados`, `2. Como acessar`, `ClinMax Backoffice: estrutura atual`, `7. Telas: o que cada uma faz`, `Scripts`, `3. Autenticação e segurança`, `8. API do backend: todos os endpoints`, `5. Rotas do frontend`, `9. Métricas do dashboard: real vs simulado`, `12. Fluxos de usuário`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `ClinMax Backoffice: estrutura atual` connect `ClinMax Backoffice: estrutura atual` to `9. Arquivos principais`, `10. O que ainda não existe`, `3. Autenticação`, `4. Shell: layout, menu e scroll`, `6. Visão geral (dashboard)`, `1. Resumo executivo`, `7. API backend`, `5. Seções do menu`?**
+- **Why does `4. Endpoints HTTP do backend (o que existe e como se usa)` connect `4. Endpoints HTTP do backend (o que existe e como se usa)` to `Inventario ponta a ponta do site (frontend + backend)`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `21st`, `$schema`, `style` to the rest of the system?**
-  _1140 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1142 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Processo: médico atende o paciente` be split into smaller, more focused modules?**
   _Cohesion score 0.04081632653061224 - nodes in this community are weakly interconnected._
 - **Should `api.ts` be split into smaller, more focused modules?**

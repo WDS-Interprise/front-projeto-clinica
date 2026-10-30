@@ -4,8 +4,8 @@ import { useTheme } from "@/context/ThemeContext"
 import type { Theme } from "@/lib/theme"
 
 const options: { value: Theme; label: string; description: string; Icon: typeof Sun }[] = [
-  { value: "light", label: "Claro", description: "Fundo claro e alto contraste", Icon: Sun },
-  { value: "dark", label: "Escuro", description: "Reduz brilho em ambientes com pouca luz", Icon: Moon },
+  { value: "dark", label: "Escuro", description: "Padrão. Preto e cinza", Icon: Moon },
+  { value: "light", label: "Claro", description: "Fundo claro com contraste azul", Icon: Sun },
 ]
 
 export default function ThemeAppearanceCard({ hideHeader = false }: { hideHeader?: boolean }) {

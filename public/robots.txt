@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /backoffice
+Disallow: /dashboard
+Disallow: /agenda
+Disallow: /pacientes
+Disallow: /prontuario
+Disallow: /atendimento
+Disallow: /prescricoes
+Disallow: /configuracoes
+Disallow: /gestao
+Disallow: /mensagens
+Disallow: /outros
+Disallow: /checkout
+
+Sitemap: https://clinmax.com.br/sitemap.xml

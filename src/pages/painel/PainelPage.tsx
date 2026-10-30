@@ -26,9 +26,8 @@ import { Button } from "@/components/ui/button"
 import type { PanelMetrics, TodayPatientSlot } from "@/types"
 import { cn } from "@/lib/utils"
 
-const MINT = "#E8F6EE"
-const GREEN = "#007D5C"
-const TEAL = "#14B8A6"
+const GREEN = "#2563EB"
+const TEAL = "#38BDF8"
 
 function formatPct(n: number) {
   const abs = Math.abs(n)
@@ -69,7 +68,7 @@ function Trend({
       className={cn(
         "mt-2 flex items-center gap-1 text-[12px] font-medium",
         value === 0 && "text-[#8A9A90]",
-        value !== 0 && (good ? "text-emerald-600" : "text-red-500")
+        value !== 0 && (good ? "text-blue-500" : "text-red-500")
       )}
     >
       {value !== 0 && <Icon className="h-3.5 w-3.5" />}
@@ -82,17 +81,17 @@ function Trend({
 function EmptyDayIllustration() {
   return (
     <svg viewBox="0 0 160 140" className="mx-auto h-32 w-32" aria-hidden>
-      <rect x="38" y="28" width="84" height="88" rx="10" fill="#F3F7F4" stroke="#C5D9CC" strokeWidth="2" />
-      <rect x="38" y="28" width="84" height="22" rx="10" fill="#D8EDE2" />
-      <rect x="38" y="40" width="84" height="10" fill="#D8EDE2" />
-      <circle cx="58" cy="34" r="3.5" fill="#007D5C" />
-      <circle cx="102" cy="34" r="3.5" fill="#007D5C" />
-      <rect x="52" y="62" width="12" height="10" rx="2" fill="#C5D9CC" />
-      <rect x="74" y="62" width="12" height="10" rx="2" fill="#C5D9CC" />
-      <rect x="96" y="62" width="12" height="10" rx="2" fill="#C5D9CC" />
-      <rect x="52" y="80" width="12" height="10" rx="2" fill="#C5D9CC" />
-      <rect x="74" y="80" width="12" height="10" rx="2" fill="#C5D9CC" />
-      <circle cx="118" cy="108" r="22" fill="#007D5C" />
+      <rect x="38" y="28" width="84" height="88" rx="10" fill="var(--painel-paper, #F3F7F4)" stroke="var(--painel-line, #C5D9CC)" strokeWidth="2" />
+      <rect x="38" y="28" width="84" height="22" rx="10" fill="var(--painel-paper-soft, #BFDBFE)" />
+      <rect x="38" y="40" width="84" height="10" fill="var(--painel-paper-soft, #BFDBFE)" />
+      <circle cx="58" cy="34" r="3.5" fill="#2563EB" />
+      <circle cx="102" cy="34" r="3.5" fill="#2563EB" />
+      <rect x="52" y="62" width="12" height="10" rx="2" fill="var(--painel-line, #C5D9CC)" />
+      <rect x="74" y="62" width="12" height="10" rx="2" fill="var(--painel-line, #C5D9CC)" />
+      <rect x="96" y="62" width="12" height="10" rx="2" fill="var(--painel-line, #C5D9CC)" />
+      <rect x="52" y="80" width="12" height="10" rx="2" fill="var(--painel-line, #C5D9CC)" />
+      <rect x="74" y="80" width="12" height="10" rx="2" fill="var(--painel-line, #C5D9CC)" />
+      <circle cx="118" cy="108" r="22" fill="#2563EB" />
       <path d="M108 108.5 115 115.5 129 100.5" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -101,13 +100,13 @@ function EmptyDayIllustration() {
 function WelcomeIllustration() {
   return (
     <svg viewBox="0 0 220 140" className="h-[118px] w-[180px] shrink-0" aria-hidden>
-      <rect x="28" y="18" width="148" height="96" rx="10" fill="#1F3D32" />
-      <rect x="36" y="26" width="132" height="72" rx="4" fill="#F7FBFA" />
-      <path d="M48 78 C68 58 88 86 108 62 C128 40 148 70 160 52" fill="none" stroke="#2ECC71" strokeWidth="3" strokeLinecap="round" />
-      <rect x="48" y="34" width="28" height="8" rx="2" fill="#D8EDE2" />
-      <rect x="80" y="34" width="18" height="8" rx="2" fill="#BFE3D0" />
-      <rect x="86" y="108" width="32" height="8" rx="2" fill="#1F3D32" />
-      <rect x="68" y="116" width="68" height="8" rx="3" fill="#C5D9CC" />
+      <rect x="28" y="18" width="148" height="96" rx="10" fill="#1E3A5F" />
+      <rect x="36" y="26" width="132" height="72" rx="4" fill="var(--painel-screen, #F7FBFA)" />
+      <path d="M48 78 C68 58 88 86 108 62 C128 40 148 70 160 52" fill="none" stroke="#3B82F6" strokeWidth="3" strokeLinecap="round" />
+      <rect x="48" y="34" width="28" height="8" rx="2" fill="var(--painel-paper-soft, #BFDBFE)" />
+      <rect x="80" y="34" width="18" height="8" rx="2" fill="var(--painel-chip, #93C5FD)" />
+      <rect x="86" y="108" width="32" height="8" rx="2" fill="#1E3A5F" />
+      <rect x="68" y="116" width="68" height="8" rx="3" fill="var(--painel-line, #93C5FD)" />
     </svg>
   )
 }
@@ -119,7 +118,7 @@ function Donut({ novos, recorrentes }: { novos: number; recorrentes: number }) {
   const novosLen = (novos / total) * c
   return (
     <svg viewBox="0 0 120 120" className="h-[140px] w-[140px]" aria-hidden>
-      <circle cx="60" cy="60" r={r} fill="none" stroke="#E6F4EC" strokeWidth="16" />
+      <circle cx="60" cy="60" r={r} fill="none" stroke="var(--painel-line, #E6F4EC)" strokeWidth="16" />
       <circle
         cx="60"
         cy="60"
@@ -221,7 +220,7 @@ export default function PainelPage() {
           <h2 className="text-[15px] font-semibold text-[#1B2E26]">Pacientes do dia</h2>
           <Link
             to="/agenda"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#007D5C] hover:bg-[#E8F6EE]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#2563EB] hover:bg-[#DBEAFE]"
             aria-label="Abrir agenda"
           >
             <CalendarDays className="h-4 w-4" />
@@ -243,10 +242,10 @@ export default function PainelPage() {
               <Link
                 key={p.id}
                 to={p.patientId ? `/prontuario/${p.patientId}` : "#"}
-                className="block rounded-xl border border-[#E2EBE5] p-3 transition-colors hover:border-[#007D5C]/30 hover:bg-[#E8F6EE]/50"
+                className="block rounded-xl border border-[#E2EBE5] p-3 transition-colors hover:border-[#2563EB]/30 hover:bg-[#DBEAFE]/50"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-sm font-medium text-[#007D5C]">{p.time}</span>
+                  <span className="font-mono text-sm font-medium text-[#2563EB]">{p.time}</span>
                   <Badge status={p.status.toLowerCase() as "scheduled"} />
                 </div>
                 <p className="mt-1 truncate text-sm font-medium text-[#1B2E26]">
@@ -257,12 +256,12 @@ export default function PainelPage() {
           </div>
         </div>
 
-        <div className="m-4 rounded-xl p-3.5" style={{ background: MINT }}>
-          <p className="flex items-center gap-1.5 text-[12px] font-semibold text-[#007D5C]">
+        <div className="m-4 rounded-xl border border-transparent p-3.5 dark:border-[#2a2a2a]" style={{ background: "var(--painel-banner, #DBEAFE)" }}>
+          <p className="flex items-center gap-1.5 text-[12px] font-semibold text-[#2563EB]">
             <Lightbulb className="h-3.5 w-3.5" />
             Dica ClinMax
           </p>
-          <p className="mt-1.5 text-[12px] leading-5 text-[#3D5A4C]">
+          <p className="mt-1.5 text-[12px] leading-5 text-[#3D5A4C] dark:text-[#a3a3a3]">
             Mantenha sua agenda atualizada para oferecer a melhor experiência aos seus pacientes.
           </p>
         </div>
@@ -270,16 +269,16 @@ export default function PainelPage() {
 
       <div className="min-w-0 flex-1 overflow-auto p-5 lg:p-7">
         <div
-          className="flex items-center justify-between gap-6 rounded-2xl px-6 py-5"
-          style={{ background: MINT }}
+          className="flex items-center justify-between gap-6 rounded-2xl border border-transparent px-6 py-5 dark:border-[#2a2a2a]"
+          style={{ background: "var(--painel-banner, #DBEAFE)" }}
         >
           <div className="flex min-w-0 items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-              <Activity className="h-6 w-6 text-[#007D5C]" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface shadow-sm dark:bg-[#262626] dark:shadow-none">
+              <Activity className="h-6 w-6 text-[#2563EB]" />
             </div>
             <div>
               <p className="text-[17px] font-semibold text-[#1B2E26]">Bem-vindo ao ClinMax! 👋</p>
-              <p className="mt-0.5 text-[13px] text-[#4A6356]">
+              <p className="mt-0.5 text-[13px] text-[#4A6356] dark:text-[#a3a3a3]">
                 Aqui você acompanha em tempo real o desempenho da sua clínica.
               </p>
             </div>
@@ -299,7 +298,7 @@ export default function PainelPage() {
         </div>
 
         {metrics?.prescriptions && !metrics.prescriptions.whatsappConnected && (
-          <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-950">
+          <div className="mt-5 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-950 dark:border-[#5c4a1f] dark:bg-[#241e12] dark:text-[#f5e6c8]">
             WhatsApp da clínica está desconectado.
             {metrics.prescriptions.sharesPending > 0
               ? ` Há ${metrics.prescriptions.sharesPending} envio(s) de receita pendente(s).`
@@ -318,7 +317,7 @@ export default function PainelPage() {
             >
               <div className="flex items-start justify-between">
                 <p className="text-[13px] text-[#6B7C73]">Receitas hoje</p>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F6EE] text-[#007D5C]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#2563EB] dark:bg-[#1e3a5f]">
                   <FileText className="h-5 w-5" />
                 </div>
               </div>
@@ -365,7 +364,7 @@ export default function PainelPage() {
         )}
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {loading && !metrics}
+          {loading && !metrics
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-[132px] animate-pulse rounded-2xl bg-white shadow-sm" />
               ))
@@ -376,7 +375,7 @@ export default function PainelPage() {
                 >
                   <div className="flex items-start justify-between">
                     <p className="text-[13px] text-[#6B7C73]">{m.label}</p>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8F6EE] text-[#007D5C]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DBEAFE] text-[#2563EB] dark:bg-[#1e3a5f]">
                       <m.icon className="h-5 w-5" />
                     </div>
                   </div>
@@ -393,7 +392,7 @@ export default function PainelPage() {
             <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
               <section className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
                 <h3 className="flex items-center gap-2 text-[15px] font-semibold text-[#1B2E26]">
-                  <BarChart3 className="h-4 w-4 text-[#007D5C]" />
+                  <BarChart3 className="h-4 w-4 text-[#2563EB]" />
                   Pacientes novos x recorrentes (hoje)
                 </h3>
                 <div className="mt-4 flex flex-wrap items-center gap-8">
@@ -401,14 +400,14 @@ export default function PainelPage() {
                   <div className="min-w-[180px] space-y-4">
                     <div>
                       <p className="text-[28px] font-bold leading-none text-[#1B2E26]">{novos}</p>
-                      <p className="mt-1 text-[13px] font-medium text-[#007D5C]">
+                      <p className="mt-1 text-[13px] font-medium text-[#2563EB]">
                         Novos ({((novos / mixTotal) * 100).toFixed(1).replace(".", ",")}%)
                       </p>
                       <Trend value={metrics.newVsReturning.newChange ?? 0} />
                     </div>
                     <div>
                       <p className="text-[28px] font-bold leading-none text-[#1B2E26]">{recorrentes}</p>
-                      <p className="mt-1 text-[13px] font-medium text-[#0D9488]">
+                      <p className="mt-1 text-[13px] font-medium text-[#38BDF8]">
                         Recorrentes ({((recorrentes / mixTotal) * 100).toFixed(1).replace(".", ",")}%)
                       </p>
                       <Trend value={metrics.newVsReturning.returningChange ?? 0} />
@@ -420,7 +419,7 @@ export default function PainelPage() {
               <section className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-[15px] font-semibold text-[#1B2E26]">
-                    <Stethoscope className="h-4 w-4 text-[#007D5C]" />
+                    <Stethoscope className="h-4 w-4 text-[#2563EB]" />
                     Pacientes por convênio (hoje)
                   </h3>
                   <span className="inline-flex items-center gap-1 text-[12px] text-[#6B7C73]">
@@ -442,7 +441,7 @@ export default function PainelPage() {
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-[#EEF4F0]">
                             <div
-                              className="h-full rounded-full bg-[#2ECC71]"
+                              className="h-full rounded-full bg-[#3B82F6]"
                               style={{ width: `${Math.max(pct, item.count ? 4 : 0)}%` }}
                             />
                           </div>
@@ -453,7 +452,7 @@ export default function PainelPage() {
                 </div>
                 <Link
                   to="/gestao/relatorios"
-                  className="mt-5 inline-flex items-center gap-1 text-[13px] font-medium text-[#007D5C] hover:underline"
+                  className="mt-5 inline-flex items-center gap-1 text-[13px] font-medium text-[#2563EB] hover:underline"
                 >
                   Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
@@ -464,7 +463,7 @@ export default function PainelPage() {
               <section className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-[15px] font-semibold text-[#1B2E26]">
-                    <Stethoscope className="h-4 w-4 text-[#007D5C]" />
+                    <Stethoscope className="h-4 w-4 text-[#2563EB]" />
                     Procedimentos (hoje)
                   </h3>
                   <span className="inline-flex items-center gap-1 text-[12px] text-[#6B7C73]">
@@ -486,7 +485,7 @@ export default function PainelPage() {
                         </span>
                         <div className="h-2 overflow-hidden rounded-full bg-[#EEF4F0]">
                           <div
-                            className="h-full rounded-full bg-[#2ECC71]"
+                            className="h-full rounded-full bg-[#3B82F6]"
                             style={{ width: `${Math.max(pct, p.count ? 6 : 0)}%` }}
                           />
                         </div>
@@ -496,7 +495,7 @@ export default function PainelPage() {
                 </div>
                 <Link
                   to="/gestao/relatorios-atendimento"
-                  className="mt-5 inline-flex items-center gap-1 text-[13px] font-medium text-[#007D5C] hover:underline"
+                  className="mt-5 inline-flex items-center gap-1 text-[13px] font-medium text-[#2563EB] hover:underline"
                 >
                   Ver relatório completo <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
@@ -505,10 +504,10 @@ export default function PainelPage() {
               <section className="rounded-2xl border border-[#E8EEEA] bg-white p-5 shadow-[0_4px_16px_rgba(16,40,28,0.05)]">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-[15px] font-semibold text-[#1B2E26]">
-                    <CalendarDays className="h-4 w-4 text-[#007D5C]" />
+                    <CalendarDays className="h-4 w-4 text-[#2563EB]" />
                     Resumo do período
                   </h3>
-                  <span className="inline-flex items-center gap-1 rounded-lg border border-[#E2EBE5] px-2.5 py-1 text-[12px] text-[#4A6356]">
+                  <span className="inline-flex items-center gap-1 rounded-lg border border-[#E2EBE5] px-2.5 py-1 text-[12px] text-[#4A6356] dark:text-[#a3a3a3]">
                     Esta semana <ChevronDown className="h-3.5 w-3.5" />
                   </span>
                 </div>
@@ -559,7 +558,7 @@ export default function PainelPage() {
                 </div>
                 <Link
                   to="/gestao/financas"
-                  className="mt-6 inline-flex items-center gap-1 text-[13px] font-medium text-[#007D5C] hover:underline"
+                  className="mt-6 inline-flex items-center gap-1 text-[13px] font-medium text-[#2563EB] hover:underline"
                 >
                   Ver relatório financeiro <ArrowRight className="h-3.5 w-3.5" />
                 </Link>

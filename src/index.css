@@ -3,76 +3,76 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* shadcn / 21st.dev tokens, bridged to ClinicHub theme */
+/* shadcn / 21st.dev tokens, bridged to ClinMax theme */
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.985 0.002 247.8);
-  --foreground: oklch(0.208 0.042 265.8);
+  --background: oklch(0.97 0.02 255);
+  --foreground: oklch(0.22 0.04 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.208 0.042 265.8);
+  --card-foreground: oklch(0.22 0.04 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.208 0.042 265.8);
-  --primary: oklch(0.685 0.169 232.7);
-  --primary-foreground: oklch(0.985 0.002 247.8);
-  --secondary: oklch(0.585 0.233 277.1);
-  --secondary-foreground: oklch(0.985 0.002 247.8);
-  --muted: oklch(0.968 0.007 247.9);
-  --muted-foreground: oklch(0.554 0.046 257.4);
-  --accent: oklch(0.704 0.14 182.5);
-  --accent-foreground: oklch(0.208 0.042 265.8);
+  --popover-foreground: oklch(0.22 0.04 260);
+  --primary: oklch(0.5 0.2 262);
+  --primary-foreground: oklch(0.985 0.01 255);
+  --secondary: oklch(0.55 0.18 255);
+  --secondary-foreground: oklch(0.985 0.01 255);
+  --muted: oklch(0.95 0.02 255);
+  --muted-foreground: oklch(0.45 0.04 255);
+  --accent: oklch(0.55 0.16 250);
+  --accent-foreground: oklch(0.985 0.01 255);
   --destructive: oklch(0.637 0.237 25.3);
-  --destructive-foreground: oklch(0.985 0.002 247.8);
-  --border: oklch(0.929 0.013 255.5);
-  --input: oklch(0.929 0.013 255.5);
-  --ring: oklch(0.685 0.169 232.7);
-  --chart-1: oklch(0.685 0.169 232.7);
-  --chart-2: oklch(0.585 0.233 277.1);
-  --chart-3: oklch(0.704 0.14 182.5);
+  --destructive-foreground: oklch(0.985 0.01 255);
+  --border: oklch(0.88 0.03 255);
+  --input: oklch(0.88 0.03 255);
+  --ring: oklch(0.5 0.2 262);
+  --chart-1: oklch(0.5 0.2 262);
+  --chart-2: oklch(0.55 0.18 255);
+  --chart-3: oklch(0.65 0.14 230);
   --chart-4: oklch(0.723 0.219 149.6);
   --chart-5: oklch(0.769 0.188 70.1);
-  --sidebar: oklch(0.985 0.002 247.8);
-  --sidebar-foreground: oklch(0.208 0.042 265.8);
-  --sidebar-primary: oklch(0.685 0.169 232.7);
-  --sidebar-primary-foreground: oklch(0.985 0.002 247.8);
-  --sidebar-accent: oklch(0.968 0.007 247.9);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.8);
-  --sidebar-border: oklch(0.929 0.013 255.5);
-  --sidebar-ring: oklch(0.685 0.169 232.7);
+  --sidebar: oklch(0.97 0.02 255);
+  --sidebar-foreground: oklch(0.22 0.04 260);
+  --sidebar-primary: oklch(0.5 0.2 262);
+  --sidebar-primary-foreground: oklch(0.985 0.01 255);
+  --sidebar-accent: oklch(0.93 0.03 255);
+  --sidebar-accent-foreground: oklch(0.35 0.12 262);
+  --sidebar-border: oklch(0.88 0.03 255);
+  --sidebar-ring: oklch(0.5 0.2 262);
 }
 
 html.dark {
-  --background: oklch(0.208 0.042 265.8);
-  --foreground: oklch(0.968 0.007 247.9);
-  --card: oklch(0.279 0.041 260.3);
-  --card-foreground: oklch(0.968 0.007 247.9);
-  --popover: oklch(0.279 0.041 260.3);
-  --popover-foreground: oklch(0.968 0.007 247.9);
-  --primary: oklch(0.685 0.169 232.7);
-  --primary-foreground: oklch(0.208 0.042 265.8);
-  --secondary: oklch(0.585 0.233 277.1);
-  --secondary-foreground: oklch(0.968 0.007 247.9);
-  --muted: oklch(0.279 0.041 260.3);
-  --muted-foreground: oklch(0.704 0.04 256.8);
-  --accent: oklch(0.704 0.14 182.5);
-  --accent-foreground: oklch(0.968 0.007 247.9);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.96 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.96 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.96 0 0);
+  --primary: oklch(0.62 0.19 258);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.28 0 0);
+  --secondary-foreground: oklch(0.96 0 0);
+  --muted: oklch(0.24 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(0.55 0.14 255);
+  --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.637 0.237 25.3);
-  --destructive-foreground: oklch(0.968 0.007 247.9);
-  --border: oklch(0.372 0.044 257.3);
-  --input: oklch(0.372 0.044 257.3);
-  --ring: oklch(0.685 0.169 232.7);
-  --chart-1: oklch(0.685 0.169 232.7);
-  --chart-2: oklch(0.585 0.233 277.1);
-  --chart-3: oklch(0.704 0.14 182.5);
+  --destructive-foreground: oklch(0.96 0 0);
+  --border: oklch(0.32 0 0);
+  --input: oklch(0.32 0 0);
+  --ring: oklch(0.62 0.19 258);
+  --chart-1: oklch(0.62 0.19 258);
+  --chart-2: oklch(0.7 0.12 250);
+  --chart-3: oklch(0.55 0.08 250);
   --chart-4: oklch(0.723 0.219 149.6);
   --chart-5: oklch(0.769 0.188 70.1);
-  --sidebar: oklch(0.208 0.042 265.8);
-  --sidebar-foreground: oklch(0.968 0.007 247.9);
-  --sidebar-primary: oklch(0.685 0.169 232.7);
-  --sidebar-primary-foreground: oklch(0.208 0.042 265.8);
-  --sidebar-accent: oklch(0.279 0.041 260.3);
-  --sidebar-accent-foreground: oklch(0.968 0.007 247.9);
-  --sidebar-border: oklch(0.372 0.044 257.3);
-  --sidebar-ring: oklch(0.685 0.169 232.7);
+  --sidebar: oklch(0.12 0 0);
+  --sidebar-foreground: oklch(0.96 0 0);
+  --sidebar-primary: oklch(0.62 0.19 258);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.24 0.03 255);
+  --sidebar-accent-foreground: oklch(0.85 0.08 255);
+  --sidebar-border: oklch(0.32 0 0);
+  --sidebar-ring: oklch(0.62 0.19 258);
 }
 
 @theme inline {
@@ -115,29 +115,40 @@ html.dark {
 }
 
 @theme {
-  --color-primary: #0ea5e9;
-  --color-primary-dark: #0284c7;
-  --color-primary-light: #e0f2fe;
-  --color-secondary: #6366f1;
-  --color-accent: #14b8a6;
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #1e40af;
+  --color-primary-light: #dbeafe;
+  --color-secondary: #2563eb;
+  --color-accent: #0284c7;
   --color-surface: #ffffff;
-  --color-surface-alt: #f8fafc;
-  --color-border: #e2e8f0;
+  --color-surface-alt: #eef4ff;
+  --color-border: #c5d4e8;
   --color-text: #0f172a;
-  --color-text-secondary: #64748b;
+  --color-text-secondary: #475569;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 }
 
 html.dark {
-  --color-primary-light: #0c4a6e;
-  --color-surface: #1e293b;
-  --color-surface-alt: #0f172a;
-  --color-border: #334155;
-  --color-text: #f1f5f9;
-  --color-text-secondary: #94a3b8;
+  --painel-banner: #171717;
+  --painel-paper: #262626;
+  --painel-paper-soft: #333333;
+  --painel-line: #3f3f46;
+  --painel-screen: #141414;
+  --painel-chip: #3f3f46;
+  --color-primary: #3b82f6;
+  --color-primary-dark: #60a5fa;
+  --color-primary-light: #1e3a5f;
+  --color-secondary: #60a5fa;
+  --color-accent: #38bdf8;
+  --color-surface: #171717;
+  --color-surface-alt: #0a0a0a;
+  --color-border: #2a2a2a;
+  --color-text: #f5f5f5;
+  --color-text-secondary: #a3a3a3;
   color-scheme: dark;
+  background-color: #0a0a0a;
 }
 
 html {
@@ -145,7 +156,7 @@ html {
   font-size: 100%;
   height: 100%;
   zoom: 0.9;
-  background-color: #f8fafc;
+  background-color: #eef4ff;
 }
 
 @supports not (zoom: 1) {
@@ -258,7 +269,7 @@ html.dark select:not([multiple]):not([size]) {
 }
 
 html.dark * {
-  scrollbar-color: #475569 transparent;
+  scrollbar-color: #3f3f46 transparent;
 }
 
 @keyframes authIconFloatUp {
@@ -476,19 +487,6 @@ html.dark * {
     animation: none;
   }
 
-  .landing-logo-track {
-    animation: none;
-  }
-
-  .landing-marquee-row {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .landing-marquee-row::-webkit-scrollbar {
-    display: none;
-  }
-
   .landing-reveal {
     opacity: 1;
     transform: none;
@@ -522,61 +520,6 @@ html.dark * {
   font-family: var(--font-landing-body);
 }
 
-.landing-logo-loop {
-  width: 100%;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-}
-
-.landing-logo-track {
-  display: flex;
-  align-items: center;
-  gap: 44px;
-  width: max-content;
-  margin: 0;
-  padding: 8px 22px;
-  list-style: none;
-  animation: landingLogoScroll 26s linear infinite;
-}
-
-.landing-logo-loop:hover .landing-logo-track {
-  animation-play-state: paused;
-}
-
-@keyframes landingLogoScroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.landing-logo-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-  color: #8b96a5;
-  cursor: default;
-  transition: transform 0.24s cubic-bezier(0.3, 0.9, 0.4, 1), color 0.24s ease;
-}
-
-.landing-logo-item:hover {
-  transform: scale(1.08);
-  color: #00914a;
-}
-
-.landing-logo-item svg {
-  width: 21px;
-  height: 21px;
-}
-
-.landing-logo-item span {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
 @keyframes onboardingFadeIn {
   from {
     opacity: 0;
@@ -601,4 +544,489 @@ html.dark * {
 
 .onboarding-step-reveal {
   animation: onboardingStepReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+}
+
+/* Tema principal: o verde da marca vira contraste azul. */
+html:not(.dark) .bg-\[\#006B4D\],
+html:not(.dark) .bg-\[\#005840\],
+html:not(.dark) .bg-\[\#005a41\],
+html:not(.dark) .bg-\[\#008069\],
+html:not(.dark) .bg-\[\#006d5b\],
+html:not(.dark) .bg-\[\#00915c\],
+html:not(.dark) .bg-\[\#00915d\] {
+  background-color: #1d4ed8;
+}
+
+html:not(.dark) .hover\:bg-\[\#005840\]:hover,
+html:not(.dark) .hover\:bg-\[\#005a41\]:hover,
+html:not(.dark) .hover\:bg-\[\#007D5C\]:hover {
+  background-color: #1e40af;
+}
+
+html:not(.dark) .text-\[\#006B4D\],
+html:not(.dark) .text-\[\#007D5C\] {
+  color: #1d4ed8;
+}
+
+html:not(.dark) .hover\:text-\[\#006B4D\]:hover {
+  color: #1e40af;
+}
+
+html:not(.dark) .border-\[\#006B4D\],
+html:not(.dark) .focus\:border-\[\#006B4D\]:focus {
+  border-color: #1d4ed8;
+}
+
+html:not(.dark) .bg-\[\#E6F4F1\],
+html:not(.dark) .bg-\[\#E8F6EE\],
+html:not(.dark) .hover\:bg-\[\#E8F6EE\]:hover {
+  background-color: #dbeafe;
+}
+
+html:not(.dark) .bg-\[\#F4F7F5\],
+html:not(.dark) .bg-\[\#F6F8F7\],
+html:not(.dark) .bg-\[\#F7FAF8\],
+html:not(.dark) .bg-\[\#F8FAF9\],
+html:not(.dark) .bg-\[\#FAFCFB\] {
+  background-color: #eef4ff;
+}
+
+html:not(.dark) .border-\[\#E4EBE6\],
+html:not(.dark) .border-\[\#E6EEE9\],
+html:not(.dark) .border-\[\#E8EEEA\] {
+  border-color: #c5d4e8;
+}
+
+html:not(.dark) .ring-\[\#006B4D\]\/10,
+html:not(.dark) .ring-\[\#006B4D\]\/20,
+html:not(.dark) .ring-\[\#006B4D\]\/30,
+html:not(.dark) .focus\:ring-\[\#006B4D\]\/10:focus,
+html:not(.dark) .focus\:ring-\[\#006B4D\]\/20:focus {
+  --tw-ring-color: rgb(29 78 216 / 0.28);
+}
+
+/* Tema escuro padrao: preto e cinza, acento azul. Login fica de fora. */
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-white {
+  background-color: #141414;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-white\/90,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-white\/95,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-white\/95:hover {
+  background-color: rgb(20 20 20 / 0.96);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F4F7F5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F4F7F5\]\/50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F3F7F5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F6F8F7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F7FAF8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F8FAF9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F8FBF9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#FAFCFB\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F7FCF9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F4FBF7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F3FAF5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#F3F7F5\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#F4F7F5\]:hover {
+  background-color: #111111;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E4EBE6\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EEF2EF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EEF4F0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#D5DED8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#C5D0CA\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#C4CDC7\] {
+  background-color: #262626;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#12261E\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#0A1F44\] {
+  background-color: #0a0a0a;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#006B4D\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#005840\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#005a41\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#008069\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#007D5C\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#006d5b\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#00915c\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#00915d\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#1D4ED8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#2563EB\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#0284C7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#0EA5E9\] {
+  background-color: #2563eb;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E6F4F1\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F6EE\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F6EE\]\/50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F5EE\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F8EE\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F8F0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#D8F0E4\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EAF4FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EFF6FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F0F7FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F1F8FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F1FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F1F8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#E8F6EE\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#E8F6EE\]\/50:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#D8F0E4\]:hover {
+  background-color: #1e3a5f;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#12261E\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#1B2E26\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:text-\[\#12261E\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:text-\[\#1B2E26\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .fill-\[\#12261E\] {
+  color: #f5f5f5;
+  fill: #f5f5f5;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#6B7C74\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#6B7C73\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#8A9A90\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#5A6B64\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#5B6B63\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#5b6573\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .fill-\[\#8A9A90\] {
+  color: #a3a3a3;
+  fill: #a3a3a3;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#006B4D\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#007D5C\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#1D4ED8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#2B6CB0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:text-\[\#006B4D\]:hover {
+  color: #60a5fa;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#3D4F5F\] {
+  color: #d4d4d4;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E4EBE6\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E6EEE9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E8EEEA\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E2EBE5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#D5DED8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#D7E3DB\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#C5D0CA\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#C5D4CB\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#C5D9CC\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#EEF2EF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#F4F7F5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .divide-\[\#E4EBE6\] > :not(:last-child) {
+  border-color: #2e2e2e;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#006B4D\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .focus\:border-\[\#006B4D\]:focus,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#0284C7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#0EA5E9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#93C5FD\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#BFDBFE\] {
+  border-color: #3b82f6;
+}
+
+/* Landing fica clara, como antes. O escuro vale só no app logado. */
+html:has(.landing-page) {
+  color-scheme: light;
+  background-color: #f8fafc;
+  --color-primary: #0ea5e9;
+  --color-primary-dark: #0284c7;
+  --color-primary-light: #e0f2fe;
+  --color-secondary: #6366f1;
+  --color-accent: #14b8a6;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-secondary: #64748b;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+}
+
+/*
+ * Dark mode: pastéis claros do Tailwind e hexes claros restantes.
+ * Escopo: app logado. Login e landing ficam de fora.
+ */
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) {
+  --cm-surface: #141414;
+  --cm-surface-2: #1a1a1a;
+  --cm-surface-3: #222222;
+  --cm-warn-bg: #241e12;
+  --cm-warn-border: #5c4a1f;
+  --cm-warn-text: #f5e6c8;
+  --cm-danger-bg: #2a1414;
+  --cm-danger-border: #7f1d1d;
+  --cm-danger-text: #fecaca;
+  --cm-ok-bg: #12241a;
+  --cm-ok-border: #1f4d33;
+  --cm-ok-text: #bbf7d0;
+  --cm-info-bg: #111827;
+  --cm-info-border: #1e3a5f;
+  --cm-info-text: #bfdbfe;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-amber-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-amber-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-yellow-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-orange-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#FFF4E5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#FFF6E5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F6EEE8\] {
+  background-color: var(--cm-warn-bg);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-amber-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-amber-300,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-amber-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-yellow-200 {
+  border-color: var(--cm-warn-border);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-amber-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-amber-950,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-amber-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-yellow-700,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-yellow-800 {
+  color: var(--cm-warn-text);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-red-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-red-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-red-50:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#FDECEC\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#FEF2F2\] {
+  background-color: var(--cm-danger-bg);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-red-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-red-300 {
+  border-color: var(--cm-danger-border);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-red-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-red-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-red-950 {
+  color: var(--cm-danger-text);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-green-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-emerald-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#ECFDF5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#d1e7dd\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#d9fdd3\] {
+  background-color: var(--cm-ok-bg);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-green-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-emerald-200 {
+  border-color: var(--cm-ok-border);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-green-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-green-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-emerald-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-emerald-900 {
+  color: var(--cm-ok-text);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-blue-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-sky-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-indigo-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EAF4FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EFF6FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F0F7FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F1F8FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F1FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E8F1F8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EEF2F6\] {
+  background-color: var(--cm-info-bg);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-blue-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-sky-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-indigo-200 {
+  border-color: var(--cm-info-border);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-blue-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-blue-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-sky-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-indigo-800 {
+  color: var(--cm-info-text);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-slate-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-slate-50\/80,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-slate-100,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-slate-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-gray-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-zinc-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-neutral-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-stone-50,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F8FAFC\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f8fafc\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f0f2f5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f3f5f7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f4f6f8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f5f6f6\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f6f8fa\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#f7f8fa\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#e9edef\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#dfe5e7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#efeae2\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#E2E8F0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EEF4F0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#EDE7F6\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F1EDF6\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#F3E8FF\] {
+  background-color: var(--cm-surface-2);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-slate-50:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-slate-100:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-gray-50:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-zinc-50:hover {
+  background-color: var(--cm-surface-3);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-slate-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-slate-300,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-gray-200,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#CBD5E1\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E2E8F0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#e9edef\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#e6eaf0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#eef1f5\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#F1F5F9\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#DCE3EC\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#D5DEE7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E8EDF2\] {
+  border-color: #2e2e2e;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-slate-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-slate-800,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-slate-700,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-gray-900,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-gray-800 {
+  color: #f5f5f5;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-slate-600,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-slate-500,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-gray-600,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-gray-500 {
+  color: #a3a3a3;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .placeholder\:text-slate-400::placeholder,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .placeholder\:text-gray-400::placeholder {
+  color: #737373;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .shadow-sm,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .shadow,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .shadow-md,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .shadow-lg,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .shadow-xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.45);
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) input:not([type="checkbox"]):not([type="radio"]),
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) textarea,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) select {
+  color-scheme: dark;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#9AA89F\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .bg-\[\#C5D9CC\] {
+  background-color: #3f3f46;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) {
+  --apt-consulta-bg: #12241a;
+  --apt-consulta-border: #1f4d33;
+  --apt-consulta-accent: #34d399;
+  --apt-retorno-bg: #111827;
+  --apt-retorno-border: #1e3a5f;
+  --apt-retorno-accent: #60a5fa;
+  --apt-exame-bg: #1a1428;
+  --apt-exame-border: #3b2f5c;
+  --apt-exame-accent: #a78bfa;
+  --apt-tele-bg: #241e12;
+  --apt-tele-border: #5c4a1f;
+  --apt-tele-accent: #fbbf24;
+  --apt-block-bg: #1a1a1a;
+  --apt-block-border: #3f3f46;
+  --apt-block-accent: #94a3b8;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#334155\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#0F172A\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#0f172a\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#1E293B\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#1E3A5F\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#1E3A4C\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#111b21\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#0A1F44\] {
+  color: #f5f5f5;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#D1E9FF\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#BFDBFE\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#93C5FD\] {
+  border-color: #2a2a2a;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#64748B\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#64748b\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#475569\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#54656f\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#667781\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#8696a0\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#5b6573\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#3d4654\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#94A3B8\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .text-\[\#9AA89F\] {
+  color: #a3a3a3;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#F8FAFC\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#f5f6f6\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-\[\#e9edef\]:hover,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:bg-white\/70:hover {
+  background-color: #262626;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .placeholder\:text-\[\#8696a0\]::placeholder,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .placeholder\:text-\[\#8A9A90\]::placeholder {
+  color: #737373;
+}
+
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#DCE3EC\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#D5DEE7\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .border-\[\#E8EDF2\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .focus\:border-\[\#94A3B8\]:focus,
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .hover\:border-\[\#CBD5E1\]:hover {
+  border-color: #2e2e2e;
+}
+
+/* WhatsApp / mensagens: texto escuro em fundo claro */
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .wa-messenger .text-\[\#111b21\],
+html.dark:not(:has(.auth-page)):not(:has(.landing-page)) .wa-messenger .text-\[\#54656f\] {
+  color: #e5e5e5;
 }

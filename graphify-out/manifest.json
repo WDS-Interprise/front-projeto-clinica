@@ -18,8 +18,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1788716109.9358585,
-    "seen": 1788770444.023311,
+    "mtime": 1792282967.4354935,
+    "seen": 1793153863.6934676,
     "ast_hash": "64dc985a165ffbea9f4eafaae6587888",
     "semantic_hash": ""
   },
@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1788716109.9358585,
-    "seen": 1788770444.0233176,
-    "ast_hash": "222f399d0372e7a67f9c25ef88fa940e",
+    "mtime": 1792282967.4354935,
+    "seen": 1793153863.6934798,
+    "ast_hash": "537a0a19c5163883d6c66920dab5cbb9",
     "semantic_hash": ""
   },
   "src/components/PermissionRoute.tsx": {
@@ -114,8 +114,8 @@
     "semantic_hash": ""
   },
   "src/components/billing/PlanUsage.tsx": {
-    "mtime": 1788716109.9358585,
-    "seen": 1788770444.0233433,
+    "mtime": 1792282967.4354935,
+    "seen": 1793153863.6935253,
     "ast_hash": "b8eb9315f98f694227ba3434f5d86cf5",
     "semantic_hash": ""
   },
@@ -138,8 +138,8 @@
     "semantic_hash": ""
   },
   "src/components/clinical/ClinicalToolsNavDropdown.tsx": {
-    "mtime": 1788716109.9178612,
-    "seen": 1788770444.0233502,
+    "mtime": 1792282967.434501,
+    "seen": 1793153863.693537,
     "ast_hash": "ec704fc40db7fee53d0ed99a85e26373",
     "semantic_hash": ""
   },
@@ -156,8 +156,8 @@
     "semantic_hash": ""
   },
   "src/components/gestao/GestaoPageShell.tsx": {
-    "mtime": 1788716109.9228723,
-    "seen": 1788770444.0233555,
+    "mtime": 1792282967.434501,
+    "seen": 1793153863.693545,
     "ast_hash": "7a3a1f4ee6ebf56b0650def7b1bd3026",
     "semantic_hash": ""
   },
@@ -167,12 +167,6 @@
     "ast_hash": "d97a95bee8dd8845101298884c85867c",
     "semantic_hash": ""
   },
-  "src/components/landing/LandingMarquee.tsx": {
-    "mtime": 1787313023.6128802,
-    "seen": 1787314936.9653258,
-    "ast_hash": "7f2038b7d126d41d748133a18a2fc220",
-    "semantic_hash": ""
-  },
   "src/components/landing/LandingReveal.tsx": {
     "mtime": 1787313023.503882,
     "seen": 1787314936.965327,
@@ -180,9 +174,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/AppHeader.tsx": {
-    "mtime": 1788716109.9308574,
-    "seen": 1788770444.0233612,
-    "ast_hash": "92b2fcb9a9849226572e194f39f12769",
+    "mtime": 1793151664.8415647,
+    "seen": 1793153863.6935515,
+    "ast_hash": "bcea595985377c38fcc5954b9a1ad64c",
     "semantic_hash": ""
   },
   "src/components/layout/AppShell.tsx": {
@@ -210,15 +204,15 @@
     "semantic_hash": ""
   },
   "src/components/layout/ClinicalToolsSidebar.tsx": {
-    "mtime": 1787313023.486878,
-    "seen": 1787314936.9653335,
-    "ast_hash": "208f22abae13fbb76bda5dcefd60941f",
+    "mtime": 1793151664.8505633,
+    "seen": 1793153863.6935623,
+    "ast_hash": "f79291eebc71e6325076876582be9fac",
     "semantic_hash": ""
   },
   "src/components/layout/HeaderIconButton.tsx": {
-    "mtime": 1787313023.4588833,
-    "seen": 1787314936.9653344,
-    "ast_hash": "fa0404412120c28c723b012b4061e2a9",
+    "mtime": 1793151664.7345624,
+    "seen": 1793153863.693565,
+    "ast_hash": "e7ac608fea2c9b15e97f09d9154a4457",
     "semantic_hash": ""
   },
   "src/components/layout/Layout.tsx": {
@@ -240,9 +234,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/SettingsSidebar.tsx": {
-    "mtime": 1787313023.5148776,
-    "seen": 1787314936.9653387,
-    "ast_hash": "f28ace00a6c4b54ff95d9667d2f4fc4e",
+    "mtime": 1793151664.845557,
+    "seen": 1793153863.6935744,
+    "ast_hash": "7e3565d6011af4b44c97d9c1bd33acd6",
     "semantic_hash": ""
   },
   "src/components/layout/Sidebar.tsx": {
@@ -360,15 +354,15 @@
     "semantic_hash": ""
   },
   "src/components/prescricoes/PrescricaoPanel.tsx": {
-    "mtime": 1783982881.6411889,
-    "seen": 1787314936.9653609,
-    "ast_hash": "f6cb806846bfc998084a2f77b88bcb19",
+    "mtime": 1792140565.176,
+    "seen": 1793153863.693618,
+    "ast_hash": "4368ef63d6e46a7c10a04d30a1951917",
     "semantic_hash": ""
   },
   "src/components/prescricoes/PrescricaoStepAssinar.tsx": {
-    "mtime": 1788107172.8469796,
-    "seen": 1788770444.0234113,
-    "ast_hash": "1477b20a107df176765908c63c039532",
+    "mtime": 1792140565.3721845,
+    "seen": 1793153863.6936202,
+    "ast_hash": "337a62f58e6c01b02ae6b1072b6dac35",
     "semantic_hash": ""
   },
   "src/components/prescricoes/PrescricaoStepFinalizada.tsx": {
@@ -390,9 +384,9 @@
     "semantic_hash": ""
   },
   "src/components/prescricoes/SignatureStubModal.tsx": {
-    "mtime": 1788107172.8479812,
-    "seen": 1788770444.023418,
-    "ast_hash": "487982cbe942a2f5b8462371d83a73af",
+    "mtime": 1792140565.3711843,
+    "seen": 1793153863.693629,
+    "ast_hash": "b09eea6a285b2c250196937008676c13",
     "semantic_hash": ""
   },
   "src/components/prescricoes/VaccineFormModal.tsx": {
@@ -468,8 +462,8 @@
     "semantic_hash": ""
   },
   "src/components/routing/PlanFeatureRoute.tsx": {
-    "mtime": 1788716109.9158616,
-    "seen": 1788770444.0234408,
+    "mtime": 1792282967.434501,
+    "seen": 1793153863.693658,
     "ast_hash": "ded47c25ed1c68cb3b0bf488a9dc3831",
     "semantic_hash": ""
   },
@@ -486,9 +480,9 @@
     "semantic_hash": ""
   },
   "src/components/settings/ThemeAppearanceCard.tsx": {
-    "mtime": 1783982881.6551867,
-    "seen": 1787314936.9653838,
-    "ast_hash": "6d23e81c2f4805189318063a5b17230d",
+    "mtime": 1793151664.732561,
+    "seen": 1793153863.693665,
+    "ast_hash": "2b084ba55631e96342f95edd97dcd8fc",
     "semantic_hash": ""
   },
   "src/components/ui/ThemeToggle.tsx": {
@@ -666,8 +660,8 @@
     "semantic_hash": ""
   },
   "src/context/PlanFeatureContext.tsx": {
-    "mtime": 1788716109.9468641,
-    "seen": 1788770444.023495,
+    "mtime": 1792282967.4354935,
+    "seen": 1793153863.6937299,
     "ast_hash": "1c36ece93f942d4890fd0d5db483c4b3",
     "semantic_hash": ""
   },
@@ -738,9 +732,9 @@
     "semantic_hash": ""
   },
   "src/hooks/useForceLightTheme.ts": {
-    "mtime": 1784024033.8147268,
-    "seen": 1787314936.9654303,
-    "ast_hash": "ba147cc1f46556a33a2a468e79fe999d",
+    "mtime": 1793151664.7345624,
+    "seen": 1793153863.693759,
+    "ast_hash": "2a640c711be4f1e4e60bac0a51a5ca58",
     "semantic_hash": ""
   },
   "src/hooks/useInView.ts": {
@@ -756,8 +750,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useUnreadMessages.ts": {
-    "mtime": 1788716109.906852,
-    "seen": 1788770444.0235198,
+    "mtime": 1792282967.3234982,
+    "seen": 1793153863.6937795,
     "ast_hash": "d9627a1e1a82a2823fd1595e35ec786e",
     "semantic_hash": ""
   },
@@ -780,9 +774,9 @@
     "semantic_hash": ""
   },
   "src/lib/agenda-ui.ts": {
-    "mtime": 1787313023.4928844,
-    "seen": 1787314936.9654374,
-    "ast_hash": "ff85baf9983d61395111d83c5ae5b171",
+    "mtime": 1793153821.9740958,
+    "seen": 1793153863.6937885,
+    "ast_hash": "7eef7708e3f5b6523fdf56f2f8c6e2dd",
     "semantic_hash": ""
   },
   "src/lib/ai-permissions.ts": {
@@ -852,9 +846,9 @@
     "semantic_hash": ""
   },
   "src/lib/landing-content.ts": {
-    "mtime": 1788229134.705922,
-    "seen": 1788770444.023548,
-    "ast_hash": "5c746069f8c2da9639663b3ec3cf3ddb",
+    "mtime": 1792140859.5802188,
+    "seen": 1793153863.693816,
+    "ast_hash": "b55958c5ca1664e79c0086870f9ec8a0",
     "semantic_hash": ""
   },
   "src/lib/medicamentos-preferences.ts": {
@@ -864,9 +858,9 @@
     "semantic_hash": ""
   },
   "src/lib/nav-ui.ts": {
-    "mtime": 1787313023.6408803,
-    "seen": 1787314936.9654517,
-    "ast_hash": "2337b48af9547e41fdddc58fa91a11cd",
+    "mtime": 1793151664.727937,
+    "seen": 1793153863.6938217,
+    "ast_hash": "f14df4b60af9b435490f48c144d67865",
     "semantic_hash": ""
   },
   "src/lib/onboarding-flow.ts": {
@@ -912,9 +906,9 @@
     "semantic_hash": ""
   },
   "src/lib/theme.ts": {
-    "mtime": 1787313023.5568762,
-    "seen": 1787314936.9654603,
-    "ast_hash": "4e2727240d1a92f1c167080f458daddd",
+    "mtime": 1793151664.8505633,
+    "seen": 1793153863.6938367,
+    "ast_hash": "dc0f0a486a9c0b525751a57279785bdb",
     "semantic_hash": ""
   },
   "src/lib/utils.ts": {
@@ -930,8 +924,8 @@
     "semantic_hash": ""
   },
   "src/lib/whatsapp-unread.ts": {
-    "mtime": 1788716109.9308574,
-    "seen": 1788770444.0235717,
+    "mtime": 1792282967.434501,
+    "seen": 1793153863.693842,
     "ast_hash": "011e55021fa6e019edcc3eae82c4db22",
     "semantic_hash": ""
   },
@@ -972,9 +966,9 @@
     "semantic_hash": ""
   },
   "src/pages/LandingPage.tsx": {
-    "mtime": 1788229136.612261,
-    "seen": 1788770444.0235834,
-    "ast_hash": "a4c88db8cf01320017e79a96b3cf2424",
+    "mtime": 1793151664.7345624,
+    "seen": 1793153863.693854,
+    "ast_hash": "fc3a9b463065e135bc0beac9f236e5fb",
     "semantic_hash": ""
   },
   "src/pages/Login.tsx": {
@@ -1002,21 +996,21 @@
     "semantic_hash": ""
   },
   "src/pages/Register.tsx": {
-    "mtime": 1788716109.9148545,
-    "seen": 1788770444.0235913,
-    "ast_hash": "3c6ebf26dc82571be83be9d14e534155",
+    "mtime": 1793151664.7345624,
+    "seen": 1793153863.6938634,
+    "ast_hash": "5209f20a10b2f6dae48cec6fc5a8898b",
     "semantic_hash": ""
   },
   "src/pages/Settings.tsx": {
-    "mtime": 1783982881.6951995,
-    "seen": 1787314936.9654775,
-    "ast_hash": "a4c293d8bb61c6a1042900ab9ef5261c",
+    "mtime": 1792140852.0514443,
+    "seen": 1793153863.693865,
+    "ast_hash": "41b26d86d02b49c5d8a90ce083738c3d",
     "semantic_hash": ""
   },
   "src/pages/agenda/AgendaPage.tsx": {
-    "mtime": 1787313023.6178763,
-    "seen": 1787314936.9654784,
-    "ast_hash": "0768a10527a46d1389d0c317f96f275e",
+    "mtime": 1793153709.3578691,
+    "seen": 1793153863.6938665,
+    "ast_hash": "4380d14665a87a56dedb179330817e5b",
     "semantic_hash": ""
   },
   "src/pages/atendimento/AtendimentoPage.tsx": {
@@ -1128,9 +1122,9 @@
     "semantic_hash": ""
   },
   "src/pages/configuracoes/AparenciaPage.tsx": {
-    "mtime": 1787313023.5048852,
-    "seen": 1787314936.9654999,
-    "ast_hash": "4657c3acfde60676fb301caa1a5e657b",
+    "mtime": 1793151664.7345624,
+    "seen": 1793153863.6939054,
+    "ast_hash": "0da383f8b1d6e4819e70018445a4a18b",
     "semantic_hash": ""
   },
   "src/pages/configuracoes/CargosPage.tsx": {
@@ -1152,8 +1146,8 @@
     "semantic_hash": ""
   },
   "src/pages/configuracoes/FinanceConfigPage.tsx": {
-    "mtime": 1788716109.9318569,
-    "seen": 1788770444.0236444,
+    "mtime": 1792282967.434501,
+    "seen": 1793153863.693914,
     "ast_hash": "77c85b540f085c919d583d97272460d2",
     "semantic_hash": ""
   },
@@ -1188,9 +1182,9 @@
     "semantic_hash": ""
   },
   "src/pages/configuracoes/UsuarioFormPage.tsx": {
-    "mtime": 1787018446.4596548,
-    "seen": 1787314936.96551,
-    "ast_hash": "57ff7c5c8122e87aedc5bfc7df488962",
+    "mtime": 1792140850.9201863,
+    "seen": 1793153863.6939263,
+    "ast_hash": "b268f4b461a2f8d00d6d92a3bee79d0c",
     "semantic_hash": ""
   },
   "src/pages/configuracoes/UsuariosPage.tsx": {
@@ -1218,8 +1212,8 @@
     "semantic_hash": ""
   },
   "src/pages/gestao/FinancasPage.tsx": {
-    "mtime": 1788716109.9448593,
-    "seen": 1788770444.0236723,
+    "mtime": 1792282967.4354935,
+    "seen": 1793153863.6939363,
     "ast_hash": "122c13dcbc06e7623ad086fa31efe056",
     "semantic_hash": ""
   },
@@ -1242,9 +1236,9 @@
     "semantic_hash": ""
   },
   "src/pages/gestao/RelatoriosPage.tsx": {
-    "mtime": 1787018520.1011064,
-    "seen": 1787314936.9655192,
-    "ast_hash": "418469d25a9ee993312c27d85dee4847",
+    "mtime": 1792140565.3711843,
+    "seen": 1793153863.6939454,
+    "ast_hash": "36779e411251754770d53c2f11777cd9",
     "semantic_hash": ""
   },
   "src/pages/gestao/TissPage.tsx": {
@@ -1296,15 +1290,15 @@
     "semantic_hash": ""
   },
   "src/pages/outros/LogsPage.tsx": {
-    "mtime": 1783982881.724187,
-    "seen": 1787314936.9655282,
-    "ast_hash": "c405221d0ce4b28a54104c65d5751696",
+    "mtime": 1792140565.3721845,
+    "seen": 1793153863.693969,
+    "ast_hash": "33111fc947e1445503faa705e0511fea",
     "semantic_hash": ""
   },
   "src/pages/painel/PainelPage.tsx": {
-    "mtime": 1788117654.561585,
-    "seen": 1788770444.0237026,
-    "ast_hash": "cf7c148bbf9f76548342161607de4894",
+    "mtime": 1793153055.8859568,
+    "seen": 1793153863.693971,
+    "ast_hash": "104b98602ff717a03493df54f7a31f0c",
     "semantic_hash": ""
   },
   "src/pages/prescricoes/PrescricoesPage.tsx": {
@@ -1320,9 +1314,9 @@
     "semantic_hash": ""
   },
   "src/services/api.ts": {
-    "mtime": 1788225776.0922263,
-    "seen": 1788770444.023708,
-    "ast_hash": "a3339511961b406aa97031c0a2d8bdb0",
+    "mtime": 1792140565.3711843,
+    "seen": 1793153863.6939785,
+    "ast_hash": "adf0b7140672935c219f6ae43e3efc49",
     "semantic_hash": ""
   },
   "src/services/avatar-service.ts": {
@@ -1344,9 +1338,9 @@
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1787313023.5608795,
-    "seen": 1787314936.9655366,
-    "ast_hash": "da03601b1686389ce82c6ff3c5082841",
+    "mtime": 1792140565.3721845,
+    "seen": 1793153863.6939886,
+    "ast_hash": "6b73e63c63e109ec3d94dc2f0ec7a286",
     "semantic_hash": ""
   },
   "src/types/medicamento.ts": {
@@ -1368,9 +1362,9 @@
     "semantic_hash": ""
   },
   "src/types/prescription.ts": {
-    "mtime": 1783982881.734187,
-    "seen": 1787314936.9655406,
-    "ast_hash": "9b9bbd9d029a00d24075cbf52e2ff474",
+    "mtime": 1792140565.1769972,
+    "seen": 1793153863.6939995,
+    "ast_hash": "6123b53d654a49bbf18a5bac67ad8624",
     "semantic_hash": ""
   },
   "src/types/tuss.ts": {
@@ -1518,9 +1512,9 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1787313023.5528736,
-    "seen": 1787314936.9655664,
-    "ast_hash": "ad9cec96546a52c449e20add11945159",
+    "mtime": 1793151664.8505633,
+    "seen": 1793153863.6940658,
+    "ast_hash": "b0661d1537c86ed88fe10576f5e6c7a1",
     "semantic_hash": ""
   },
   "ChatGPT Image 14_07_2026, 06_54_14.png": {
@@ -1584,8 +1578,8 @@
     "semantic_hash": ""
   },
   "src/pages/legal/LegalPage.tsx": {
-    "mtime": 1788716109.9178612,
-    "seen": 1788770444.023687,
+    "mtime": 1792140565.1769972,
+    "seen": 1793153863.6939495,
     "ast_hash": "1b93d82138fdffe3e53a21f681a3eb33",
     "semantic_hash": ""
   },
@@ -1596,9 +1590,9 @@
     "semantic_hash": ""
   },
   "docs/clinica-e-legal.md": {
-    "mtime": 1788191405.5529306,
-    "seen": 1788770444.023751,
-    "ast_hash": "54da45b6c3e936ec5f7d1456957a9d17",
+    "mtime": 1792140862.403119,
+    "seen": 1793153863.694043,
+    "ast_hash": "4eef847f9045576fefd36b967bf3b545",
     "semantic_hash": ""
   },
   "docs/politicas.md": {
@@ -1617,6 +1611,12 @@
     "mtime": 1787333268.1670587,
     "seen": 1788770444.0237732,
     "ast_hash": "bd16b5f00b078864b5c1b52332e59c0a",
+    "semantic_hash": ""
+  },
+  "src/pages/public/ValidarReceitaPage.tsx": {
+    "mtime": 1792140565.298291,
+    "seen": 1793153863.6939769,
+    "ast_hash": "b18b847a050afee219b3e6b080488844",
     "semantic_hash": ""
   }
 }

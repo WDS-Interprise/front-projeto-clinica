@@ -21,7 +21,7 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input id="clinic-name" label="Nome da Clínica" defaultValue="ClinMax Centro Médico" />
+            <Input id="clinic-name" label="Nome da Clínica" defaultValue="ClinMax" />
             <Input id="clinic-cnpj" label="CNPJ" defaultValue="00.000.000/0001-00" />
             <Input id="clinic-phone" label="Telefone" defaultValue="(11) 3000-0000" />
             <Input id="clinic-email" label="E-mail" defaultValue="contato@clinmax.com.br" />
