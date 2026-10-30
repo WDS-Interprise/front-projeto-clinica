@@ -15,9 +15,10 @@ export function absoluteUrl(path: string) {
 type JsonLd = Record<string, unknown>
 
 function upsertMeta(attr: "name" | "property", key: string, content: string) {
-  let el = document.head.querySelector(`meta[${attr}="${key}"]`)
-  if (!(el instanceof HTMLMetaElement)) {
-    el = document.createElement("meta")
+  const found = document.head.querySelector(`meta[${attr}="${key}"]`)
+  const el: HTMLMetaElement =
+    found instanceof HTMLMetaElement ? found : document.createElement("meta")
+  if (found !== el) {
     el.setAttribute(attr, key)
     document.head.appendChild(el)
   }
@@ -25,9 +26,10 @@ function upsertMeta(attr: "name" | "property", key: string, content: string) {
 }
 
 function upsertCanonical(href: string) {
-  let el = document.head.querySelector('link[rel="canonical"]')
-  if (!(el instanceof HTMLLinkElement)) {
-    el = document.createElement("link")
+  const found = document.head.querySelector('link[rel="canonical"]')
+  const el: HTMLLinkElement =
+    found instanceof HTMLLinkElement ? found : document.createElement("link")
+  if (found !== el) {
     el.rel = "canonical"
     document.head.appendChild(el)
   }
